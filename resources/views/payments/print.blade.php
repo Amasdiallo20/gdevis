@@ -25,7 +25,7 @@
     @endphp
     <style>
         @page {
-            margin: 15mm 20mm 15mm 20mm;
+            margin: 15mm 15mm 70mm 15mm;
             size: A4 portrait;
         }
         
@@ -59,17 +59,9 @@
         }
         
         @if(request()->has('pdf'))
-        body {
-            position: relative;
-            min-height: 100vh;
-        }
-        
         .content-wrapper {
-            width: 100%;
-            margin: 0;
-            padding: 5mm 5mm 80mm 5mm;
-            position: relative;
-            min-height: calc(100vh - 15mm - 15mm);
+            margin-top: 0;
+            padding-top: 0;
         }
         @endif
         
@@ -111,10 +103,10 @@
         
         .print-header {
             position: relative;
-            padding: 12px 10px;
-            margin-bottom: 15px;
+            padding: 20px 15px;
+            margin-bottom: 20px;
             width: 100%;
-            background: {{ isset($settings) && $settings->primary_color ? $settings->primary_color : '#f0f9ff' }};
+            background: #ffffff;
             page-break-inside: avoid;
             border-radius: 4px;
         }
@@ -122,27 +114,30 @@
         .header-content {
             display: table;
             width: 100%;
-            margin-bottom: 5px;
-            table-layout: fixed;
+            margin-bottom: 10px;
+            table-layout: auto;
         }
         
         .logo-container {
             display: table-cell;
             vertical-align: middle;
-            width: 120px;
+            width: 100px;
+            padding: 0 10px;
         }
         
         .logo-container:first-child {
             text-align: left;
+            padding-left: 0;
         }
         
         .logo-container:last-child {
             text-align: right;
+            padding-right: 20px;
         }
         
         .logo-container img {
-            max-height: 50px;
-            max-width: 80px;
+            max-height: 60px;
+            max-width: 100px;
             width: auto;
             height: auto;
             display: inline-block;
@@ -154,41 +149,52 @@
             text-align: center;
             padding: 0 20px;
             width: auto;
+            min-width: 0;
         }
         
         .company-name-text {
-            font-size: 16px;
+            font-size: 20px;
             font-weight: bold;
-            color: {{ isset($settings) && $settings->print_text_color ? $settings->print_text_color : '#ffffff' }};
+            color: {{ $headerColor }};
             text-transform: uppercase;
+            letter-spacing: 1px;
             margin: 0;
-            line-height: 1.2;
+            padding: 0;
+            line-height: 1.3;
+            display: block;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         
         .company-activity {
-            font-size: 9px;
-            color: {{ isset($settings) && $settings->print_text_color ? $settings->print_text_color : '#ffffff' }};
-            margin: 3px 0 0 0;
-            line-height: 1.2;
+            font-size: 11px;
+            color: #666;
+            margin-top: 8px;
+            padding: 0;
+            line-height: 1.4;
+            text-align: center;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 4;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
+            max-height: 6.16em;
         }
         
         .header-separator {
-            height: 2px;
-            background-color: {{ isset($settings) && $settings->print_header_color ? $settings->print_header_color : '#14b8a6' }};
             width: 100%;
-            margin-top: 5px;
+            height: 2px;
+            background-color: {{ $headerColor }};
+            margin-top: 10px;
         }
         
         .receipt-title {
             font-size: 22px;
             font-weight: bold;
-            color: {{ $primaryColor }};
-            margin: 10px 0 15px 0;
+            color: {{ $headerColor }};
+            margin: 20px 0 25px 0;
             text-transform: uppercase;
             text-align: center;
             line-height: 1.2;
@@ -197,8 +203,8 @@
         .receipt-info {
             display: table;
             width: 100%;
-            margin: 12px 0;
-            padding: 0 5px;
+            margin: 20px 0;
+            padding: 0 15px;
         }
         
         .info-row {
@@ -208,29 +214,29 @@
         .info-label {
             display: table-cell;
             font-weight: bold;
-            padding: 4px 12px 4px 0;
+            padding: 8px 15px 8px 0;
             width: 40%;
             color: #333;
             vertical-align: top;
             text-align: left;
-            line-height: 1.3;
+            line-height: 1.5;
         }
         
         .info-value {
             display: table-cell;
-            padding: 4px 0;
+            padding: 8px 0;
             color: #555;
             vertical-align: top;
             text-align: left;
-            line-height: 1.3;
+            line-height: 1.5;
         }
         
         .amount-section {
             background: #f8f9fa;
-            border: 2px solid {{ $primaryColor }};
+            border: 2px solid {{ $headerColor }};
             border-radius: 8px;
-            padding: 15px;
-            margin: 15px 5px;
+            padding: 20px;
+            margin: 25px 15px;
             text-align: center;
         }
         
@@ -244,26 +250,26 @@
         .amount-value {
             font-size: 28px;
             font-weight: bold;
-            color: {{ $primaryColor }};
+            color: {{ $headerColor }};
             line-height: 1.2;
         }
         
         .payment-details {
-            margin: 12px 0;
-            padding: 0 5px;
+            margin: 20px 0;
+            padding: 0 15px;
         }
         
         .details-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 10px 0;
+            margin: 15px 0;
         }
         
         .details-table td {
-            padding: 6px 12px;
+            padding: 10px 15px;
             border-bottom: 1px solid #e5e7eb;
             vertical-align: top;
-            line-height: 1.3;
+            line-height: 1.5;
         }
         
         .details-table td:first-child {
@@ -279,69 +285,87 @@
         }
         
         .signature-section {
-            @if(request()->has('pdf'))
-            position: absolute;
-            bottom: 55mm;
-            left: 0;
-            right: 0;
-            margin-top: 0;
-            width: 100%;
-            @else
-            margin-top: 25px;
-            width: calc(100% - 10px);
-            @endif
+            margin-top: 50px;
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        
+        .signature-container {
             display: table;
-            padding: 0 5px;
+            width: 100%;
+            table-layout: fixed;
+            margin-top: 40px;
         }
         
         .signature-box {
             display: table-cell;
             width: 50%;
-            text-align: center;
-            padding: 0 15px;
             vertical-align: top;
+            padding: 0 20px;
         }
         
         .signature-line {
-            border-bottom: 2px solid {{ $primaryColor }};
-            width: 180px;
-            margin: 0 auto 5px;
-            height: 35px;
+            width: 100%;
+            height: 1px;
+            border-bottom: 2px solid #333;
+            margin-bottom: 5px;
+            min-height: 50px;
         }
         
         .signature-label {
+            text-align: center;
+            font-size: 11px;
             font-weight: bold;
             color: #333;
-            margin-top: 3px;
-            font-size: 10px;
-            line-height: 1.2;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .print-footer {
-            @if(request()->has('pdf'))
-            position: absolute;
-            bottom: 15mm;
-            left: 0;
-            right: 0;
-            margin-top: 0;
-            @else
-            margin-top: 20px;
-            @endif
-            padding: 10px 5px 0 5px;
-            border-top: 2px solid {{ $primaryColor }};
-            text-align: center;
+            position: relative;
+            margin-top: 30px;
+            padding: 10px 0;
             font-size: 9px;
-            color: #666;
-            line-height: 1.3;
+            border-top: 2px solid {{ $headerColor }};
+            width: 100%;
+        }
+        
+        .footer-content {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
         }
         
         .footer-info {
-            margin-bottom: 5px;
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            width: 70%;
         }
         
         .footer-info p {
-            margin: 2px 0;
-            line-height: 1.3;
+            margin: 0;
+            color: #333;
+            font-size: 12px;
+            line-height: 1.6;
+            display: inline-block;
+        }
+        
+        .footer-info p:first-child::after {
+            content: " | ";
+            margin: 0 10px;
+            font-weight: normal;
+        }
+        
+        .footer-pagination {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: right;
+            color: #333;
+            font-weight: bold;
+            font-size: 9px;
+            width: 30%;
         }
     </style>
 </head>
@@ -378,13 +402,13 @@
             
             <!-- Nom de l'entreprise au centre -->
             <div class="header-company-name">
-                <p class="company-name-text">
+                <div class="company-name-text">
                     {{ isset($settings) && $settings->company_name ? strtoupper($settings->company_name) : 'SELF BMS' }}
-                </p>
+                </div>
                 @if(isset($settings) && $settings->activity)
-                <p class="company-activity">
+                <div class="company-activity">
                     {{ $settings->activity }}
-                </p>
+                </div>
                 @endif
             </div>
             
@@ -399,7 +423,7 @@
     </div>
     
     <!-- TITRE DU REÇU -->
-    <div style="text-align: center; margin: 10px 0 15px 0; padding: 0 5px;">
+    <div style="text-align: center; margin: 20px 0 25px 0; padding: 0 15px;">
         <h1 class="receipt-title">REÇU DE PAIEMENT</h1>
     </div>
     
@@ -464,39 +488,47 @@
     </div>
     
     @if($payment->notes)
-    <div style="margin: 12px 5px; padding: 10px; background: #f8f9fa; border-left: 4px solid {{ $primaryColor }}; border-radius: 4px;">
-        <strong style="line-height: 1.3;">Notes :</strong>
-        <p style="margin-top: 3px; color: #555; text-align: left; line-height: 1.3;">{{ $payment->notes }}</p>
+    <div style="margin: 20px 15px; padding: 15px; background: #f8f9fa; border-left: 4px solid {{ $headerColor }}; border-radius: 4px;">
+        <strong style="line-height: 1.5;">Notes :</strong>
+        <p style="margin-top: 8px; color: #555; text-align: left; line-height: 1.5;">{{ $payment->notes }}</p>
     </div>
     @endif
     
     <!-- SIGNATURES -->
     <div class="signature-section">
-        <div class="signature-box">
-            <div class="signature-line"></div>
-            <p class="signature-label">GÉRANT</p>
-        </div>
-        <div class="signature-box">
-            <div class="signature-line"></div>
-            <p class="signature-label">CLIENT</p>
+        <div class="signature-container">
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <p class="signature-label">GÉRANT</p>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <p class="signature-label">CLIENT</p>
+            </div>
         </div>
     </div>
     
     <!-- FOOTER -->
     <div class="print-footer">
-        <div class="footer-info">
-            @if(isset($settings))
-                @if($settings->address)
-                    <p><strong>Adresse:</strong> {{ $settings->address }}</p>
+        <div class="footer-content">
+            <div class="footer-info">
+                @if(isset($settings))
+                    @if($settings->address)
+                        <p><strong>Adresse:</strong> {{ $settings->address }}</p>
+                    @endif
+                    @if($settings->phone)
+                        <p><strong>Téléphone:</strong> {{ $settings->phone }}</p>
+                    @endif
                 @endif
-                @if($settings->phone)
-                    <p><strong>Téléphone:</strong> {{ $settings->phone }}</p>
+            </div>
+            <div class="footer-pagination">
+                @if(request()->has('pdf'))
+                    <span id="page-number">Page 1 / 1</span>
+                @else
+                    <span id="page-info">Page 1</span>
                 @endif
-            @endif
+            </div>
         </div>
-        <p style="margin-top: 5px; font-size: 8px; color: #999; line-height: 1.3;">
-            Reçu généré le {{ now()->format('d/m/Y à H:i') }}
-        </p>
     </div>
     </div>
     

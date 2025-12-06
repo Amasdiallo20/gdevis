@@ -5,17 +5,55 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\Quote;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $payments = Payment::with('quote.client')
-            ->latest('payment_date')
-            ->paginate(15);
+        $query = Payment::with('quote.client');
+
+        // Filtre par devis
+        if ($request->filled('quote_id')) {
+            $query->where('quote_id', $request->quote_id);
+        }
+
+        // Filtre par client (via le devis)
+        if ($request->filled('client_id')) {
+            $query->whereHas('quote', function($q) use ($request) {
+                $q->where('client_id', $request->client_id);
+            });
+        }
+
+        // Filtre par date (de)
+        if ($request->filled('date_from')) {
+            $query->whereDate('payment_date', '>=', $request->date_from);
+        }
+
+        // Filtre par date (à)
+        if ($request->filled('date_to')) {
+            $query->whereDate('payment_date', '<=', $request->date_to);
+        }
+
+        // Filtre par méthode de paiement
+        if ($request->filled('payment_method')) {
+            $query->where('payment_method', $request->payment_method);
+        }
+
+        // Recherche par référence ou numéro de devis
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('reference', 'like', '%' . $search . '%')
+                  ->orWhereHas('quote', function($quoteQuery) use ($search) {
+                      $quoteQuery->where('quote_number', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
+        $payments = $query->latest('payment_date')->paginate(15)->withQueryString();
         
         // Calculer le montant total restant non payé
-        // Récupérer tous les devis acceptés ou validés qui ont des paiements ou un solde restant
         $quotesWithPayments = Quote::whereIn('status', ['accepted', 'validated'])
             ->with(['payments', 'lines'])
             ->get();
@@ -23,8 +61,12 @@ class PaymentController extends Controller
         $totalRemainingAmount = $quotesWithPayments->sum(function ($quote) {
             return $quote->remaining_amount;
         });
+
+        // Pour les filtres
+        $quotes = Quote::whereIn('status', ['accepted', 'validated'])->orderBy('quote_number')->get();
+        $clients = \App\Models\Client::orderBy('name')->get();
         
-        return view('payments.index', compact('payments', 'totalRemainingAmount'));
+        return view('payments.index', compact('payments', 'totalRemainingAmount', 'quotes', 'clients'));
     }
 
     public function create(Quote $quote)
@@ -55,6 +97,7 @@ class PaymentController extends Controller
             'amount.max' => 'Le montant ne peut pas dépasser le solde restant de ' . number_format($quote->remaining_amount, 2, ',', ' ') . ' GNF.',
         ]);
 
+        $validated['created_by'] = Auth::id();
         $payment = $quote->payments()->create($validated);
 
         return redirect()->route('quotes.show', $quote)
@@ -114,12 +157,38 @@ class PaymentController extends Controller
             ->with('success', 'Paiement supprimé avec succès.');
     }
 
-    public function pendingQuotes()
+    public function pendingQuotes(Request $request)
     {
         // Récupérer tous les devis acceptés ou validés qui ont encore un solde à payer
         $quotes = Quote::whereIn('status', ['accepted', 'validated'])
-            ->with(['client', 'payments', 'lines'])
-            ->get()
+            ->with(['client', 'payments', 'lines']);
+
+        // Filtre par client
+        if ($request->filled('client_id')) {
+            $quotes->where('client_id', $request->client_id);
+        }
+
+        // Filtre par statut
+        if ($request->filled('status')) {
+            $quotes->where('status', $request->status);
+        }
+
+        // Filtre par date (de)
+        if ($request->filled('date_from')) {
+            $quotes->whereDate('date', '>=', $request->date_from);
+        }
+
+        // Filtre par date (à)
+        if ($request->filled('date_to')) {
+            $quotes->whereDate('date', '<=', $request->date_to);
+        }
+
+        // Recherche par numéro de devis
+        if ($request->filled('search')) {
+            $quotes->where('quote_number', 'like', '%' . $request->search . '%');
+        }
+
+        $quotes = $quotes->get()
             ->filter(function ($quote) {
                 return $quote->remaining_amount > 0;
             })
@@ -130,8 +199,11 @@ class PaymentController extends Controller
         $totalRemainingAmount = $quotes->sum(function ($quote) {
             return $quote->remaining_amount;
         });
+
+        // Pour les filtres
+        $clients = \App\Models\Client::orderBy('name')->get();
         
-        return view('payments.pending-quotes', compact('quotes', 'totalRemainingAmount'));
+        return view('payments.pending-quotes', compact('quotes', 'totalRemainingAmount', 'clients'));
     }
 
     public function print(Payment $payment)

@@ -45,6 +45,111 @@
         </div>
     </div>
 
+    <!-- Filtres -->
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <form method="GET" action="{{ route('payments.index') }}" class="space-y-4">
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-6">
+                <!-- Recherche -->
+                <div>
+                    <label for="search" class="block text-xs font-medium text-gray-700 mb-1">
+                        <i class="fas fa-search mr-1"></i>Recherche
+                    </label>
+                    <input type="text" name="search" id="search" value="{{ request('search') }}" 
+                        placeholder="Référence ou devis"
+                        class="block w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
+                        style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};">
+                </div>
+
+                <!-- Devis -->
+                <div>
+                    <label for="quote_id" class="block text-xs font-medium text-gray-700 mb-1">
+                        <i class="fas fa-file-invoice mr-1"></i>Devis
+                    </label>
+                    <select name="quote_id" id="quote_id" 
+                        class="block w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
+                        style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }}; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23374151\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1em 1em; padding-right: 2rem;">
+                        <option value="">Tous les devis</option>
+                        @foreach($quotes as $quote)
+                            <option value="{{ $quote->id }}" {{ request('quote_id') == $quote->id ? 'selected' : '' }}>
+                                {{ $quote->quote_number }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Client -->
+                <div>
+                    <label for="client_id" class="block text-xs font-medium text-gray-700 mb-1">
+                        <i class="fas fa-user mr-1"></i>Client
+                    </label>
+                    <select name="client_id" id="client_id" 
+                        class="block w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
+                        style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }}; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23374151\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1em 1em; padding-right: 2rem;">
+                        <option value="">Tous les clients</option>
+                        @foreach($clients as $client)
+                            <option value="{{ $client->id }}" {{ request('client_id') == $client->id ? 'selected' : '' }}>
+                                {{ $client->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Date de -->
+                <div>
+                    <label for="date_from" class="block text-xs font-medium text-gray-700 mb-1">
+                        <i class="fas fa-calendar-alt mr-1"></i>Date de
+                    </label>
+                    <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" 
+                        class="block w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
+                        style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};">
+                </div>
+
+                <!-- Date à -->
+                <div>
+                    <label for="date_to" class="block text-xs font-medium text-gray-700 mb-1">
+                        <i class="fas fa-calendar-alt mr-1"></i>Date à
+                    </label>
+                    <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" 
+                        class="block w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
+                        style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};">
+                </div>
+
+                <!-- Méthode de paiement -->
+                <div>
+                    <label for="payment_method" class="block text-xs font-medium text-gray-700 mb-1">
+                        <i class="fas fa-credit-card mr-1"></i>Méthode
+                    </label>
+                    <select name="payment_method" id="payment_method" 
+                        class="block w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
+                        style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }}; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23374151\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1em 1em; padding-right: 2rem;">
+                        <option value="">Toutes les méthodes</option>
+                        <option value="cash" {{ request('payment_method') == 'cash' ? 'selected' : '' }}>Espèces</option>
+                        <option value="bank_transfer" {{ request('payment_method') == 'bank_transfer' ? 'selected' : '' }}>Virement</option>
+                        <option value="check" {{ request('payment_method') == 'check' ? 'selected' : '' }}>Chèque</option>
+                        <option value="mobile_money" {{ request('payment_method') == 'mobile_money' ? 'selected' : '' }}>Mobile Money</option>
+                        <option value="other" {{ request('payment_method') == 'other' ? 'selected' : '' }}>Autre</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <button type="submit" 
+                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-200"
+                    style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);"
+                    onmouseover="this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fas fa-filter mr-2"></i>Filtrer
+                </button>
+                @if(request()->hasAny(['search', 'quote_id', 'client_id', 'date_from', 'date_to', 'payment_method']))
+                    <a href="{{ route('payments.index') }}" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200">
+                        <i class="fas fa-times mr-2"></i>Réinitialiser
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+
     <div class="p-6">
         @if($payments->count() > 0)
         <div class="overflow-x-auto">

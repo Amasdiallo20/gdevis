@@ -98,10 +98,10 @@
         /* HEADER */
         .print-header {
             position: relative;
-            padding: 15px 0;
+            padding: 20px 15px;
             margin-bottom: 20px;
             width: 100%;
-            background: {{ isset($settings) && $settings->primary_color ? $settings->primary_color : '#f0f9ff' }};
+            background: #ffffff;
             page-break-inside: avoid;
             border-radius: 4px;
         }
@@ -110,21 +110,24 @@
             display: table;
             width: 100%;
             margin-bottom: 10px;
-            table-layout: fixed;
+            table-layout: auto;
         }
         
         .logo-container {
             display: table-cell;
             vertical-align: middle;
-            width: 120px;
+            width: 100px;
+            padding: 0 10px;
         }
         
         .logo-container:first-child {
             text-align: left;
+            padding-left: 0;
         }
         
         .logo-container:last-child {
             text-align: right;
+            padding-right: 20px;
         }
         
         .logo-container img {
@@ -141,6 +144,7 @@
             text-align: center;
             padding: 0 20px;
             width: auto;
+            min-width: 0;
         }
         
         .company-name-text {
@@ -150,19 +154,28 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             margin: 0;
-            line-height: 1.2;
+            padding: 0;
+            line-height: 1.3;
+            display: block;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         
         .company-activity {
             font-size: 11px;
             color: #666;
-            margin-top: 5px;
+            margin-top: 8px;
+            padding: 0;
             line-height: 1.4;
-            max-height: 2.8em;
-            overflow: hidden;
-            text-overflow: ellipsis;
             text-align: center;
             word-wrap: break-word;
+            overflow-wrap: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-height: 6.16em;
         }
         
         .header-separator {
@@ -266,22 +279,27 @@
             background-color: #f9fafb;
         }
         
+        .product-table tbody tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+        
         .product-header {
-            background-color: {{ $headerColor }} !important;
-            color: {{ $textColor }} !important;
+            background-color: #ffffff !important;
+            color: {{ $headerColor }} !important;
             font-weight: bold;
             text-align: left !important;
             padding: 8px 10px !important;
             page-break-after: avoid;
+            border-bottom: 2px solid {{ $headerColor }};
         }
         
         .subtotal-row {
-            background-color: #dbeafe !important;
+            background-color: #f3f4f6 !important;
             font-weight: bold;
         }
         
         .subtotal-row td {
-            color: #1e40af;
+            color: {{ $headerColor }};
         }
         
         .total-row {
@@ -444,13 +462,13 @@
             
             <!-- Nom de l'entreprise au centre -->
             <div class="header-company-name">
-                <p class="company-name-text">
+                <div class="company-name-text">
                     {{ isset($settings) && $settings->company_name ? strtoupper($settings->company_name) : 'SELF BMS' }}
-                </p>
+                </div>
                 @if(isset($settings) && $settings->activity)
-                <p class="company-activity">
+                <div class="company-activity">
                     {{ $settings->activity }}
-                </p>
+                </div>
                 @endif
             </div>
             
@@ -611,13 +629,13 @@
                     <td><strong>{{ number_format($grandTotalSurface, 3, '.', ',') }}</strong></td>
                     <td><strong>{{ number_format($grandTotalAmount, 0, ',', ' ') }} GNF</strong></td>
                 </tr>
-                <tr class="total-row" style="background-color: #d4edda; border-top: 3px solid #28a745;">
-                    <td><strong style="color: #155724;">MONTANT FINAL s'accorder</strong></td>
+                <tr class="total-row" style="background-color: {{ $headerColor }} !important; border-top: 3px solid {{ $headerColor }};">
+                    <td><strong style="color: {{ $textColor }};">MONTANT FINAL s'accorder</strong></td>
                     <td></td>
-                    <td><strong style="color: #155724;">-</strong></td>
-                    <td><strong style="color: #155724;">-</strong></td>
-                    <td><strong style="color: #155724;">-</strong></td>
-                    <td><strong style="color: #155724; font-size: 1.2em;">{{ number_format($quote->final_amount, 0, ',', ' ') }} GNF</strong></td>
+                    <td><strong style="color: {{ $textColor }};">-</strong></td>
+                    <td><strong style="color: {{ $textColor }};">-</strong></td>
+                    <td><strong style="color: {{ $textColor }};">-</strong></td>
+                    <td><strong style="color: {{ $textColor }}; font-size: 1.2em;">{{ number_format($quote->final_amount, 0, ',', ' ') }} GNF</strong></td>
                 </tr>
                 @else
                 <tr class="total-row">

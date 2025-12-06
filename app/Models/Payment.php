@@ -12,6 +12,7 @@ class Payment extends Model
 
     protected $fillable = [
         'quote_id',
+        'created_by',
         'amount',
         'payment_date',
         'payment_method',
@@ -27,6 +28,11 @@ class Payment extends Model
     public function quote(): BelongsTo
     {
         return $this->belongsTo(Quote::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function getPaymentMethodLabelAttribute(): string

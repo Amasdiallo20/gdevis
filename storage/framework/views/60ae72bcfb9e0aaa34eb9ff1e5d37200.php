@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - Gestion Devis</title>
+    <title>Connexion - A2 VitraDevis</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <?php
@@ -42,10 +42,26 @@
         <div class="bg-white rounded-2xl shadow-2xl overflow-hidden card-shadow">
             <!-- Header avec gradient -->
             <div class="gradient-bg px-8 py-10 text-center">
-                <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4 shadow-lg">
-                    <i class="fas fa-file-invoice-dollar text-4xl" style="color: <?php echo e($primaryColor); ?>;"></i>
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4 shadow-lg overflow-hidden">
+                    <?php if($settings->logo): ?>
+                        <img src="<?php echo e(asset('storage/' . $settings->logo)); ?>" 
+                             alt="Logo" 
+                             class="h-full w-full object-contain p-2"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="hidden items-center justify-center w-full h-full">
+                            <i class="fas fa-file-invoice-dollar text-4xl" style="color: <?php echo e($primaryColor); ?>;"></i>
+                        </div>
+                    <?php else: ?>
+                        <i class="fas fa-file-invoice-dollar text-4xl" style="color: <?php echo e($primaryColor); ?>;"></i>
+                    <?php endif; ?>
                 </div>
-                <h2 class="text-3xl font-bold text-white mb-2">
+                <h1 class="text-2xl font-bold text-white mb-1">
+                    A2 VitraDevis
+                </h1>
+                <p class="text-blue-100 text-xs mb-3 italic">
+                    Votre devis, clair comme le verre.
+                </p>
+                <h2 class="text-xl font-semibold text-white mb-2">
                     Connexion
                 </h2>
                 <p class="text-blue-100 text-sm">

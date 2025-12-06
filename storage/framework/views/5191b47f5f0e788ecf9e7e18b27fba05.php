@@ -16,12 +16,35 @@
                 <p class="mt-2 text-sm text-gray-600">Détails et informations du devis</p>
             </div>
             <div class="flex flex-wrap gap-2">
+                <?php if($quote->status !== 'validated'): ?>
                 <a href="<?php echo e(route('quotes.edit', $quote)); ?>" 
                    class="btn-primary inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300"
                    onmouseover="this.style.transform='translateY(-2px)'"
                    onmouseout="this.style.transform='translateY(0)'">
                     <i class="fas fa-edit mr-2"></i><span class="hidden sm:inline">Modifier</span><span class="sm:hidden">Modif.</span>
                 </a>
+                <?php else: ?>
+                <span class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-gray-400 bg-gray-200 cursor-not-allowed"
+                      title="Un devis validé ne peut pas être modifié. Annulez d'abord la validation.">
+                    <i class="fas fa-edit mr-2"></i><span class="hidden sm:inline">Modifier</span><span class="sm:hidden">Modif.</span>
+                </span>
+                <?php endif; ?>
+                <?php if($quote->status === 'accepted'): ?>
+                <a href="<?php echo e(route('quotes.show-validation', $quote)); ?>" 
+                   class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-emerald-600 hover:bg-emerald-700"
+                   onmouseover="this.style.transform='translateY(-2px)'"
+                   onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fas fa-check-circle mr-2"></i><span class="hidden sm:inline">Valider</span><span class="sm:hidden">Val.</span>
+                </a>
+                <?php endif; ?>
+                <?php if($quote->status === 'validated'): ?>
+                <a href="<?php echo e(route('payments.create', $quote)); ?>" 
+                   class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-green-600 hover:bg-green-700"
+                   onmouseover="this.style.transform='translateY(-2px)'"
+                   onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fas fa-money-bill-wave mr-2"></i><span class="hidden sm:inline">Payer</span><span class="sm:hidden">Pay.</span>
+                </a>
+                <?php endif; ?>
                 <a href="<?php echo e(route('quotes.print', $quote)); ?>" target="_blank" 
                    class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-teal-600 hover:bg-teal-700"
                    onmouseover="this.style.transform='translateY(-2px)'"
@@ -81,6 +104,16 @@
                         <dd class="text-sm text-gray-900"><i class="fas fa-calendar-check mr-2 text-gray-400"></i><?php echo e($quote->valid_until->format('d/m/Y')); ?></dd>
                     </div>
                     <?php endif; ?>
+                    <?php if($quote->creator): ?>
+                    <div class="flex items-center">
+                        <dt class="text-sm font-semibold text-gray-600 w-32">Créé par:</dt>
+                        <dd class="text-sm text-gray-900">
+                            <i class="fas fa-user mr-2 text-gray-400"></i>
+                            <span class="font-medium"><?php echo e($quote->creator->name); ?></span>
+                            <span class="text-xs text-gray-500 ml-2">(<?php echo e($quote->created_at->format('d/m/Y à H:i')); ?>)</span>
+                        </dd>
+                    </div>
+                    <?php endif; ?>
                     <div>
                         <dt class="text-sm font-medium text-gray-500 mb-2">Statut</dt>
                         <dd class="text-sm">
@@ -93,6 +126,7 @@
                                         'rejected' => ['label' => 'Refusé', 'icon' => 'fa-times-circle', 'color' => 'red'],
                                     ];
                                     $isValidated = $quote->status === 'validated';
+                                    $isCancelled = $quote->status === 'cancelled';
                                 ?>
                                 <?php if($isValidated): ?>
                                     <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-200 text-emerald-800 border-2 border-emerald-400">
@@ -101,8 +135,46 @@
                                         <span class="ml-2 text-xs opacity-75">(Actuel)</span>
                                     </span>
                                 <?php endif; ?>
+                                <?php if($isCancelled): ?>
+                                    <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-orange-200 text-orange-800 border-2 border-orange-400">
+                                        <i class="fas fa-ban mr-2"></i>
+                                        Annulé
+                                        <span class="ml-2 text-xs opacity-75">(Actuel)</span>
+                                    </span>
+                                <?php endif; ?>
+                                
+                                <!-- Bouton Valider (si devis accepté ou annulé) -->
+                                <?php if(in_array($quote->status, ['accepted', 'cancelled'])): ?>
+                                    <a href="<?php echo e(route('quotes.show-validation', $quote)); ?>" 
+                                       class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow-md bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border border-emerald-300">
+                                        <i class="fas fa-check-circle mr-2"></i>
+                                        Valider
+                                    </a>
+                                <?php endif; ?>
+                                
+                                <!-- Bouton Annuler (si devis validé et sans paiements) -->
+                                <?php if($isValidated): ?>
+                                    <?php if($quote->payments->count() > 0): ?>
+                                        <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-400 border border-gray-300 cursor-not-allowed"
+                                              title="Un devis avec des paiements ne peut pas être annulé. Supprimez d'abord les paiements.">
+                                            <i class="fas fa-ban mr-2"></i>
+                                            Annuler
+                                        </span>
+                                    <?php else: ?>
+                                        <form action="<?php echo e(route('quotes.cancel', $quote)); ?>" method="POST" class="inline" 
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce devis validé ?');">
+                                            <?php echo csrf_field(); ?>
+                                            <button type="submit" 
+                                                    class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow-md bg-orange-100 text-orange-700 hover:bg-orange-200 border border-orange-300">
+                                                <i class="fas fa-ban mr-2"></i>
+                                                Annuler
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                                
                                 <?php $__currentLoopData = $statuses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $statusValue => $statusInfo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <?php if($quote->status == $statusValue && !$isValidated): ?>
+                                    <?php if($quote->status == $statusValue && !$isValidated && !$isCancelled): ?>
                                         <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold 
                                             <?php if($statusValue == 'draft'): ?> bg-gray-200 text-gray-800 border-2 border-gray-400
                                             <?php elseif($statusValue == 'sent'): ?> bg-blue-200 text-blue-800 border-2 border-blue-400
@@ -114,7 +186,7 @@
 
                                             <span class="ml-2 text-xs opacity-75">(Actuel)</span>
                                         </span>
-                                    <?php elseif(!$isValidated): ?>
+                                    <?php elseif(!$isValidated && !$isCancelled): ?>
                                         <form action="<?php echo e(route('quotes.update-status', $quote)); ?>" method="POST" class="inline">
                                             <?php echo csrf_field(); ?>
                                             <input type="hidden" name="status" value="<?php echo e($statusValue); ?>">
@@ -319,6 +391,7 @@
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Montant</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Méthode</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Référence</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Créé par</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notes</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
@@ -330,6 +403,14 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right"><?php echo e(number_format($payment->amount, 2, ',', ' ')); ?> GNF</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo e($payment->payment_method_label); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo e($payment->reference ?? '-'); ?></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <?php if($payment->creator): ?>
+                                    <i class="fas fa-user mr-1 text-gray-400"></i>
+                                    <span class="font-medium"><?php echo e($payment->creator->name); ?></span>
+                                <?php else: ?>
+                                    <span class="text-gray-400">-</span>
+                                <?php endif; ?>
+                            </td>
                             <td class="px-6 py-4 text-sm text-gray-500"><?php echo e($payment->notes ? \Illuminate\Support\Str::limit($payment->notes, 50) : '-'); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex justify-end space-x-2">

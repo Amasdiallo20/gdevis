@@ -7,24 +7,74 @@ use App\Models\Client;
 use App\Models\Product;
 use App\Models\QuoteLine;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class QuoteController extends Controller
 {
-    public function index()
+    public function __construct()
     {
-        $quotes = Quote::with(['client', 'payments'])->latest()->paginate(15);
-        return view('quotes.index', compact('quotes'));
+        $this->middleware('auth');
+    }
+
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user->hasPermission('quotes.view')) {
+            abort(403, 'Vous n\'avez pas la permission de voir les devis.');
+        }
+
+        $query = Quote::with(['client', 'creator', 'payments']);
+
+        // Filtre par statut
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filtre par client
+        if ($request->filled('client_id')) {
+            $query->where('client_id', $request->client_id);
+        }
+
+        // Filtre par date (de)
+        if ($request->filled('date_from')) {
+            $query->whereDate('date', '>=', $request->date_from);
+        }
+
+        // Filtre par date (à)
+        if ($request->filled('date_to')) {
+            $query->whereDate('date', '<=', $request->date_to);
+        }
+
+        // Recherche par numéro de devis
+        if ($request->filled('search')) {
+            $query->where('quote_number', 'like', '%' . $request->search . '%');
+        }
+
+        $quotes = $query->latest()->paginate(15)->withQueryString();
+        $clients = Client::orderBy('name')->get();
+
+        return view('quotes.index', compact('quotes', 'clients'));
     }
 
     public function create()
     {
+        $user = Auth::user();
+        if (!$user->hasPermission('quotes.create')) {
+            abort(403, 'Vous n\'avez pas la permission de créer des devis.');
+        }
+
         $clients = Client::orderBy('name')->get();
         return view('quotes.create', compact('clients'));
     }
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+        if (!$user->hasPermission('quotes.create')) {
+            abort(403, 'Vous n\'avez pas la permission de créer des devis.');
+        }
+
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'date' => 'required|date',
@@ -34,6 +84,7 @@ class QuoteController extends Controller
 
         $validated['quote_number'] = $this->generateQuoteNumber();
         $validated['status'] = 'draft';
+        $validated['created_by'] = Auth::id();
 
         $quote = Quote::create($validated);
 
@@ -43,16 +94,21 @@ class QuoteController extends Controller
 
     public function show(Quote $quote)
     {
-        $quote->load(['client', 'lines.product', 'payments']);
+        $user = Auth::user();
+        if (!$user->hasPermission('quotes.view')) {
+            abort(403, 'Vous n\'avez pas la permission de voir les devis.');
+        }
+
+        $quote->load(['client', 'creator', 'lines.product', 'payments.creator']);
         return view('quotes.show', compact('quote'));
     }
 
     public function showValidation(Quote $quote)
     {
-        // Vérifier que le devis est accepté
-        if ($quote->status !== 'accepted') {
+        // Vérifier que le devis est accepté ou annulé (pour permettre de re-valider un devis annulé)
+        if (!in_array($quote->status, ['accepted', 'cancelled'])) {
             return redirect()->route('quotes.show', $quote)
-                ->with('error', 'Seuls les devis acceptés peuvent être validés.');
+                ->with('error', 'Seuls les devis acceptés ou annulés peuvent être validés.');
         }
 
         $quote->load(['client', 'lines.product']);
@@ -61,6 +117,17 @@ class QuoteController extends Controller
 
     public function edit(Quote $quote)
     {
+        $user = Auth::user();
+        if (!$user->hasPermission('quotes.edit')) {
+            abort(403, 'Vous n\'avez pas la permission de modifier les devis.');
+        }
+
+        // Empêcher la modification d'un devis validé
+        if ($quote->status === 'validated') {
+            return redirect()->route('quotes.show', $quote)
+                ->with('error', 'Un devis validé ne peut pas être modifié. Veuillez d\'abord annuler la validation.');
+        }
+
         $quote->load(['client', 'lines.product']);
         $products = Product::orderBy('name')->get();
         $clients = Client::orderBy('name')->get();
@@ -69,11 +136,22 @@ class QuoteController extends Controller
 
     public function update(Request $request, Quote $quote)
     {
+        $user = Auth::user();
+        if (!$user->hasPermission('quotes.edit')) {
+            abort(403, 'Vous n\'avez pas la permission de modifier les devis.');
+        }
+
+        // Empêcher la modification d'un devis validé
+        if ($quote->status === 'validated') {
+            return redirect()->route('quotes.show', $quote)
+                ->with('error', 'Un devis validé ne peut pas être modifié. Veuillez d\'abord annuler la validation.');
+        }
+
         $validated = $request->validate([
             'client_id' => 'required|exists:clients,id',
             'date' => 'required|date',
             'valid_until' => 'nullable|date',
-            'status' => 'required|in:draft,sent,accepted,rejected,validated',
+            'status' => 'required|in:draft,sent,accepted,rejected,validated,cancelled',
             'notes' => 'nullable|string',
             'final_amount' => 'nullable|numeric|min:0',
         ]);
@@ -87,7 +165,7 @@ class QuoteController extends Controller
     public function updateStatus(Request $request, Quote $quote)
     {
         $validated = $request->validate([
-            'status' => 'required|in:draft,sent,accepted,rejected,validated',
+            'status' => 'required|in:draft,sent,accepted,rejected,validated,cancelled',
         ]);
 
         $quote->update(['status' => $validated['status']]);
@@ -98,6 +176,7 @@ class QuoteController extends Controller
             'accepted' => 'Accepté',
             'rejected' => 'Refusé',
             'validated' => 'Validé',
+            'cancelled' => 'Annulé',
         ];
 
         return redirect()->route('quotes.edit', $quote)
@@ -106,10 +185,15 @@ class QuoteController extends Controller
 
     public function validateQuote(Request $request, Quote $quote)
     {
-        // Vérifier que le devis est accepté
-        if ($quote->status !== 'accepted') {
+        $user = Auth::user();
+        if (!$user->hasPermission('quotes.validate')) {
+            abort(403, 'Vous n\'avez pas la permission de valider les devis.');
+        }
+
+        // Vérifier que le devis est accepté ou annulé (pour permettre de re-valider un devis annulé)
+        if (!in_array($quote->status, ['accepted', 'cancelled'])) {
             return redirect()->route('quotes.show', $quote)
-                ->with('error', 'Seuls les devis acceptés peuvent être validés.');
+                ->with('error', 'Seuls les devis acceptés ou annulés peuvent être validés.');
         }
 
         $validated = $request->validate([
@@ -125,6 +209,33 @@ class QuoteController extends Controller
             ->with('success', 'Devis validé avec succès. Le montant final de ' . number_format($validated['final_amount'], 0, ',', ' ') . ' GNF a été enregistré.');
     }
 
+    public function cancelQuote(Quote $quote)
+    {
+        $user = Auth::user();
+        if (!$user->hasPermission('quotes.cancel')) {
+            abort(403, 'Vous n\'avez pas la permission d\'annuler les devis.');
+        }
+
+        // Vérifier que le devis est validé
+        if ($quote->status !== 'validated') {
+            return redirect()->route('quotes.index')
+                ->with('error', 'Seuls les devis validés peuvent être annulés.');
+        }
+
+        // Empêcher l'annulation d'un devis qui a des paiements
+        if ($quote->payments()->count() > 0) {
+            return redirect()->route('quotes.show', $quote)
+                ->with('error', 'Un devis avec des paiements ne peut pas être annulé. Veuillez d\'abord supprimer ou rembourser les paiements.');
+        }
+
+        $quote->update([
+            'status' => 'cancelled',
+        ]);
+
+        return redirect()->route('quotes.index')
+            ->with('success', 'Devis annulé avec succès.');
+    }
+
     public function destroy(Quote $quote)
     {
         $quote->delete();
@@ -135,6 +246,11 @@ class QuoteController extends Controller
 
     public function addLine(Request $request, Quote $quote)
     {
+        // Empêcher l'ajout de lignes à un devis validé
+        if ($quote->status === 'validated') {
+            return back()->withErrors(['error' => 'Un devis validé ne peut pas être modifié. Veuillez d\'abord annuler la validation.']);
+        }
+
         $validated = $request->validate([
             'line_type' => 'required|in:product,transport,labor,material',
             'product_id' => 'nullable|exists:products,id',
@@ -249,25 +365,44 @@ class QuoteController extends Controller
 
     public function updateAllPrices(Request $request, Quote $quote)
     {
+        // Empêcher la modification des prix d'un devis validé
+        if ($quote->status === 'validated') {
+            return back()->withErrors(['error' => 'Un devis validé ne peut pas être modifié. Veuillez d\'abord annuler la validation.']);
+        }
+
         $validated = $request->validate([
             'price_per_m2' => 'required|numeric|min:0',
+            'product_id' => 'nullable|exists:products,id',
         ]);
 
         $pricePerM2 = $validated['price_per_m2'];
+        $productId = $validated['product_id'] ?? null;
 
-        // Mettre à jour toutes les lignes du devis
-        foreach ($quote->lines as $line) {
+        // Filtrer les lignes selon le produit sélectionné
+        $linesToUpdate = $quote->lines;
+        if ($productId) {
+            $linesToUpdate = $linesToUpdate->where('product_id', $productId);
+        }
+
+        $updatedCount = 0;
+        // Mettre à jour les lignes filtrées
+        foreach ($linesToUpdate as $line) {
             if ($line->surface && $line->surface > 0) {
                 // Recalculer le montant = Surface x Prix M²
                 // (La quantité est déjà incluse dans la surface)
                 $line->price_per_m2 = $pricePerM2;
                 $line->amount = $line->surface * $pricePerM2;
                 $line->save();
+                $updatedCount++;
             }
         }
 
+        $message = $productId 
+            ? "Prix M² mis à jour pour {$updatedCount} ligne(s) du produit sélectionné. Les montants ont été recalculés."
+            : "Prix M² mis à jour pour {$updatedCount} ligne(s). Les montants ont été recalculés.";
+
         return redirect()->route('quotes.edit', $quote)
-            ->with('success', 'Prix M² mis à jour pour toutes les lignes. Les montants ont été recalculés.');
+            ->with('success', $message);
     }
 
     public function editLine(Quote $quote, QuoteLine $line)
@@ -299,6 +434,11 @@ class QuoteController extends Controller
     {
         if ($line->quote_id !== $quote->id) {
             abort(404);
+        }
+
+        // Empêcher la modification de lignes d'un devis validé
+        if ($quote->status === 'validated') {
+            return back()->withErrors(['error' => 'Un devis validé ne peut pas être modifié. Veuillez d\'abord annuler la validation.']);
         }
 
         $validated = $request->validate([
@@ -388,6 +528,11 @@ class QuoteController extends Controller
             abort(404);
         }
 
+        // Empêcher la suppression de lignes d'un devis validé
+        if ($quote->status === 'validated') {
+            return back()->withErrors(['error' => 'Un devis validé ne peut pas être modifié. Veuillez d\'abord annuler la validation.']);
+        }
+
         $line->delete();
 
         return redirect()->route('quotes.edit', $quote)
@@ -398,6 +543,11 @@ class QuoteController extends Controller
     {
         if ($line->quote_id !== $quote->id) {
             abort(404);
+        }
+
+        // Empêcher la duplication de lignes d'un devis validé
+        if ($quote->status === 'validated') {
+            return back()->withErrors(['error' => 'Un devis validé ne peut pas être modifié. Veuillez d\'abord annuler la validation.']);
         }
 
         // Créer une copie de la ligne
@@ -436,6 +586,276 @@ class QuoteController extends Controller
         }
         
         return view('quotes.print', compact('quote', 'settings'));
+    }
+
+    public function calculateMaterials(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user->hasPermission('quotes.calculate-materials')) {
+            abort(403, 'Vous n\'avez pas la permission de calculer les matériaux.');
+        }
+
+        $quotes = Quote::orderBy('quote_number', 'desc')->get();
+        $selectedQuote = null;
+        $materials = null;
+
+        if ($request->filled('quote_id')) {
+            $selectedQuote = Quote::with(['client', 'lines.product'])->findOrFail($request->quote_id);
+            
+            // Calculer les matériaux pour toutes les fenêtres du devis
+            $materials = $this->calculateMaterialsForQuote($selectedQuote);
+        }
+
+        return view('quotes.calculate-materials', compact('quotes', 'selectedQuote', 'materials'));
+    }
+
+    public function printMaterials(Quote $quote)
+    {
+        $quote->load(['client', 'lines.product']);
+        $settings = \App\Models\Setting::getSettings();
+        $materials = $this->calculateMaterialsForQuote($quote);
+        
+        if (request()->has('pdf')) {
+            try {
+                if (class_exists('\Barryvdh\DomPDF\Facade\Pdf')) {
+                    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('quotes.print-materials', compact('quote', 'settings', 'materials'));
+                    $pdf->setPaper('a4', 'portrait');
+                    $pdf->setOption('enable-local-file-access', true);
+                    $pdf->setOption('isHtml5ParserEnabled', true);
+                    $pdf->setOption('isRemoteEnabled', true);
+                    $pdf->setOption('defaultFont', 'DejaVu Sans');
+                    $pdf->setOption('enable_php', true);
+                    
+                    if (request()->has('download')) {
+                        return $pdf->download('materiaux-' . $quote->quote_number . '.pdf');
+                    }
+                    
+                    return $pdf->stream('materiaux-' . $quote->quote_number . '.pdf');
+                }
+            } catch (\Exception $e) {
+                \Log::error('Erreur DOMPDF: ' . $e->getMessage());
+            }
+        }
+        
+        return view('quotes.print-materials', compact('quote', 'settings', 'materials'));
+    }
+
+    private function calculateMaterialsForQuote(Quote $quote)
+    {
+        $totalCadre = 0;
+        $totalVento = 0;
+        $totalSikane = 0;
+        $totalMoustiquaire = 0;
+        $totalCadrePorte = 0;
+        $totalBattantPorte = 0;
+        $totalDivision = 0;
+        $fenetresDetails = [];
+        $portesDetails = [];
+
+        // Parcourir toutes les lignes du devis
+        foreach ($quote->lines as $line) {
+            // Vérifier si c'est une ligne de produit
+            if ($line->line_type === 'product') {
+                // Vérifier que les dimensions sont présentes et > 0
+                if ($line->width && $line->width > 0 && $line->height && $line->height > 0) {
+                    $productName = '';
+                    if ($line->product) {
+                        $productName = strtolower($line->product->name);
+                    }
+                    $description = strtolower($line->description ?? '');
+                    
+                    // Les dimensions sont en cm, on les utilise directement
+                    $largeur = $line->width;
+                    $hauteur = $line->height;
+                    $nombrePortes = (int) $line->quantity;
+                    
+                    // Vérifier si c'est une porte
+                    $porteKeywords = [
+                        'porte 1 battant', 'porte 1 battants', 'porte un battant',
+                        'porte 2 battants', 'porte 2 battant', 'porte deux battants',
+                        'porte', 'portes',
+                    ];
+                    
+                    $isPorte = false;
+                    $porteType = null; // '1_battant' ou '2_battants'
+                    
+                    foreach ($porteKeywords as $keyword) {
+                        if (strpos($productName, $keyword) !== false || strpos($description, $keyword) !== false) {
+                            $isPorte = true;
+                            // Déterminer le type de porte
+                            if (strpos($productName, '2 battants') !== false || strpos($description, '2 battants') !== false ||
+                                strpos($productName, '2 battant') !== false || strpos($description, '2 battant') !== false ||
+                                strpos($productName, 'deux battants') !== false || strpos($description, 'deux battants') !== false) {
+                                $porteType = '2_battants';
+                            } else {
+                                $porteType = '1_battant';
+                            }
+                            break;
+                        }
+                    }
+                    
+                    // Calculs pour les portes
+                    if ($isPorte) {
+                        // Cadre porte = ((Largeur+Hauteur)*2)+40)/580 (identique pour les deux types)
+                        $cadrePorteUnitaire = ((($largeur + $hauteur) * 2) + 40) / 580;
+                        
+                        // Battant porte selon le type
+                        if ($porteType === '1_battant') {
+                            // PORTE 1 BATTANT: Battant porte = ((Largeur+Hauteur)*2)/580
+                            $battantPorteUnitaire = (($largeur + $hauteur) * 2) / 580;
+                        } else {
+                            // PORTE 2 BATTANTS: Battant porte = (((Largeur*2)+(Hauteur*4))-32)/580
+                            $battantPorteUnitaire = ((($largeur * 2) + ($hauteur * 4)) - 32) / 580;
+                        }
+                        
+                        // Division = (largeur*Nombre porte trouvé)/580
+                        $division = ($largeur * $nombrePortes) / 580;
+                        
+                        // Calculer les totaux pour cette ligne (multiplier par nombre de portes)
+                        $cadrePorteLigne = $cadrePorteUnitaire * $nombrePortes;
+                        $battantPorteLigne = $battantPorteUnitaire * $nombrePortes;
+                        
+                        // Ajouter aux totaux globaux
+                        $totalCadrePorte += $cadrePorteLigne;
+                        $totalBattantPorte += $battantPorteLigne;
+                        $totalDivision += $division;
+                        
+                        // Stocker les détails
+                        $portesDetails[] = [
+                            'line' => $line,
+                            'cadre_porte' => $cadrePorteLigne,
+                            'battant_porte' => $battantPorteLigne,
+                            'division' => $division,
+                            'nombre_portes' => $nombrePortes,
+                            'type' => $porteType,
+                        ];
+                    } else {
+                        // Vérifier si c'est une fenêtre - chercher dans le nom du produit ou la description
+                        $fenetreKeywords = [
+                            'fenêtre', 'fenetre', 'fenêtres', 'fenetres',
+                            'fentres', 'fentre', 'fentr', // Variantes sans accent
+                            'fenetr', 'fenet', 'fent', // Autres variantes
+                        ];
+                        
+                        $isFenetre = false;
+                        foreach ($fenetreKeywords as $keyword) {
+                            if (strpos($productName, $keyword) !== false || strpos($description, $keyword) !== false) {
+                                $isFenetre = true;
+                                break;
+                            }
+                        }
+                        
+                        if ($isFenetre) {
+                            // Utiliser la quantité comme nombre de fenêtres
+                            $nombreFenetres = (int) $line->quantity;
+                            
+                            // Calcul CADRE pour UNE fenêtre = ((largeur + hauteur) * 2 + 50) / 580
+                            // Formule: ((largeur + hauteur) * 2 + 50) / 580
+                            // Exemple: ((200 + 110) * 2 + 50) / 580 = ((310) * 2 + 50) / 580 = (620 + 50) / 580 = 670 / 580 = 1,155
+                            $cadreUnitaire = (($largeur + $hauteur) * 2 + 50) / 580;
+                            
+                            // Calcul VENTO pour UNE fenêtre = nombre_cadre * 1.3
+                            $ventoUnitaire = $cadreUnitaire * 1.3;
+                            
+                            // Calcul SIKANE = (hauteur * 2 * nombre_total_fenetres) / 580
+                            // Note: SIKANE est déjà calculé avec le nombre total de fenêtres
+                            $sikane = ($hauteur * 2 * $nombreFenetres) / 580;
+                            
+                            // Calcul MOUSTIQUAIRE pour UNE fenêtre = nombre_vento / 2
+                            $moustiquaireUnitaire = $ventoUnitaire / 2;
+                            
+                            // Calculer les totaux pour cette ligne (multiplier par nombre de fenêtres)
+                            $cadreLigne = $cadreUnitaire * $nombreFenetres;
+                            $ventoLigne = $ventoUnitaire * $nombreFenetres;
+                            $moustiquaireLigne = $moustiquaireUnitaire * $nombreFenetres;
+                            
+                            // Ajouter aux totaux globaux
+                            $totalCadre += $cadreLigne;
+                            $totalVento += $ventoLigne;
+                            $totalSikane += $sikane;
+                            $totalMoustiquaire += $moustiquaireLigne;
+                            
+                            // Stocker les détails
+                            $fenetresDetails[] = [
+                                'line' => $line,
+                                'cadre' => $cadreLigne,
+                                'vento' => $ventoLigne,
+                                'sikane' => $sikane,
+                                'moustiquaire' => $moustiquaireLigne,
+                                'nombre_fenetres' => $nombreFenetres,
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        // Informations de debug
+        $debugInfo = [
+            'total_lines' => $quote->lines->count(),
+            'product_lines' => $quote->lines->where('line_type', 'product')->count(),
+            'lines_checked' => [],
+        ];
+        
+        // Ajouter des infos sur chaque ligne pour le debug
+        foreach ($quote->lines as $line) {
+            if ($line->line_type === 'product') {
+                $productName = $line->product ? strtolower($line->product->name) : '';
+                $description = strtolower($line->description ?? '');
+                
+                $fenetreKeywords = [
+                    'fenêtre', 'fenetre', 'fenêtres', 'fenetres',
+                    'fentres', 'fentre', 'fentr',
+                    'fenetr', 'fenet', 'fent',
+                ];
+                
+                $porteKeywords = [
+                    'porte 1 battant', 'porte 1 battants', 'porte un battant',
+                    'porte 2 battants', 'porte 2 battant', 'porte deux battants',
+                    'porte', 'portes',
+                ];
+                
+                $hasFenetre = false;
+                foreach ($fenetreKeywords as $keyword) {
+                    if (strpos($productName, $keyword) !== false || strpos($description, $keyword) !== false) {
+                        $hasFenetre = true;
+                        break;
+                    }
+                }
+                
+                $hasPorte = false;
+                foreach ($porteKeywords as $keyword) {
+                    if (strpos($productName, $keyword) !== false || strpos($description, $keyword) !== false) {
+                        $hasPorte = true;
+                        break;
+                    }
+                }
+                
+                $debugInfo['lines_checked'][] = [
+                    'id' => $line->id,
+                    'product_name' => $line->product ? $line->product->name : 'N/A',
+                    'description' => $line->description,
+                    'has_fenetre' => $hasFenetre,
+                    'has_porte' => $hasPorte,
+                    'has_dimensions' => ($line->width && $line->width > 0 && $line->height && $line->height > 0),
+                    'width' => $line->width,
+                    'height' => $line->height,
+                ];
+            }
+        }
+
+        return [
+            'total_cadre' => $totalCadre,
+            'total_vento' => $totalVento,
+            'total_sikane' => $totalSikane,
+            'total_moustiquaire' => $totalMoustiquaire,
+            'total_cadre_porte' => $totalCadrePorte,
+            'total_battant_porte' => $totalBattantPorte,
+            'total_division' => $totalDivision,
+            'fenetres_details' => $fenetresDetails,
+            'portes_details' => $portesDetails,
+            'debug' => $debugInfo,
+        ];
     }
 
     private function generateQuoteNumber(): string

@@ -23,6 +23,40 @@
         </div>
     </div>
 
+    <!-- Filtres -->
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <form method="GET" action="<?php echo e(route('clients.index')); ?>" class="space-y-4">
+            <div class="flex flex-col sm:flex-row gap-6">
+                <!-- Recherche -->
+                <div class="flex-1">
+                    <label for="search" class="block text-xs font-medium text-gray-700 mb-1">
+                        <i class="fas fa-search mr-1"></i>Recherche
+                    </label>
+                    <input type="text" name="search" id="search" value="<?php echo e(request('search')); ?>" 
+                        placeholder="Nom, email ou ville"
+                        class="block w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
+                        style="focus:ring-color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">
+                </div>
+
+                <div class="flex items-end gap-2">
+                    <button type="submit" 
+                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-200"
+                        style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);"
+                        onmouseover="this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.transform='translateY(0)'">
+                        <i class="fas fa-filter mr-2"></i>Filtrer
+                    </button>
+                    <?php if(request()->has('search')): ?>
+                        <a href="<?php echo e(route('clients.index')); ?>" 
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200">
+                            <i class="fas fa-times mr-2"></i>Réinitialiser
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </form>
+    </div>
+
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gradient-to-r from-gray-50 to-gray-100">

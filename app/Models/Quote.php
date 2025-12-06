@@ -10,6 +10,7 @@ class Quote extends Model
 {
     protected $fillable = [
         'client_id',
+        'created_by',
         'quote_number',
         'date',
         'valid_until',
@@ -37,6 +38,11 @@ class Quote extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class)->orderBy('payment_date', 'desc');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function getSubtotalAttribute()

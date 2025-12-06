@@ -17,12 +17,35 @@
                 <p class="mt-2 text-sm text-gray-600">Détails et informations du devis</p>
             </div>
             <div class="flex flex-wrap gap-2">
+                @if($quote->status !== 'validated')
                 <a href="{{ route('quotes.edit', $quote) }}" 
                    class="btn-primary inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300"
                    onmouseover="this.style.transform='translateY(-2px)'"
                    onmouseout="this.style.transform='translateY(0)'">
                     <i class="fas fa-edit mr-2"></i><span class="hidden sm:inline">Modifier</span><span class="sm:hidden">Modif.</span>
                 </a>
+                @else
+                <span class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-gray-400 bg-gray-200 cursor-not-allowed"
+                      title="Un devis validé ne peut pas être modifié. Annulez d'abord la validation.">
+                    <i class="fas fa-edit mr-2"></i><span class="hidden sm:inline">Modifier</span><span class="sm:hidden">Modif.</span>
+                </span>
+                @endif
+                @if($quote->status === 'accepted')
+                <a href="{{ route('quotes.show-validation', $quote) }}" 
+                   class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-emerald-600 hover:bg-emerald-700"
+                   onmouseover="this.style.transform='translateY(-2px)'"
+                   onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fas fa-check-circle mr-2"></i><span class="hidden sm:inline">Valider</span><span class="sm:hidden">Val.</span>
+                </a>
+                @endif
+                @if($quote->status === 'validated')
+                <a href="{{ route('payments.create', $quote) }}" 
+                   class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-green-600 hover:bg-green-700"
+                   onmouseover="this.style.transform='translateY(-2px)'"
+                   onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fas fa-money-bill-wave mr-2"></i><span class="hidden sm:inline">Payer</span><span class="sm:hidden">Pay.</span>
+                </a>
+                @endif
                 <a href="{{ route('quotes.print', $quote) }}" target="_blank" 
                    class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-teal-600 hover:bg-teal-700"
                    onmouseover="this.style.transform='translateY(-2px)'"
@@ -82,6 +105,16 @@
                         <dd class="text-sm text-gray-900"><i class="fas fa-calendar-check mr-2 text-gray-400"></i>{{ $quote->valid_until->format('d/m/Y') }}</dd>
                     </div>
                     @endif
+                    @if($quote->creator)
+                    <div class="flex items-center">
+                        <dt class="text-sm font-semibold text-gray-600 w-32">Créé par:</dt>
+                        <dd class="text-sm text-gray-900">
+                            <i class="fas fa-user mr-2 text-gray-400"></i>
+                            <span class="font-medium">{{ $quote->creator->name }}</span>
+                            <span class="text-xs text-gray-500 ml-2">({{ $quote->created_at->format('d/m/Y à H:i') }})</span>
+                        </dd>
+                    </div>
+                    @endif
                     <div>
                         <dt class="text-sm font-medium text-gray-500 mb-2">Statut</dt>
                         <dd class="text-sm">
@@ -94,6 +127,7 @@
                                         'rejected' => ['label' => 'Refusé', 'icon' => 'fa-times-circle', 'color' => 'red'],
                                     ];
                                     $isValidated = $quote->status === 'validated';
+                                    $isCancelled = $quote->status === 'cancelled';
                                 @endphp
                                 @if($isValidated)
                                     <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-200 text-emerald-800 border-2 border-emerald-400">
@@ -102,8 +136,46 @@
                                         <span class="ml-2 text-xs opacity-75">(Actuel)</span>
                                     </span>
                                 @endif
+                                @if($isCancelled)
+                                    <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-orange-200 text-orange-800 border-2 border-orange-400">
+                                        <i class="fas fa-ban mr-2"></i>
+                                        Annulé
+                                        <span class="ml-2 text-xs opacity-75">(Actuel)</span>
+                                    </span>
+                                @endif
+                                
+                                <!-- Bouton Valider (si devis accepté ou annulé) -->
+                                @if(in_array($quote->status, ['accepted', 'cancelled']))
+                                    <a href="{{ route('quotes.show-validation', $quote) }}" 
+                                       class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow-md bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border border-emerald-300">
+                                        <i class="fas fa-check-circle mr-2"></i>
+                                        Valider
+                                    </a>
+                                @endif
+                                
+                                <!-- Bouton Annuler (si devis validé et sans paiements) -->
+                                @if($isValidated)
+                                    @if($quote->payments->count() > 0)
+                                        <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-400 border border-gray-300 cursor-not-allowed"
+                                              title="Un devis avec des paiements ne peut pas être annulé. Supprimez d'abord les paiements.">
+                                            <i class="fas fa-ban mr-2"></i>
+                                            Annuler
+                                        </span>
+                                    @else
+                                        <form action="{{ route('quotes.cancel', $quote) }}" method="POST" class="inline" 
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce devis validé ?');">
+                                            @csrf
+                                            <button type="submit" 
+                                                    class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow-md bg-orange-100 text-orange-700 hover:bg-orange-200 border border-orange-300">
+                                                <i class="fas fa-ban mr-2"></i>
+                                                Annuler
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endif
+                                
                                 @foreach($statuses as $statusValue => $statusInfo)
-                                    @if($quote->status == $statusValue && !$isValidated)
+                                    @if($quote->status == $statusValue && !$isValidated && !$isCancelled)
                                         <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold 
                                             @if($statusValue == 'draft') bg-gray-200 text-gray-800 border-2 border-gray-400
                                             @elseif($statusValue == 'sent') bg-blue-200 text-blue-800 border-2 border-blue-400
@@ -114,7 +186,7 @@
                                             {{ $statusInfo['label'] }}
                                             <span class="ml-2 text-xs opacity-75">(Actuel)</span>
                                         </span>
-                                    @elseif(!$isValidated)
+                                    @elseif(!$isValidated && !$isCancelled)
                                         <form action="{{ route('quotes.update-status', $quote) }}" method="POST" class="inline">
                                             @csrf
                                             <input type="hidden" name="status" value="{{ $statusValue }}">
@@ -315,6 +387,7 @@
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Montant</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Méthode</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Référence</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Créé par</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Notes</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
@@ -326,6 +399,14 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">{{ number_format($payment->amount, 2, ',', ' ') }} GNF</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $payment->payment_method_label }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $payment->reference ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                @if($payment->creator)
+                                    <i class="fas fa-user mr-1 text-gray-400"></i>
+                                    <span class="font-medium">{{ $payment->creator->name }}</span>
+                                @else
+                                    <span class="text-gray-400">-</span>
+                                @endif
+                            </td>
                             <td class="px-6 py-4 text-sm text-gray-500">{{ $payment->notes ? \Illuminate\Support\Str::limit($payment->notes, 50) : '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex justify-end space-x-2">

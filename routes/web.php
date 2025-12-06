@@ -8,6 +8,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
 
 // Routes d'authentification (publiques)
 Route::middleware(['guest'])->group(function () {
@@ -31,6 +32,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('products', ProductController::class);
 
     // Routes pour les devis
+    // Route spécifique AVANT la route resource pour éviter les conflits
+    Route::get('quotes/calculate-materials', [QuoteController::class, 'calculateMaterials'])->name('quotes.calculate-materials');
+    Route::get('quotes/{quote}/print-materials', [QuoteController::class, 'printMaterials'])->name('quotes.print-materials');
     Route::resource('quotes', QuoteController::class);
     Route::post('quotes/{quote}/lines', [QuoteController::class, 'addLine'])->name('quotes.lines.store');
     Route::get('quotes/{quote}/lines/{line}/edit', [QuoteController::class, 'editLine'])->name('quotes.lines.edit');
@@ -41,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('quotes/{quote}/update-status', [QuoteController::class, 'updateStatus'])->name('quotes.update-status');
     Route::get('quotes/{quote}/validate', [QuoteController::class, 'showValidation'])->name('quotes.show-validation');
     Route::post('quotes/{quote}/validate', [QuoteController::class, 'validateQuote'])->name('quotes.validate');
+    Route::post('quotes/{quote}/cancel', [QuoteController::class, 'cancelQuote'])->name('quotes.cancel');
     Route::get('quotes/{quote}/print', [QuoteController::class, 'print'])->name('quotes.print');
 
     // Routes pour les paramètres
@@ -61,5 +66,8 @@ Route::middleware(['auth'])->group(function () {
     Route::put('quotes/{quote}/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
     Route::delete('quotes/{quote}/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
     Route::get('payments/{payment}/print', [PaymentController::class, 'print'])->name('payments.print');
+
+    // Routes pour la gestion des utilisateurs (admin seulement)
+    Route::resource('users', UserController::class);
 });
 

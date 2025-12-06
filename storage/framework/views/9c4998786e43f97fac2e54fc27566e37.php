@@ -122,11 +122,19 @@ unset($__errorArgs, $__bag); ?>
                                     'rejected' => ['label' => 'Refusé', 'short' => 'Refusé', 'icon' => 'fa-times-circle', 'color' => 'red'],
                                 ];
                                 $isValidated = $quote->status === 'validated';
+                                $isCancelled = $quote->status === 'cancelled';
                             ?>
                             <?php if($isValidated): ?>
                                 <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-200 text-emerald-800 border-2 border-emerald-400">
                                     <i class="fas fa-check-circle mr-2"></i>
                                     Validé
+                                    <span class="ml-2 text-xs opacity-75">(Actuel)</span>
+                                </span>
+                            <?php endif; ?>
+                            <?php if($isCancelled): ?>
+                                <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-orange-200 text-orange-800 border-2 border-orange-400">
+                                    <i class="fas fa-ban mr-2"></i>
+                                    Annulé
                                     <span class="ml-2 text-xs opacity-75">(Actuel)</span>
                                 </span>
                             <?php endif; ?>
@@ -234,14 +242,37 @@ unset($__errorArgs, $__bag); ?>
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-gray-900">Lignes du Devis</h3>
                 <?php if($quote->lines->count() > 0): ?>
-                <div class="flex items-center space-x-3">
-                    <label for="global_price_per_m2" class="text-sm font-medium text-gray-700">Modifier Prix M² pour toutes les lignes:</label>
-                    <input type="number" step="0.01" min="0" id="global_price_per_m2" placeholder="Prix M²" 
-                        class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 w-32">
-                    <button type="button" onclick="updateAllPrices()" 
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">
-                        <i class="fas fa-sync-alt mr-2"></i>Appliquer
-                    </button>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-1 w-full sm:w-auto">
+                        <label for="global_product_select" class="text-sm font-medium text-gray-700 whitespace-nowrap">Modifier Prix M² pour:</label>
+                        <select id="global_product_select" 
+                            class="block w-full sm:w-auto rounded-lg border-2 border-gray-400 bg-white px-4 py-2 text-gray-900 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
+                            style="focus:ring-color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23374151\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1em 1em; padding-right: 2.5rem; min-width: 200px;">
+                            <option value="">Toutes les lignes</option>
+                            <?php
+                                $uniqueProductIds = $quote->lines->where('line_type', 'product')->whereNotNull('product_id')->pluck('product_id')->unique();
+                            ?>
+                            <?php $__currentLoopData = $uniqueProductIds; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $productId): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
+                                    $product = $products->find($productId);
+                                ?>
+                                <?php if($product): ?>
+                                    <option value="<?php echo e($product->id); ?>"><?php echo e($product->name); ?></option>
+                                <?php endif; ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </select>
+                        <label for="global_price_per_m2" class="text-sm font-medium text-gray-700 whitespace-nowrap">Prix M²:</label>
+                        <input type="number" step="0.01" min="0" id="global_price_per_m2" placeholder="Prix M²" 
+                            class="block w-full sm:w-32 rounded-lg border-2 border-gray-400 bg-white px-3 py-2 text-gray-900 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
+                            style="focus:ring-color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">
+                        <button type="button" onclick="updateAllPrices()" 
+                            class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-200"
+                            style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.2)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'">
+                            <i class="fas fa-sync-alt mr-2"></i>Appliquer
+                        </button>
+                    </div>
                 </div>
                 <?php endif; ?>
             </div>
@@ -298,16 +329,16 @@ unset($__errorArgs, $__bag); ?>
                             <div>
                                 <label for="width" class="block text-sm font-medium text-gray-700">Largeur (cm)</label>
                                 <input type="number" step="0.01" min="0" name="width" id="width" placeholder="0.00"
-                                    oninput="calculateSurfaceAndAmount()"
-                                    class="block w-full rounded-lg border-2 border-gray-400 bg-white px-3 py-2.5 text-gray-900 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all"
-                                    style="focus:ring-color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">
+                                oninput="calculateSurfaceAndAmount(); checkAndCalculateMaterials()"
+                                class="block w-full rounded-lg border-2 border-gray-400 bg-white px-3 py-2.5 text-gray-900 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all"
+                                style="focus:ring-color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">
                             </div>
                         </div>
                         <div id="dimensions_fields_height">
                             <div>
                                 <label for="height" class="block text-sm font-medium text-gray-700">Hauteur (cm)</label>
                                 <input type="number" step="0.01" min="0" name="height" id="height" placeholder="0.00"
-                                    oninput="calculateSurfaceAndAmount()"
+                                    oninput="calculateSurfaceAndAmount(); checkAndCalculateMaterials()"
                                     class="block w-full rounded-lg border-2 border-gray-400 bg-white px-3 py-2.5 text-gray-900 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all"
                                     style="focus:ring-color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">
                             </div>
@@ -315,7 +346,14 @@ unset($__errorArgs, $__bag); ?>
                         <div>
                             <label for="quantity" class="block text-sm font-medium text-gray-700">Quantité *</label>
                             <input type="number" step="0.01" min="0.01" name="quantity" id="quantity" value="1" required
-                                oninput="calculateSurfaceAndAmount()"
+                                oninput="calculateSurfaceAndAmount(); checkAndCalculateMaterials()"
+                                class="block w-full rounded-lg border-2 border-gray-400 bg-white px-3 py-2.5 text-gray-900 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all"
+                                style="focus:ring-color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">
+                        </div>
+                        <div id="nombre_fenetres_field" style="display: none;">
+                            <label for="nombre_total_fenetres" class="block text-sm font-medium text-gray-700">Nombre total fenêtres</label>
+                            <input type="number" step="1" min="1" name="nombre_total_fenetres" id="nombre_total_fenetres" placeholder="1"
+                                oninput="checkAndCalculateMaterials()"
                                 class="block w-full rounded-lg border-2 border-gray-400 bg-white px-3 py-2.5 text-gray-900 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all"
                                 style="focus:ring-color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">
                         </div>
@@ -359,6 +397,33 @@ unset($__errorArgs, $__bag); ?>
                                 placeholder="0.00">
                         </div>
                     </div>
+                    
+                    <!-- Section Calcul Matériaux Fenêtres -->
+                    <div id="materiaux_fenetres_section" style="display: none;" class="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                        <h5 class="text-sm font-bold text-gray-900 mb-3 flex items-center">
+                            <i class="fas fa-calculator mr-2" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;"></i>
+                            Calcul Automatique des Matériaux pour Fenêtres
+                        </h5>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Total Cadre</label>
+                                <div id="total_cadre" class="text-lg font-bold" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">0</div>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Total Vento</label>
+                                <div id="total_vento" class="text-lg font-bold" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">0</div>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Total Sikane</label>
+                                <div id="total_sikane" class="text-lg font-bold" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">0</div>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg border border-gray-200">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Total Moustiquaire</label>
+                                <div id="total_moustiquaire" class="text-lg font-bold" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="mt-4 flex justify-end space-x-3 border-t pt-4">
                         <button type="button" onclick="cancelEdit()" id="cancelBtn" class="hidden bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded transition-colors">
                             <i class="fas fa-times mr-2"></i>Annuler
@@ -633,6 +698,9 @@ function toggleLineTypeFields() {
         // Définir l'unité à "unité" pour les produits (masquée mais définie)
         document.getElementById('unit').value = 'unité';
         surfaceField.style.display = 'block';
+        
+        // Vérifier si c'est une fenêtre pour afficher le calcul des matériaux
+        setTimeout(checkAndCalculateMaterials, 100);
     } else {
         // Afficher les champs pour les autres types
         productField.style.display = 'none';
@@ -693,6 +761,75 @@ function calculateAmountForOtherTypes() {
 function fillProductData() {
     // Recalculer après avoir sélectionné un produit
     calculateSurfaceAndAmount();
+    checkAndCalculateMaterials();
+}
+
+// Fonction pour calculer les matériaux pour fenêtres
+function calculMaterielFenetre(largeur, hauteur, nombreFenetres) {
+    // Convertir cm en mm
+    const largeurMm = largeur * 10;
+    const hauteurMm = hauteur * 10;
+    
+    // Calcul CADRE = ((largeur + hauteur) * 2 + 50) / 580
+    const perimetre = (largeurMm + hauteurMm) * 2;
+    const cadre = Math.ceil((perimetre + 50) / 580);
+    
+    // Calcul VENTO = nombre_cadre * 1.3
+    const vento = Math.ceil(cadre * 1.3);
+    
+    // Calcul SIKANE = (hauteur * 2 * nombre_total_fenetres) / 580
+    const sikane = Math.ceil((hauteurMm * 2 * nombreFenetres) / 580);
+    
+    // Calcul MOUSTIQUAIRE = nombre_vento / 2
+    const moustiquaire = Math.ceil(vento / 2);
+    
+    return {
+        nombre_cadre: cadre,
+        nombre_vento: vento,
+        nombre_sikane: sikane,
+        nombre_moustiquaire: moustiquaire
+    };
+}
+
+// Fonction pour vérifier si c'est une fenêtre et calculer les matériaux
+function checkAndCalculateMaterials() {
+    const productSelect = document.getElementById('product_id');
+    if (!productSelect) return;
+    
+    const productName = productSelect.options[productSelect.selectedIndex]?.text.toLowerCase() || '';
+    const isFenetre = productName.includes('fenêtre') || productName.includes('fenetre');
+    
+    const nombreFenetresField = document.getElementById('nombre_fenetres_field');
+    const materiauxSection = document.getElementById('materiaux_fenetres_section');
+    
+    if (isFenetre && nombreFenetresField && materiauxSection) {
+        nombreFenetresField.style.display = 'block';
+        materiauxSection.style.display = 'block';
+        
+        // Récupérer les valeurs
+        const largeur = parseFloat(document.getElementById('width').value) || 0;
+        const hauteur = parseFloat(document.getElementById('height').value) || 0;
+        const nombreFenetres = parseInt(document.getElementById('nombre_total_fenetres').value) || 1;
+        
+        if (largeur > 0 && hauteur > 0 && nombreFenetres > 0) {
+            const resultats = calculMaterielFenetre(largeur, hauteur, nombreFenetres);
+            
+            // Afficher les résultats
+            document.getElementById('total_cadre').textContent = resultats.nombre_cadre;
+            document.getElementById('total_vento').textContent = resultats.nombre_vento;
+            document.getElementById('total_sikane').textContent = resultats.nombre_sikane;
+            document.getElementById('total_moustiquaire').textContent = resultats.nombre_moustiquaire;
+        } else {
+            // Réinitialiser si les valeurs ne sont pas complètes
+            document.getElementById('total_cadre').textContent = '0';
+            document.getElementById('total_vento').textContent = '0';
+            document.getElementById('total_sikane').textContent = '0';
+            document.getElementById('total_moustiquaire').textContent = '0';
+        }
+    } else {
+        if (nombreFenetresField) nombreFenetresField.style.display = 'none';
+        if (materiauxSection) materiauxSection.style.display = 'none';
+    }
 }
 
 function editLine(lineId) {
@@ -824,13 +961,18 @@ function cancelEdit() {
 
 function updateAllPrices() {
     const pricePerM2 = document.getElementById('global_price_per_m2').value;
+    const productId = document.getElementById('global_product_select').value;
     
     if (!pricePerM2 || parseFloat(pricePerM2) <= 0) {
         alert('Veuillez saisir un prix M² valide.');
         return;
     }
     
-    if (!confirm('Êtes-vous sûr de vouloir modifier le prix M² de toutes les lignes du devis ?')) {
+    const productName = productId 
+        ? document.getElementById('global_product_select').options[document.getElementById('global_product_select').selectedIndex].text
+        : 'toutes les lignes';
+    
+    if (!confirm(`Êtes-vous sûr de vouloir modifier le prix M² pour ${productName} ?`)) {
         return;
     }
     
@@ -849,6 +991,14 @@ function updateAllPrices() {
     priceInput.name = 'price_per_m2';
     priceInput.value = pricePerM2;
     form.appendChild(priceInput);
+    
+    if (productId) {
+        const productInput = document.createElement('input');
+        productInput.type = 'hidden';
+        productInput.name = 'product_id';
+        productInput.value = productId;
+        form.appendChild(productInput);
+    }
     
     document.body.appendChild(form);
     form.submit();

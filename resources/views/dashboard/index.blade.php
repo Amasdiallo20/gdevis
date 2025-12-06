@@ -8,13 +8,25 @@
     <div class="card-modern overflow-hidden">
         <div class="px-6 py-6 border-b border-gray-200 bg-gradient-to-r" 
              style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }}15 0%, {{ $settings->secondary_color ?? '#1e40af' }}15 100%);">
-            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+            <div class="mb-3 text-center">
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-1">
+                    A2 VitraDevis
+                </h1>
+                <p class="text-base sm:text-lg text-gray-600 italic">
+                    Votre devis, clair comme le verre.
+                </p>
+            </div>
+            <div class="flex items-center mt-4 pt-4 border-t border-gray-200">
                 <div class="p-2 rounded-lg mr-3" style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
                     <i class="fas fa-chart-line text-white"></i>
                 </div>
-                Tableau de bord
-            </h2>
-            <p class="mt-2 text-sm text-gray-600">Vue d'ensemble de votre activité</p>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900">
+                        Tableau de bord
+                    </h2>
+                    <p class="text-sm text-gray-600">Vue d'ensemble de votre activité</p>
+                </div>
+            </div>
         </div>
     </div>
 
