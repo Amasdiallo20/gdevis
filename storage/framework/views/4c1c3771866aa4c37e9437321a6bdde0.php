@@ -104,21 +104,20 @@
     <!-- Grille -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
         <?php $__currentLoopData = $modeles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $modele): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer transform hover:-translate-y-2"
-             onclick="window.location.href='<?php echo e(route('modeles.show', $modele)); ?><?php echo e(request()->has('quote_id') ? '?quote_id=' . request('quote_id') : ''); ?>'">
+        <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 transform hover:-translate-y-2">
             <!-- Image -->
             <div class="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                    <?php if($modele->image): ?>
-                    <img src="<?php echo e($modele->thumbnail_url ?? $modele->image_url); ?>" 
-                         srcset="<?php echo e($modele->thumbnail_url ?? $modele->image_url); ?> 300w,
-                                 <?php echo e($modele->medium_image_url ?? $modele->image_url); ?> 800w,
-                                 <?php echo e($modele->large_image_url ?? $modele->image_url); ?> 1200w"
-                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                         loading="lazy" 
-                         alt="<?php echo e($modele->nom); ?>"
-                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-zoom-in"
-                         onclick="event.stopPropagation(); openImageZoom(this, '<?php echo e($modele->nom); ?>')"
-                         data-zoom-src="<?php echo e($modele->large_image_url ?? $modele->image_url); ?>">
+                <?php if($modele->image): ?>
+                <img src="<?php echo e($modele->thumbnail_url ?? $modele->image_url); ?>" 
+                     srcset="<?php echo e($modele->thumbnail_url ?? $modele->image_url); ?> 300w,
+                             <?php echo e($modele->medium_image_url ?? $modele->image_url); ?> 800w,
+                             <?php echo e($modele->large_image_url ?? $modele->image_url); ?> 1200w"
+                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                     loading="lazy" 
+                     alt="<?php echo e($modele->nom); ?>"
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-zoom-in"
+                     onclick="openImageZoom(this, '<?php echo e($modele->nom); ?>')"
+                     data-zoom-src="<?php echo e($modele->large_image_url ?? $modele->image_url); ?>">
                 <?php else: ?>
                 <div class="w-full h-full flex items-center justify-center">
                     <i class="fas fa-image text-gray-400 text-5xl"></i>
@@ -151,15 +150,14 @@
                 </h3>
                 
                 <div class="flex gap-2">
-                    <button class="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-                            style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);"
-                            onclick="event.stopPropagation(); window.location.href='<?php echo e(route('modeles.show', $modele)); ?><?php echo e(request()->has('quote_id') ? '?quote_id=' . request('quote_id') : ''); ?>'">
+                    <a href="<?php echo e(route('modeles.show', $modele)); ?><?php echo e(request()->has('quote_id') ? '?quote_id=' . request('quote_id') : ''); ?>"
+                       class="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                       style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);">
                         <i class="fas fa-eye mr-2"></i>Voir les détails
-                    </button>
+                    </a>
                     <?php if(request()->has('quote_id')): ?>
                     <a href="<?php echo e(route('modeles.add-to-quote', $modele)); ?>?quote_id=<?php echo e(request('quote_id')); ?>" 
-                       class="inline-flex items-center justify-center px-4 py-3 rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-                       onclick="event.stopPropagation()">
+                       class="inline-flex items-center justify-center px-4 py-3 rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
                         <i class="fas fa-link"></i>
                     </a>
                     <?php endif; ?>
