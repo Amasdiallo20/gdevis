@@ -59,6 +59,14 @@ class Modele extends Model
     }
 
     /**
+     * Obtenir l'URL de l'image medium
+     */
+    public function getMediumImageUrlAttribute(): ?string
+    {
+        return $this->getImageUrl('medium');
+    }
+
+    /**
      * Obtenir l'URL de l'image large
      */
     public function getLargeImageUrlAttribute(): ?string

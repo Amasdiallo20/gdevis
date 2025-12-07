@@ -80,9 +80,13 @@
                 @if($modele->image)
                 <div class="relative h-full min-h-[350px] md:min-h-[400px] cursor-zoom-in" id="imageContainer">
                     <img src="{{ $modele->large_image_url ?? $modele->image_url }}" 
+                         srcset="{{ $modele->thumbnail_url ?? $modele->image_url }} 300w,
+                                 {{ $modele->medium_image_url ?? $modele->image_url }} 800w,
+                                 {{ $modele->large_image_url ?? $modele->image_url }} 1200w"
+                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 50vw"
                          alt="{{ $modele->nom }}"
                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                         loading="lazy"
+                         loading="eager"
                          id="mainImage"
                          data-zoom-src="{{ $modele->image_url }}"
                          onclick="openImageZoom(this)">

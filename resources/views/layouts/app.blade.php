@@ -2,11 +2,33 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="@yield('description', 'A2 VitraDevis - Votre devis, clair comme le verre. Gestion de devis pour vitrerie et aluminium.')">
+    <meta name="keywords" content="devis, vitrerie, aluminium, gestion, facturation">
+    <meta name="author" content="A2 VitraDevis">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="{{ $settings->primary_color ?? '#3b82f6' }}">
+    
+    <!-- Preconnect pour améliorer les performances -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    
     <title>@yield('title', 'A2 VitraDevis')</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind CSS avec defer pour ne pas bloquer le rendu -->
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    
+    <!-- Font Awesome avec preload -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    
+    <!-- Alpine.js avec defer -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary-color: {{ $settings->primary_color ?? '#3b82f6' }};
@@ -199,12 +221,107 @@
             .hide-mobile {
                 display: none !important;
             }
+            
+            /* Amélioration des tableaux sur mobile */
+            .table-mobile-card {
+                display: block;
+            }
+            
+            .table-mobile-card thead {
+                display: none;
+            }
+            
+            .table-mobile-card tbody,
+            .table-mobile-card tr,
+            .table-mobile-card td {
+                display: block;
+                width: 100%;
+            }
+            
+            .table-mobile-card tr {
+                margin-bottom: 1rem;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                background: white;
+                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            }
+            
+            .table-mobile-card td {
+                text-align: left !important;
+                padding: 0.5rem 0;
+                border: none;
+            }
+            
+            .table-mobile-card td:before {
+                content: attr(data-label);
+                font-weight: 700;
+                display: inline-block;
+                width: 40%;
+                color: #6b7280;
+                margin-right: 0.5rem;
+            }
         }
         
         @media (max-width: 768px) {
             .container-mobile {
                 padding-left: 1rem;
                 padding-right: 1rem;
+            }
+            
+            /* Amélioration du scroll horizontal pour les tableaux */
+            .overflow-x-auto {
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+            }
+            
+            .overflow-x-auto::-webkit-scrollbar {
+                height: 8px;
+            }
+            
+            .overflow-x-auto::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 4px;
+            }
+            
+            .overflow-x-auto::-webkit-scrollbar-thumb {
+                background: #888;
+                border-radius: 4px;
+            }
+            
+            .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+        }
+        
+        /* Optimisation des performances */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+        
+        /* Réduction des animations sur mobile pour améliorer les performances */
+        @media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Support pour prefers-reduced-motion */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
             }
         }
         
@@ -261,7 +378,12 @@
                     <!-- Logo et nom -->
                     <div class="flex-shrink-0 flex items-center">
                         @if($settings->logo)
-                        <img src="{{ asset('storage/' . $settings->logo) }}" alt="Logo" class="h-10 w-auto" 
+                        <img src="{{ asset('storage/' . $settings->logo) }}" 
+                             alt="Logo A2 VitraDevis" 
+                             class="h-10 w-auto" 
+                             loading="eager"
+                             width="auto"
+                             height="40"
                              onerror="console.error('Erreur chargement logo: {{ $settings->logo }}'); this.style.display='none';">
                         <div class="ml-4 flex flex-col">
                         @else

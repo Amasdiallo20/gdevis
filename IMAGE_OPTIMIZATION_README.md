@@ -107,3 +107,5 @@ const SIZES = [
 - Suppression automatique de toutes les versions lors de la suppression d'un modèle
 - Compatible avec les images existantes (fallback sur l'original si les versions optimisées n'existent pas)
 
+
+

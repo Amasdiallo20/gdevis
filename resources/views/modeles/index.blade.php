@@ -109,7 +109,12 @@
             <!-- Image -->
             <div class="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                     @if($modele->image)
-                    <img src="{{ $modele->thumbnail_url ?? $modele->image_url }}" loading="lazy" 
+                    <img src="{{ $modele->thumbnail_url ?? $modele->image_url }}" 
+                         srcset="{{ $modele->thumbnail_url ?? $modele->image_url }} 300w,
+                                 {{ $modele->medium_image_url ?? $modele->image_url }} 800w,
+                                 {{ $modele->large_image_url ?? $modele->image_url }} 1200w"
+                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                         loading="lazy" 
                          alt="{{ $modele->nom }}"
                          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-zoom-in"
                          onclick="event.stopPropagation(); openImageZoom(this, '{{ $modele->nom }}')"
