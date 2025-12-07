@@ -209,6 +209,112 @@
         
         /* Améliorations responsive générales */
         @media (max-width: 640px) {
+            /* Réduction des tailles de texte sur mobile */
+            h1, .text-4xl, .text-5xl, .text-6xl {
+                font-size: 1.75rem !important; /* 28px au lieu de 36px+ */
+                line-height: 1.2 !important;
+            }
+            
+            h2, .text-3xl {
+                font-size: 1.5rem !important; /* 24px */
+                line-height: 1.3 !important;
+            }
+            
+            h3, .text-2xl {
+                font-size: 1.25rem !important; /* 20px */
+                line-height: 1.4 !important;
+            }
+            
+            h4, .text-xl {
+                font-size: 1.125rem !important; /* 18px */
+                line-height: 1.4 !important;
+            }
+            
+            .text-lg {
+                font-size: 1rem !important; /* 16px */
+            }
+            
+            .text-base {
+                font-size: 0.9375rem !important; /* 15px */
+            }
+            
+            .text-sm {
+                font-size: 0.875rem !important; /* 14px */
+            }
+            
+            /* Réduction des tailles de boutons sur mobile */
+            button:not(.mobile-touch-target):not([class*="text-xs"]), 
+            .btn-primary, 
+            a[class*="btn"]:not([class*="text-xs"]),
+            a[class*="px-6"][class*="py-3"]:not([class*="text-xs"]),
+            a[class*="px-5"][class*="py-3"]:not([class*="text-xs"]),
+            a[class*="px-4"][class*="py-3"]:not([class*="text-xs"]),
+            button[class*="px-6"][class*="py-3"]:not([class*="text-xs"]),
+            button[class*="px-5"][class*="py-3"]:not([class*="text-xs"]),
+            button[class*="px-4"][class*="py-3"]:not([class*="text-xs"]) {
+                padding: 0.5rem 0.875rem !important; /* 8px 14px */
+                font-size: 0.8125rem !important; /* 13px */
+                min-height: 36px !important;
+            }
+            
+            /* Réduction des espacements des cartes et conteneurs */
+            .p-5, .p-6 {
+                padding: 1rem !important; /* 16px au lieu de 20px/24px */
+            }
+            
+            .px-6 {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+            
+            .py-6 {
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+            }
+            
+            .px-4 {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+            
+            .py-3 {
+                padding-top: 0.5rem !important;
+                padding-bottom: 0.5rem !important;
+            }
+            
+            .mb-4, .mb-6, .mb-8 {
+                margin-bottom: 0.75rem !important;
+            }
+            
+            .mt-4, .mt-6, .mt-8 {
+                margin-top: 0.75rem !important;
+            }
+            
+            /* Réduction des icônes sur mobile */
+            .fas, .fa, i[class*="fa-"] {
+                font-size: 0.875rem !important;
+            }
+            
+            i.text-xl, .text-xl i {
+                font-size: 1rem !important;
+            }
+            
+            i.text-2xl, .text-2xl i {
+                font-size: 1.125rem !important;
+            }
+            
+            i.text-3xl, .text-3xl i {
+                font-size: 1.25rem !important;
+            }
+            
+            i.text-4xl, .text-4xl i {
+                font-size: 1.5rem !important;
+            }
+            
+            i.text-5xl, .text-5xl i {
+                font-size: 1.75rem !important;
+            }
+            
             .table-responsive {
                 font-size: 0.875rem;
             }

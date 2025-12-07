@@ -12,16 +12,16 @@
                  style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
                 <i class="fas fa-images text-white text-3xl"></i>
             </div>
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-4">
+            <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-3 sm:mb-4">
                 Catalogue de <span style="color: {{ $settings->primary_color ?? '#3b82f6' }};">Modèles</span>
             </h1>
-            <p class="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+            <p class="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto mb-4 sm:mb-8">
                 Découvrez notre collection complète de modèles aluminium : fenêtres, portes, garde-corps et bien plus encore
             </p>
             @auth
             @if(Auth::user()->hasPermission('modeles.create'))
             <a href="{{ route('modeles.create') }}" 
-               class="inline-flex items-center justify-center px-6 py-3 rounded-xl text-base font-semibold text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+               class="inline-flex items-center justify-center px-4 py-2 sm:px-6 sm:py-3 rounded-xl text-sm sm:text-base font-semibold text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
                 <i class="fas fa-plus mr-2"></i>Ajouter un Modèle
             </a>
@@ -72,13 +72,13 @@
                 <!-- Boutons -->
                 <div class="flex items-end gap-2">
                     <button type="submit" 
-                        class="flex-1 inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-semibold text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                        class="flex-1 inline-flex items-center justify-center px-4 py-2 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                         style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
                         <i class="fas fa-filter mr-2"></i>Filtrer
                     </button>
                     @if(request()->hasAny(['search', 'categorie']))
                     <a href="{{ route('modeles.index') }}" 
-                       class="inline-flex items-center justify-center px-4 py-3 rounded-xl border-2 border-gray-300 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md">
+                       class="inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-3 rounded-xl border-2 border-gray-300 text-xs sm:text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md">
                         <i class="fas fa-times"></i>
                     </a>
                     @endif
@@ -143,20 +143,20 @@
             
             <!-- Contenu -->
             <div class="p-5">
-                <h3 class="text-xl font-bold text-gray-900 mb-4 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                <h3 class="text-base sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 line-clamp-2 group-hover:text-blue-600 transition-colors">
                     {{ $modele->nom }}
                 </h3>
                 
                 <div class="flex gap-2">
                     <a href="{{ route('modeles.show', $modele) }}{{ request()->has('quote_id') ? '?quote_id=' . request('quote_id') : '' }}"
-                       class="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                       class="flex-1 inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                        style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
-                        <i class="fas fa-eye mr-2"></i>Voir les détails
+                        <i class="fas fa-eye mr-1 sm:mr-2 text-xs sm:text-sm"></i><span class="hidden sm:inline">Voir les détails</span><span class="sm:hidden">Détails</span>
                     </a>
                     @if(request()->has('quote_id'))
                     <a href="{{ route('modeles.add-to-quote', $modele) }}?quote_id={{ request('quote_id') }}" 
-                       class="inline-flex items-center justify-center px-4 py-3 rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-                        <i class="fas fa-link"></i>
+                       class="inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold text-white bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                        <i class="fas fa-link text-xs sm:text-sm"></i>
                     </a>
                     @endif
                 </div>

@@ -8,16 +8,16 @@
          style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }}15 0%, {{ $settings->secondary_color ?? '#1e40af' }}15 100%);">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
-                    <div class="p-2 rounded-lg mr-3" style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
-                        <i class="fas fa-file-invoice text-white"></i>
+                <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center">
+                    <div class="p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3" style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                        <i class="fas fa-file-invoice text-white text-sm sm:text-base"></i>
                     </div>
                     Liste des Devis
                 </h2>
-                <p class="mt-2 text-sm text-gray-600">Gérez tous vos devis et factures</p>
+                <p class="mt-2 text-xs sm:text-sm text-gray-600">Gérez tous vos devis et factures</p>
             </div>
             <a href="{{ route('quotes.create') }}" 
-               class="btn-primary inline-flex items-center justify-center px-5 py-3 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300"
+               class="btn-primary inline-flex items-center justify-center px-3 py-2 sm:px-5 sm:py-3 border border-transparent rounded-lg shadow-lg text-xs sm:text-sm font-semibold text-white transition-all duration-300"
                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.2)'"
                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'">
                 <i class="fas fa-plus mr-2"></i>Nouveau Devis
