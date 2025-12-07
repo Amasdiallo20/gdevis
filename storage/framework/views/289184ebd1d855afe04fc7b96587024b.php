@@ -10,6 +10,29 @@
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="<?php echo e($settings->primary_color ?? '#3b82f6'); ?>">
     
+    <!-- Favicon - Utilise le logo des paramètres si disponible, sinon favicon par défaut -->
+    <?php
+        $faviconUrl = null;
+        if ($settings->logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings->logo)) {
+            $faviconUrl = asset('storage/' . $settings->logo);
+        } elseif (file_exists(public_path('favicon.ico'))) {
+            $faviconUrl = asset('favicon.ico');
+        } elseif (file_exists(public_path('favicon.png'))) {
+            $faviconUrl = asset('favicon.png');
+        }
+    ?>
+    <?php if($faviconUrl): ?>
+        <link rel="icon" type="image/x-icon" href="<?php echo e($faviconUrl); ?>">
+        <link rel="icon" type="image/png" href="<?php echo e($faviconUrl); ?>">
+        <link rel="apple-touch-icon" href="<?php echo e($faviconUrl); ?>">
+    <?php else: ?>
+        <!-- Favicon par défaut si aucun logo n'est configuré -->
+        <link rel="icon" type="image/x-icon" href="<?php echo e(asset('favicon.ico')); ?>">
+        <link rel="icon" type="image/png" sizes="32x32" href="<?php echo e(asset('favicon-32x32.png')); ?>">
+        <link rel="icon" type="image/png" sizes="16x16" href="<?php echo e(asset('favicon-16x16.png')); ?>">
+        <link rel="apple-touch-icon" sizes="180x180" href="<?php echo e(asset('apple-touch-icon.png')); ?>">
+    <?php endif; ?>
+    
     <!-- Preconnect pour améliorer les performances -->
     <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -209,6 +232,181 @@
         
         /* Améliorations responsive générales */
         @media (max-width: 640px) {
+            /* Réduction très agressive des tailles de texte sur mobile */
+            h1, .text-4xl, .text-5xl, .text-6xl {
+                font-size: 1.125rem !important; /* 18px */
+                line-height: 1.3 !important;
+            }
+            
+            h2, .text-3xl {
+                font-size: 1rem !important; /* 16px */
+                line-height: 1.3 !important;
+            }
+            
+            h3, .text-2xl {
+                font-size: 0.9375rem !important; /* 15px */
+                line-height: 1.4 !important;
+            }
+            
+            h4, .text-xl {
+                font-size: 0.875rem !important; /* 14px */
+                line-height: 1.4 !important;
+            }
+            
+            .text-lg {
+                font-size: 0.8125rem !important; /* 13px */
+            }
+            
+            .text-base {
+                font-size: 0.75rem !important; /* 12px */
+            }
+            
+            .text-sm {
+                font-size: 0.6875rem !important; /* 11px */
+            }
+            
+            .text-xs {
+                font-size: 0.625rem !important; /* 10px */
+            }
+            
+            /* Réduction des nombres dans les cartes */
+            .text-3xl.font-bold {
+                font-size: 1.125rem !important; /* 18px */
+            }
+            
+            .text-2xl.font-bold {
+                font-size: 1rem !important; /* 16px */
+            }
+            
+            .text-xl.font-bold {
+                font-size: 0.9375rem !important; /* 15px */
+            }
+            
+            /* Réduction très agressive des tailles de boutons sur mobile */
+            button:not(.mobile-touch-target):not([class*="text-xs"]), 
+            .btn-primary, 
+            a[class*="btn"]:not([class*="text-xs"]),
+            a[class*="px-6"][class*="py-3"]:not([class*="text-xs"]),
+            a[class*="px-5"][class*="py-3"]:not([class*="text-xs"]),
+            a[class*="px-4"][class*="py-3"]:not([class*="text-xs"]),
+            button[class*="px-6"][class*="py-3"]:not([class*="text-xs"]),
+            button[class*="px-5"][class*="py-3"]:not([class*="text-xs"]),
+            button[class*="px-4"][class*="py-3"]:not([class*="text-xs"]) {
+                padding: 0.25rem 0.625rem !important; /* 4px 10px */
+                font-size: 0.6875rem !important; /* 11px */
+                min-height: 28px !important;
+            }
+            
+            /* Réduction des boutons avec classes spécifiques */
+            a[class*="inline-flex"][class*="items-center"][class*="justify-center"]:not(.mobile-touch-target),
+            button[class*="inline-flex"][class*="items-center"][class*="justify-center"]:not(.mobile-touch-target) {
+                padding: 0.25rem 0.625rem !important;
+                font-size: 0.6875rem !important;
+                min-height: 28px !important;
+            }
+            
+            /* Réduction spécifique pour les boutons dans les cartes */
+            .card-modern button,
+            .card-modern a[class*="btn"],
+            .card-modern .btn-primary {
+                padding: 0.25rem 0.5rem !important;
+                font-size: 0.625rem !important; /* 10px */
+                min-height: 26px !important;
+            }
+            
+            /* Réduction agressive des espacements des cartes et conteneurs */
+            .p-5, .p-6 {
+                padding: 0.75rem !important; /* 12px */
+            }
+            
+            .p-4 {
+                padding: 0.625rem !important; /* 10px */
+            }
+            
+            .px-6 {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+            
+            .py-6 {
+                padding-top: 0.75rem !important;
+                padding-bottom: 0.75rem !important;
+            }
+            
+            .px-4 {
+                padding-left: 0.625rem !important;
+                padding-right: 0.625rem !important;
+            }
+            
+            .px-5 {
+                padding-left: 0.625rem !important;
+                padding-right: 0.625rem !important;
+            }
+            
+            .py-3 {
+                padding-top: 0.375rem !important;
+                padding-bottom: 0.375rem !important;
+            }
+            
+            .py-2 {
+                padding-top: 0.25rem !important;
+                padding-bottom: 0.25rem !important;
+            }
+            
+            .mb-4, .mb-6, .mb-8 {
+                margin-bottom: 0.5rem !important;
+            }
+            
+            .mt-4, .mt-6, .mt-8 {
+                margin-top: 0.5rem !important;
+            }
+            
+            .gap-2 {
+                gap: 0.375rem !important;
+            }
+            
+            .gap-3 {
+                gap: 0.5rem !important;
+            }
+            
+            .gap-4 {
+                gap: 0.625rem !important;
+            }
+            
+            .gap-6 {
+                gap: 0.75rem !important;
+            }
+            
+            /* Réduction agressive des icônes sur mobile */
+            .fas, .fa, i[class*="fa-"] {
+                font-size: 0.75rem !important; /* 12px */
+            }
+            
+            i.text-xl, .text-xl i {
+                font-size: 0.875rem !important; /* 14px */
+            }
+            
+            i.text-2xl, .text-2xl i {
+                font-size: 1rem !important; /* 16px */
+            }
+            
+            i.text-3xl, .text-3xl i {
+                font-size: 1.125rem !important; /* 18px */
+            }
+            
+            i.text-4xl, .text-4xl i {
+                font-size: 1.25rem !important; /* 20px */
+            }
+            
+            i.text-5xl, .text-5xl i {
+                font-size: 1.5rem !important; /* 24px */
+            }
+            
+            /* Réduction des icônes dans les boutons */
+            button i, a i, .btn-primary i {
+                font-size: 0.6875rem !important; /* 11px */
+            }
+            
             .table-responsive {
                 font-size: 0.875rem;
             }
