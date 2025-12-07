@@ -104,8 +104,8 @@
     <!-- Grille -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
         @foreach($modeles as $modele)
-        <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer transform hover:-translate-y-2"
-             onclick="window.location.href='{{ route('modeles.show', $modele) }}{{ request()->has('quote_id') ? '?quote_id=' . request('quote_id') : '' }}'">
+        <a href="{{ route('modeles.show', $modele) }}{{ request()->has('quote_id') ? '?quote_id=' . request('quote_id') : '' }}" 
+           class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer transform hover:-translate-y-2 block">
             <!-- Image -->
             <div class="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                     @if($modele->image)
@@ -149,11 +149,12 @@
                 </h3>
                 
                 <div class="flex gap-2">
-                    <button class="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-                            style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);"
-                            onclick="event.stopPropagation(); window.location.href='{{ route('modeles.show', $modele) }}{{ request()->has('quote_id') ? '?quote_id=' . request('quote_id') : '' }}'">
+                    <a href="{{ route('modeles.show', $modele) }}{{ request()->has('quote_id') ? '?quote_id=' . request('quote_id') : '' }}"
+                       class="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                       style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);"
+                       onclick="event.stopPropagation()">
                         <i class="fas fa-eye mr-2"></i>Voir les détails
-                    </button>
+                    </a>
                     @if(request()->has('quote_id'))
                     <a href="{{ route('modeles.add-to-quote', $modele) }}?quote_id={{ request('quote_id') }}" 
                        class="inline-flex items-center justify-center px-4 py-3 rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"

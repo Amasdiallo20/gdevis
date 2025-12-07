@@ -20,12 +20,11 @@
     
     <title>@yield('title', 'A2 VitraDevis')</title>
     
-    <!-- Tailwind CSS avec defer pour ne pas bloquer le rendu -->
-    <script src="https://cdn.tailwindcss.com" defer></script>
+    <!-- Tailwind CSS - doit être chargé immédiatement pour générer les styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Font Awesome avec preload -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Alpine.js avec defer -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -394,9 +393,6 @@
                             $isMobileMenuEnabled = Auth::check();
                         @endphp
                         <a href="{{ $homeRoute }}" 
-                           @if($isMobileMenuEnabled)
-                           onclick="if(window.innerWidth < 640) { event.preventDefault(); toggleMobileMenu(); }"
-                           @endif
                            class="text-lg sm:text-xl font-bold hover:opacity-80 transition-opacity cursor-pointer" 
                            style="color: {{ $settings->primary_color ?? '#3b82f6' }}; text-decoration: none;">
                             A2 VitraDevis

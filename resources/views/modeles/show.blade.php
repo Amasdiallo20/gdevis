@@ -249,8 +249,8 @@
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach($relatedModeles as $related)
-            <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 cursor-pointer transform hover:-translate-y-2"
-                 onclick="window.location.href='{{ route('modeles.show', $related) }}'">
+            <a href="{{ route('modeles.show', $related) }}" 
+               class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 cursor-pointer transform hover:-translate-y-2 block">
                 <!-- Image -->
                 <div class="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                     @if($related->image)
@@ -293,7 +293,7 @@
                         </span>
                     </div>
                 </div>
-            </div>
+            </a>
             @endforeach
         </div>
     </div>

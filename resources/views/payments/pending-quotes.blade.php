@@ -154,21 +154,22 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($quotes as $quote)
                     <tr class="table-row-hover cursor-pointer" 
-                        onclick="window.location.href='{{ route('payments.create', $quote) }}'"
                         style="transition: all 0.2s;"
                         onmouseover="this.style.backgroundColor='#f0f9ff'; this.style.transform='scale(1.01)';"
                         onmouseout="this.style.backgroundColor='white'; this.style.transform='scale(1)';">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-8 w-8 rounded-lg flex items-center justify-center mr-3"
-                                     style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
-                                    <i class="fas fa-file-invoice text-white text-xs"></i>
+                            <a href="{{ route('payments.create', $quote) }}" class="block">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-8 w-8 rounded-lg flex items-center justify-center mr-3"
+                                         style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                                        <i class="fas fa-file-invoice text-white text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-bold text-gray-900">{{ $quote->quote_number }}</div>
+                                        <div class="text-xs text-gray-500 md:hidden">{{ $quote->date->format('d/m/Y') }}</div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div class="text-sm font-bold text-gray-900">{{ $quote->quote_number }}</div>
-                                    <div class="text-xs text-gray-500 md:hidden">{{ $quote->date->format('d/m/Y') }}</div>
-                                </div>
-                            </div>
+                            </a>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-semibold text-gray-900">{{ $quote->client->name }}</div>
