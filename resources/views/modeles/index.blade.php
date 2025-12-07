@@ -21,9 +21,9 @@
             @auth
             @if(Auth::user()->hasPermission('modeles.create'))
             <a href="{{ route('modeles.create') }}" 
-               class="inline-flex items-center justify-center px-4 py-2 sm:px-6 sm:py-3 rounded-xl text-sm sm:text-base font-semibold text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+               class="inline-flex items-center justify-center px-3 py-1.5 sm:px-6 sm:py-3 rounded-lg text-xs sm:text-base font-medium text-white shadow-sm hover:shadow-md transition-all duration-300"
                style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
-                <i class="fas fa-plus mr-2"></i>Ajouter un Modèle
+                <i class="fas fa-plus mr-1 sm:mr-2 text-xs"></i><span class="hidden sm:inline">Ajouter un Modèle</span><span class="sm:hidden">Ajouter</span>
             </a>
             @endif
             @endauth
@@ -72,9 +72,9 @@
                 <!-- Boutons -->
                 <div class="flex items-end gap-2">
                     <button type="submit" 
-                        class="flex-1 inline-flex items-center justify-center px-4 py-2 sm:px-6 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                        class="flex-1 inline-flex items-center justify-center px-2 py-1.5 sm:px-6 sm:py-3 rounded-lg text-xs sm:text-sm font-medium text-white shadow-sm hover:shadow-md transition-all duration-200"
                         style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
-                        <i class="fas fa-filter mr-2"></i>Filtrer
+                        <i class="fas fa-filter mr-1 sm:mr-2 text-xs"></i>Filtrer
                     </button>
                     @if(request()->hasAny(['search', 'categorie']))
                     <a href="{{ route('modeles.index') }}" 
@@ -149,14 +149,14 @@
                 
                 <div class="flex gap-2">
                     <a href="{{ route('modeles.show', $modele) }}{{ request()->has('quote_id') ? '?quote_id=' . request('quote_id') : '' }}"
-                       class="flex-1 inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                       class="flex-1 inline-flex items-center justify-center px-2 py-1.5 sm:px-4 sm:py-3 rounded-lg text-xs sm:text-sm font-medium text-white shadow-sm hover:shadow-md transition-all duration-200"
                        style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
-                        <i class="fas fa-eye mr-1 sm:mr-2 text-xs sm:text-sm"></i><span class="hidden sm:inline">Voir les détails</span><span class="sm:hidden">Détails</span>
+                        <i class="fas fa-eye mr-1 text-xs"></i><span class="hidden sm:inline">Voir les détails</span><span class="sm:hidden">Détails</span>
                     </a>
                     @if(request()->has('quote_id'))
                     <a href="{{ route('modeles.add-to-quote', $modele) }}?quote_id={{ request('quote_id') }}" 
-                       class="inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold text-white bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-                        <i class="fas fa-link text-xs sm:text-sm"></i>
+                       class="inline-flex items-center justify-center px-2 py-1.5 sm:px-4 sm:py-3 rounded-lg text-xs sm:text-sm font-medium text-white bg-green-600 hover:bg-green-700 shadow-sm hover:shadow-md transition-all duration-200">
+                        <i class="fas fa-link text-xs"></i>
                     </a>
                     @endif
                 </div>
