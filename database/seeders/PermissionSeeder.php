@@ -39,6 +39,12 @@ class PermissionSeeder extends Seeder
             ['name' => 'Supprimer les paiements', 'slug' => 'payments.delete', 'description' => 'Permet de supprimer les paiements', 'category' => 'payments'],
             ['name' => 'Imprimer les paiements', 'slug' => 'payments.print', 'description' => 'Permet d\'imprimer les paiements', 'category' => 'payments'],
 
+            // Permissions pour les modèles
+            ['name' => 'Voir les modèles', 'slug' => 'modeles.view', 'description' => 'Permet de voir la liste des modèles', 'category' => 'modeles'],
+            ['name' => 'Créer des modèles', 'slug' => 'modeles.create', 'description' => 'Permet de créer de nouveaux modèles', 'category' => 'modeles'],
+            ['name' => 'Modifier les modèles', 'slug' => 'modeles.update', 'description' => 'Permet de modifier les modèles', 'category' => 'modeles'],
+            ['name' => 'Supprimer les modèles', 'slug' => 'modeles.delete', 'description' => 'Permet de supprimer les modèles', 'category' => 'modeles'],
+
             // Permissions pour les utilisateurs
             ['name' => 'Voir les utilisateurs', 'slug' => 'users.view', 'description' => 'Permet de voir la liste des utilisateurs', 'category' => 'users'],
             ['name' => 'Créer des utilisateurs', 'slug' => 'users.create', 'description' => 'Permet de créer de nouveaux utilisateurs', 'category' => 'users'],

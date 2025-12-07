@@ -109,6 +109,14 @@
                 </h3>
                 <p class="text-sm text-gray-600 mb-4">Sélectionnez les permissions à attribuer à cet utilisateur. Les administrateurs ont automatiquement toutes les permissions.</p>
                 
+                @if(empty($permissions) || $permissions->isEmpty())
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Aucune permission trouvée. Veuillez exécuter le seeder des permissions : <code class="bg-yellow-100 px-2 py-1 rounded">php artisan db:seed --class=PermissionSeeder</code>
+                    </p>
+                </div>
+                @else
                 <div class="space-y-6">
                     @foreach($permissions as $category => $categoryPermissions)
                         <div class="border border-gray-200 rounded-lg p-4">
@@ -133,6 +141,7 @@
                         </div>
                     @endforeach
                 </div>
+                @endif
             </div>
 
             <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
