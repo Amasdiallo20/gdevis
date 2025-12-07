@@ -52,6 +52,20 @@
                    onmouseout="this.style.transform='translateY(0)'">
                     <i class="fas fa-print mr-2"></i><span class="hidden sm:inline">Imprimer</span><span class="sm:hidden">Print</span>
                 </a>
+                @hasPermission('quotes.calculate-materials')
+                <a href="{{ route('quotes.calculate-materials', ['quote_id' => $quote->id]) }}" 
+                   class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-orange-600 hover:bg-orange-700"
+                   onmouseover="this.style.transform='translateY(-2px)'"
+                   onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fas fa-calculator mr-2"></i><span class="hidden sm:inline">Calcul Matériaux</span><span class="sm:hidden">Matériaux</span>
+                </a>
+                @endhasPermission
+                <button type="button" id="optimizeCutsBtn" 
+                   class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-purple-600 hover:bg-purple-700"
+                   onmouseover="this.style.transform='translateY(-2px)'"
+                   onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fas fa-cut mr-2"></i><span class="hidden sm:inline">Optimiser Coupes</span><span class="sm:hidden">Coupes</span>
+                </button>
                 <a href="{{ route('quotes.index') }}" 
                    class="inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 rounded-lg shadow-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300"
                    onmouseover="this.style.transform='translateY(-2px)'"
@@ -218,6 +232,8 @@
         <!-- Version mobile (cartes) -->
         <div class="block md:hidden space-y-4">
             @php
+                // Recharger les lignes pour s'assurer qu'elles sont à jour
+                $quote->load('lines');
                 $groupedLines = $quote->lines->groupBy('description');
             @endphp
             @forelse($groupedLines as $productName => $lines)
@@ -336,10 +352,97 @@
             </table>
         </div>
 
+        <!-- Image du modèle associé -->
+        @if($quote->modele && $quote->modele->image)
+        <div class="mt-8">
+            <div class="flex items-center mb-4">
+                <div class="p-2 rounded-lg mr-3" style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                    <i class="fas fa-image text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Modèle associé</h3>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-gray-100 hover:shadow-xl transition-all duration-300">
+                <div class="relative">
+                    <!-- Image principale avec overlay -->
+                    <div class="relative h-64 sm:h-80 overflow-hidden">
+                        <img src="{{ $quote->modele->large_image_url ?? $quote->modele->image_url }}" 
+                             alt="{{ $quote->modele->nom }}"
+                             class="w-full h-full object-cover"
+                             loading="lazy">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                        <!-- Badge catégorie sur l'image -->
+                        <div class="absolute top-4 left-4">
+                            <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-bold text-white shadow-lg backdrop-blur-sm bg-white/20 border border-white/30">
+                                <i class="fas fa-folder mr-2"></i>
+                                {{ \App\Models\Modele::getCategories()[$quote->modele->categorie] ?? $quote->modele->categorie }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Contenu en dessous de l'image -->
+                    <div class="p-6">
+                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                            <div class="flex-1">
+                                <h4 class="text-2xl font-bold text-gray-900 mb-3 uppercase tracking-tight">
+                                    {{ $quote->modele->nom }}
+                                </h4>
+                                @if($quote->modele->description)
+                                <p class="text-gray-600 mb-4 leading-relaxed">{{ $quote->modele->description }}</p>
+                                @endif
+                                
+                                @if($quote->modele->prix_indicatif)
+                                <div class="inline-flex items-center px-5 py-3 rounded-xl text-base font-bold shadow-md"
+                                     style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }}15 0%, {{ $settings->secondary_color ?? '#1e40af' }}15 100%); border: 2px solid {{ $settings->primary_color ?? '#3b82f6' }}40;">
+                                    <i class="fas fa-tag mr-2" style="color: {{ $settings->primary_color ?? '#3b82f6' }};"></i>
+                                    <span style="color: {{ $settings->primary_color ?? '#3b82f6' }};">
+                                        {{ number_format($quote->modele->prix_indicatif, 0, ',', ' ') }} GNF
+                                    </span>
+                                    <span class="ml-2 text-xs font-normal text-gray-500">(Prix indicatif)</span>
+                                </div>
+                                @endif
+                            </div>
+                            
+                            <!-- Bouton pour changer le modèle -->
+                            @if($quote->status !== 'validated')
+                            <div class="flex-shrink-0">
+                                <a href="{{ route('modeles.index') }}?quote_id={{ $quote->id }}" 
+                                   class="inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                                   style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                                    <i class="fas fa-exchange-alt mr-2"></i>Changer
+                                </a>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         @if($quote->notes)
         <div class="mt-6">
             <h3 class="text-lg font-medium text-gray-900 mb-2">Notes</h3>
             <p class="text-sm text-gray-700">{{ $quote->notes }}</p>
+        </div>
+        @endif
+
+        <!-- Bouton pour associer un modèle depuis le catalogue -->
+        @if($quote->status !== 'validated')
+        <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-900 mb-1">
+                        <i class="fas fa-images mr-2" style="color: {{ $settings->primary_color ?? '#3b82f6' }};"></i>
+                        {{ $quote->modele ? 'Changer le modèle associé' : 'Associer un modèle' }}
+                    </h3>
+                    <p class="text-xs text-gray-600">Sélectionnez un modèle dans le catalogue pour l'associer à ce devis</p>
+                </div>
+                <a href="{{ route('modeles.index') }}?quote_id={{ $quote->id }}" 
+                   class="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all duration-200 shadow-sm hover:shadow-md"
+                   style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                    <i class="fas fa-images mr-2"></i>Voir le Catalogue
+                </a>
+            </div>
         </div>
         @endif
 
@@ -440,5 +543,105 @@
         @endif
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const optimizeBtn = document.getElementById('optimizeCutsBtn');
+    if (optimizeBtn) {
+        optimizeBtn.addEventListener('click', function() {
+            // Désactiver le bouton pendant le traitement
+            const originalText = optimizeBtn.innerHTML;
+            optimizeBtn.disabled = true;
+            optimizeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Traitement...';
+            
+            // Appel AJAX
+            fetch('{{ route("quotes.cut-optimize", $quote) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Afficher un message de succès
+                    alert('Plan de coupe généré avec succès !');
+                    // Rediriger vers la page du plan
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    // Afficher l'erreur
+                    alert(data.message || 'Une erreur est survenue lors de la génération du plan de coupe.');
+                    optimizeBtn.disabled = false;
+                    optimizeBtn.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la génération du plan de coupe.');
+                optimizeBtn.disabled = false;
+                optimizeBtn.innerHTML = originalText;
+            });
+        });
+    }
+});
+</script>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const optimizeBtn = document.getElementById('optimizeCutsBtn');
+    if (optimizeBtn) {
+        optimizeBtn.addEventListener('click', function() {
+            // Désactiver le bouton pendant le traitement
+            const originalText = optimizeBtn.innerHTML;
+            optimizeBtn.disabled = true;
+            optimizeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Traitement...';
+            
+            // Appel AJAX
+            fetch('{{ route("quotes.cut-optimize", $quote) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Afficher un message de succès
+                    alert('Plan de coupe généré avec succès !');
+                    // Rediriger vers la page du plan
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    // Afficher l'erreur
+                    alert(data.message || 'Une erreur est survenue lors de la génération du plan de coupe.');
+                    optimizeBtn.disabled = false;
+                    optimizeBtn.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la génération du plan de coupe.');
+                optimizeBtn.disabled = false;
+                optimizeBtn.innerHTML = originalText;
+            });
+        });
+    }
+});
+</script>
+@endpush
 @endsection
 

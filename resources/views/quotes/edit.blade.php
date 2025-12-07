@@ -264,7 +264,7 @@
                             <div>
                                 <label for="width" class="block text-sm font-medium text-gray-700">Largeur (cm)</label>
                                 <input type="number" step="0.01" min="0" name="width" id="width" placeholder="0.00"
-                                oninput="calculateSurfaceAndAmount(); checkAndCalculateMaterials()"
+                                oninput="calculateSurfaceAndAmount()"
                                 class="block w-full rounded-lg border-2 border-gray-400 bg-white px-3 py-2.5 text-gray-900 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all"
                                 style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};">
                             </div>
@@ -273,7 +273,7 @@
                             <div>
                                 <label for="height" class="block text-sm font-medium text-gray-700">Hauteur (cm)</label>
                                 <input type="number" step="0.01" min="0" name="height" id="height" placeholder="0.00"
-                                    oninput="calculateSurfaceAndAmount(); checkAndCalculateMaterials()"
+                                    oninput="calculateSurfaceAndAmount()"
                                     class="block w-full rounded-lg border-2 border-gray-400 bg-white px-3 py-2.5 text-gray-900 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all"
                                     style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};">
                             </div>
@@ -281,14 +281,13 @@
                         <div>
                             <label for="quantity" class="block text-sm font-medium text-gray-700">Quantité *</label>
                             <input type="number" step="0.01" min="0.01" name="quantity" id="quantity" value="1" required
-                                oninput="calculateSurfaceAndAmount(); checkAndCalculateMaterials()"
+                                oninput="calculateSurfaceAndAmount()"
                                 class="block w-full rounded-lg border-2 border-gray-400 bg-white px-3 py-2.5 text-gray-900 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all"
                                 style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};">
                         </div>
                         <div id="nombre_fenetres_field" style="display: none;">
                             <label for="nombre_total_fenetres" class="block text-sm font-medium text-gray-700">Nombre total fenêtres</label>
                             <input type="number" step="1" min="1" name="nombre_total_fenetres" id="nombre_total_fenetres" placeholder="1"
-                                oninput="checkAndCalculateMaterials()"
                                 class="block w-full rounded-lg border-2 border-gray-400 bg-white px-3 py-2.5 text-gray-900 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all"
                                 style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};">
                         </div>
@@ -304,6 +303,7 @@
                             <label for="unit_price" class="block text-sm font-medium text-gray-700">Prix unitaire (GNF)</label>
                             <input type="number" step="0.01" min="0" name="unit_price" id="unit_price" placeholder="0.00"
                                 oninput="calculateAmountForOtherTypes()"
+                                onkeypress="if(event.key === 'Enter') { event.preventDefault(); submitLineForm(event); }"
                                 class="block w-full rounded-lg border-2 border-gray-400 bg-white px-3 py-2.5 text-gray-900 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all"
                                 style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};">
                         </div>
@@ -330,32 +330,6 @@
                             <input type="number" step="0.01" min="0" name="amount" id="amount" readonly
                                 class="block w-full rounded-lg border-2 border-gray-300 bg-gray-100 px-3 py-2.5 text-gray-700 text-base shadow-sm cursor-not-allowed"
                                 placeholder="0.00">
-                        </div>
-                    </div>
-                    
-                    <!-- Section Calcul Matériaux Fenêtres -->
-                    <div id="materiaux_fenetres_section" style="display: none;" class="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-                        <h5 class="text-sm font-bold text-gray-900 mb-3 flex items-center">
-                            <i class="fas fa-calculator mr-2" style="color: {{ $settings->primary_color ?? '#3b82f6' }};"></i>
-                            Calcul Automatique des Matériaux pour Fenêtres
-                        </h5>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                            <div class="bg-white p-3 rounded-lg border border-gray-200">
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Total Cadre</label>
-                                <div id="total_cadre" class="text-lg font-bold" style="color: {{ $settings->primary_color ?? '#3b82f6' }};">0</div>
-                            </div>
-                            <div class="bg-white p-3 rounded-lg border border-gray-200">
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Total Vento</label>
-                                <div id="total_vento" class="text-lg font-bold" style="color: {{ $settings->primary_color ?? '#3b82f6' }};">0</div>
-                            </div>
-                            <div class="bg-white p-3 rounded-lg border border-gray-200">
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Total Sikane</label>
-                                <div id="total_sikane" class="text-lg font-bold" style="color: {{ $settings->primary_color ?? '#3b82f6' }};">0</div>
-                            </div>
-                            <div class="bg-white p-3 rounded-lg border border-gray-200">
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Total Moustiquaire</label>
-                                <div id="total_moustiquaire" class="text-lg font-bold" style="color: {{ $settings->primary_color ?? '#3b82f6' }};">0</div>
-                            </div>
                         </div>
                     </div>
                     
@@ -625,8 +599,6 @@ function toggleLineTypeFields() {
         document.getElementById('unit').value = 'unité';
         surfaceField.style.display = 'block';
         
-        // Vérifier si c'est une fenêtre pour afficher le calcul des matériaux
-        setTimeout(checkAndCalculateMaterials, 100);
     } else {
         // Afficher les champs pour les autres types
         productField.style.display = 'none';
@@ -640,6 +612,7 @@ function toggleLineTypeFields() {
         pricePerM2Field.querySelector('#price_per_m2').required = false;
         pricePerM2Field.querySelector('#price_per_m2').value = '';
         unitPriceField.style.display = 'block';
+        unitPriceField.querySelector('#unit_price').required = true;
         unitField.style.display = 'block';
         surfaceField.style.display = 'none';
         
@@ -661,6 +634,40 @@ function toggleLineTypeFields() {
         document.getElementById('width').value = '';
         document.getElementById('height').value = '';
         document.getElementById('surface').value = '';
+        
+        // Focus sur le champ Prix unitaire après un délai pour s'assurer que le champ est visible
+        // Utiliser plusieurs tentatives pour s'assurer que le focus fonctionne
+        const focusUnitPrice = () => {
+            const unitPriceField = document.getElementById('unit_price');
+            const unitPriceFieldContainer = document.getElementById('unit_price_field');
+            if (unitPriceField && unitPriceFieldContainer) {
+                // Vérifier que le champ est visible
+                const computedStyle = window.getComputedStyle(unitPriceFieldContainer);
+                const isVisible = computedStyle.display !== 'none' && 
+                                 computedStyle.visibility !== 'hidden' &&
+                                 unitPriceFieldContainer.offsetParent !== null;
+                if (isVisible && !unitPriceField.disabled) {
+                    try {
+                        unitPriceField.focus();
+                        // Vérifier que le focus a bien été appliqué
+                        if (document.activeElement === unitPriceField) {
+                            unitPriceField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    } catch (e) {
+                        console.log('Erreur lors du focus:', e);
+                    }
+                }
+            }
+        };
+        
+        // Essayer plusieurs fois avec des délais différents
+        if (shouldFocusOnUnitPrice) {
+            requestAnimationFrame(() => {
+                setTimeout(focusUnitPrice, 100);
+                setTimeout(focusUnitPrice, 250);
+                setTimeout(focusUnitPrice, 400);
+            });
+        }
     }
     
     calculateAmountForOtherTypes();
@@ -687,76 +694,9 @@ function calculateAmountForOtherTypes() {
 function fillProductData() {
     // Recalculer après avoir sélectionné un produit
     calculateSurfaceAndAmount();
-    checkAndCalculateMaterials();
 }
 
-// Fonction pour calculer les matériaux pour fenêtres
-function calculMaterielFenetre(largeur, hauteur, nombreFenetres) {
-    // Convertir cm en mm
-    const largeurMm = largeur * 10;
-    const hauteurMm = hauteur * 10;
-    
-    // Calcul CADRE = ((largeur + hauteur) * 2 + 50) / 580
-    const perimetre = (largeurMm + hauteurMm) * 2;
-    const cadre = Math.ceil((perimetre + 50) / 580);
-    
-    // Calcul VENTO = nombre_cadre * 1.3
-    const vento = Math.ceil(cadre * 1.3);
-    
-    // Calcul SIKANE = (hauteur * 2 * nombre_total_fenetres) / 580
-    const sikane = Math.ceil((hauteurMm * 2 * nombreFenetres) / 580);
-    
-    // Calcul MOUSTIQUAIRE = nombre_vento / 2
-    const moustiquaire = Math.ceil(vento / 2);
-    
-    return {
-        nombre_cadre: cadre,
-        nombre_vento: vento,
-        nombre_sikane: sikane,
-        nombre_moustiquaire: moustiquaire
-    };
-}
 
-// Fonction pour vérifier si c'est une fenêtre et calculer les matériaux
-function checkAndCalculateMaterials() {
-    const productSelect = document.getElementById('product_id');
-    if (!productSelect) return;
-    
-    const productName = productSelect.options[productSelect.selectedIndex]?.text.toLowerCase() || '';
-    const isFenetre = productName.includes('fenêtre') || productName.includes('fenetre');
-    
-    const nombreFenetresField = document.getElementById('nombre_fenetres_field');
-    const materiauxSection = document.getElementById('materiaux_fenetres_section');
-    
-    if (isFenetre && nombreFenetresField && materiauxSection) {
-        nombreFenetresField.style.display = 'block';
-        materiauxSection.style.display = 'block';
-        
-        // Récupérer les valeurs
-        const largeur = parseFloat(document.getElementById('width').value) || 0;
-        const hauteur = parseFloat(document.getElementById('height').value) || 0;
-        const nombreFenetres = parseInt(document.getElementById('nombre_total_fenetres').value) || 1;
-        
-        if (largeur > 0 && hauteur > 0 && nombreFenetres > 0) {
-            const resultats = calculMaterielFenetre(largeur, hauteur, nombreFenetres);
-            
-            // Afficher les résultats
-            document.getElementById('total_cadre').textContent = resultats.nombre_cadre;
-            document.getElementById('total_vento').textContent = resultats.nombre_vento;
-            document.getElementById('total_sikane').textContent = resultats.nombre_sikane;
-            document.getElementById('total_moustiquaire').textContent = resultats.nombre_moustiquaire;
-        } else {
-            // Réinitialiser si les valeurs ne sont pas complètes
-            document.getElementById('total_cadre').textContent = '0';
-            document.getElementById('total_vento').textContent = '0';
-            document.getElementById('total_sikane').textContent = '0';
-            document.getElementById('total_moustiquaire').textContent = '0';
-        }
-    } else {
-        if (nombreFenetresField) nombreFenetresField.style.display = 'none';
-        if (materiauxSection) materiauxSection.style.display = 'none';
-    }
-}
 
 function editLine(lineId) {
     // Récupérer les données de la ligne via AJAX
@@ -1003,6 +943,23 @@ function resetForm() {
     form.action = '{{ route("quotes.lines.store", $quote) }}';
     
     calculateSurfaceAndAmount();
+    
+    // Focus sur le champ approprié selon le type de ligne
+    setTimeout(() => {
+        const lineType = document.getElementById('line_type').value;
+        if (lineType === 'product') {
+            const widthField = document.getElementById('width');
+            if (widthField) {
+                widthField.focus();
+            }
+        } else {
+            const unitPriceField = document.getElementById('unit_price');
+            const unitPriceFieldContainer = document.getElementById('unit_price_field');
+            if (unitPriceField && unitPriceFieldContainer && unitPriceFieldContainer.style.display !== 'none') {
+                unitPriceField.focus();
+            }
+        }
+    }, 200);
 }
 
 function submitLineForm(event) {
@@ -1050,6 +1007,9 @@ function submitLineForm(event) {
                 sessionStorage.setItem('selectedProductId', productId);
             }
             
+            // Sauvegarder l'info pour le focus après rechargement
+            sessionStorage.setItem('focusOnWidth', 'true');
+            
             // Recharger la page pour afficher les modifications
             window.location.reload();
         }
@@ -1065,9 +1025,81 @@ function submitLineForm(event) {
 
 // Initialiser les champs selon le type de ligne au chargement
 document.addEventListener('DOMContentLoaded', function() {
+    // Pré-remplir avec les données du modèle si disponibles
+    @if(isset($modeleData) && $modeleData)
+    const modeleData = @json($modeleData);
+    if (modeleData) {
+        // Pré-remplir la description
+        const descriptionField = document.getElementById('description');
+        if (descriptionField) {
+            descriptionField.value = modeleData.nom || '';
+            descriptionField.style.display = 'block';
+        }
+        
+        // Pré-remplir le prix unitaire si disponible
+        if (modeleData.prix_indicatif) {
+            const unitPriceField = document.getElementById('unit_price');
+            if (unitPriceField) {
+                unitPriceField.value = modeleData.prix_indicatif;
+            }
+        }
+        
+        // Afficher un message
+        if (typeof alert !== 'undefined') {
+            setTimeout(() => {
+                alert('Modèle "' + modeleData.nom + '" ajouté. Veuillez compléter les informations.');
+            }, 500);
+        }
+    }
+    @endif
+    
     // Initialiser les champs selon le type sélectionné
-    if (document.getElementById('line_type')) {
+    const lineTypeSelect = document.getElementById('line_type');
+    if (lineTypeSelect) {
         toggleLineTypeFields();
+        
+        // Surcharger la fonction toggleLineTypeFields pour ajouter le focus
+        // Note: toggleLineTypeFields() est aussi appelé via onchange dans le HTML
+        const originalToggle = window.toggleLineTypeFields;
+        if (originalToggle) {
+            window.toggleLineTypeFields = function() {
+                const lineType = document.getElementById('line_type').value;
+                originalToggle();
+                
+                // Forcer le focus après que toggleLineTypeFields a terminé
+                if (lineType !== 'product') {
+                    // Utiliser plusieurs tentatives avec des délais croissants
+                    const attemptFocus = (attempt = 0) => {
+                        if (attempt >= 6) return; // Maximum 6 tentatives
+                        setTimeout(() => {
+                            const unitPriceField = document.getElementById('unit_price');
+                            const unitPriceFieldContainer = document.getElementById('unit_price_field');
+                            if (unitPriceField && unitPriceFieldContainer) {
+                                const computedStyle = window.getComputedStyle(unitPriceFieldContainer);
+                                const isVisible = computedStyle.display !== 'none' && 
+                                                 computedStyle.visibility !== 'hidden' &&
+                                                 unitPriceFieldContainer.offsetParent !== null;
+                                if (isVisible && !unitPriceField.disabled) {
+                                    unitPriceField.focus();
+                                    // Vérifier si le focus a réussi
+                                    if (document.activeElement === unitPriceField) {
+                                        return; // Focus réussi, arrêter les tentatives
+                                    }
+                                }
+                            }
+                            // Réessayer si le focus n'a pas fonctionné
+                            if (attempt < 5) {
+                                attemptFocus(attempt + 1);
+                            }
+                        }, 150 * (attempt + 1)); // Délais croissants: 150ms, 300ms, 450ms, etc.
+                    };
+                    // Commencer après le prochain frame de rendu
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => attemptFocus());
+                    });
+                }
+            };
+        }
     }
     
     // Calculer automatiquement la surface au chargement si les valeurs existent
@@ -1089,13 +1121,51 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Améliorer l'expérience utilisateur : focus automatique sur le premier champ vide
-    const form = document.getElementById('addLineForm');
-    if (form) {
-        const firstEmptyInput = form.querySelector('input:not([readonly]):not([value]):not([required])');
-        if (firstEmptyInput) {
-            setTimeout(() => firstEmptyInput.focus(), 100);
-        }
+    // Focus sur le champ approprié après ajout de ligne
+    const focusOnWidth = sessionStorage.getItem('focusOnWidth');
+    if (focusOnWidth === 'true') {
+        sessionStorage.removeItem('focusOnWidth');
+        // Attendre que le formulaire soit visible et le champ soit disponible
+        setTimeout(() => {
+            const lineType = document.getElementById('line_type').value;
+            const formFields = document.getElementById('formFields');
+            if (formFields && formFields.style.display === 'none') {
+                formFields.style.display = 'block';
+            }
+            
+            // Focus selon le type de ligne
+            if (lineType === 'product') {
+                const widthField = document.getElementById('width');
+                if (widthField) {
+                    widthField.focus();
+                    widthField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                const unitPriceField = document.getElementById('unit_price');
+                const unitPriceFieldContainer = document.getElementById('unit_price_field');
+                if (unitPriceField && unitPriceFieldContainer && unitPriceFieldContainer.style.display !== 'none') {
+                    unitPriceField.focus();
+                    unitPriceField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }, 500);
+    } else {
+        // Améliorer l'expérience utilisateur : focus automatique sur le champ approprié au chargement
+        setTimeout(() => {
+            const lineType = document.getElementById('line_type').value;
+            if (lineType === 'product') {
+                const widthField = document.getElementById('width');
+                if (widthField && !widthField.value) {
+                    widthField.focus();
+                }
+            } else {
+                const unitPriceField = document.getElementById('unit_price');
+                const unitPriceFieldContainer = document.getElementById('unit_price_field');
+                if (unitPriceField && unitPriceFieldContainer && unitPriceFieldContainer.style.display !== 'none' && !unitPriceField.value) {
+                    unitPriceField.focus();
+                }
+            }
+        }, 200);
     }
 });
 </script>

@@ -20,10 +20,10 @@
                 <div class="bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-lg p-3 shadow-md">
                     <p class="text-xs font-medium text-gray-600 mb-1">
                         <i class="fas fa-wallet mr-2 text-orange-500"></i>
-                        Total restant
+                        Montant non payé (Devis validés)
                     </p>
                     <p class="text-xl font-bold" style="color: {{ $settings->primary_color ?? '#3b82f6' }};">
-                        {{ number_format($totalRemainingAmount, 2, ',', ' ') }} <span class="text-sm text-gray-500">GNF</span>
+                        {{ number_format($totalRemainingAmountForValidated ?? $totalRemainingAmount, 2, ',', ' ') }} <span class="text-sm text-gray-500">GNF</span>
                     </p>
                 </div>
                 <a href="{{ route('payments.index') }}" 

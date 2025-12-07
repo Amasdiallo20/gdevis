@@ -6,8 +6,11 @@ use App\Models\Quote;
 use App\Models\Client;
 use App\Models\Product;
 use App\Models\QuoteLine;
+use App\Models\Material;
+use App\Exports\MaterialsExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 
 class QuoteController extends Controller
@@ -65,7 +68,12 @@ class QuoteController extends Controller
         }
 
         $clients = Client::orderBy('name')->get();
-        return view('quotes.create', compact('clients'));
+        $settings = \App\Models\Setting::getSettings();
+        
+        // Récupérer les données du modèle depuis la session (si ajout depuis catalogue)
+        $modeleData = session('modele_data');
+        
+        return view('quotes.create', compact('clients', 'settings', 'modeleData'));
     }
 
     public function store(Request $request)
@@ -86,7 +94,21 @@ class QuoteController extends Controller
         $validated['status'] = 'draft';
         $validated['created_by'] = Auth::id();
 
+        // Si un modèle est pré-sélectionné, l'associer au devis
+        $modeleId = session('modele_id');
+        if ($modeleId) {
+            $validated['model_id'] = $modeleId;
+            // Nettoyer la session après utilisation
+            session()->forget('modele_id');
+        }
+
         $quote = Quote::create($validated);
+
+        // Si des données de modèle sont présentes, les conserver pour pré-remplir le formulaire
+        $modeleData = session('modele_data');
+        if ($modeleData) {
+            session()->flash('modele_data', $modeleData);
+        }
 
         return redirect()->route('quotes.edit', $quote)
             ->with('success', 'Devis créé avec succès. Ajoutez maintenant des lignes.');
@@ -99,8 +121,9 @@ class QuoteController extends Controller
             abort(403, 'Vous n\'avez pas la permission de voir les devis.');
         }
 
-        $quote->load(['client', 'creator', 'lines.product', 'payments.creator']);
-        return view('quotes.show', compact('quote'));
+        $quote->load(['client', 'creator', 'lines.product', 'payments.creator', 'cutPlans', 'modele']);
+        $settings = \App\Models\Setting::getSettings();
+        return view('quotes.show', compact('quote', 'settings'));
     }
 
     public function showValidation(Quote $quote)
@@ -131,7 +154,10 @@ class QuoteController extends Controller
         $quote->load(['client', 'lines.product']);
         $products = Product::orderBy('name')->get();
         $clients = Client::orderBy('name')->get();
-        return view('quotes.edit', compact('quote', 'products', 'clients'));
+        $settings = \App\Models\Setting::getSettings();
+        $modeleData = session('modele_data');
+        
+        return view('quotes.edit', compact('quote', 'products', 'clients', 'settings', 'modeleData'));
     }
 
     public function update(Request $request, Quote $quote)
@@ -179,8 +205,8 @@ class QuoteController extends Controller
             'cancelled' => 'Annulé',
         ];
 
-        return redirect()->route('quotes.edit', $quote)
-            ->with('success', 'Statut changé en "' . $statusLabels[$validated['status']] . '" avec succès.');
+        return redirect()->route('quotes.index')
+            ->with('success', 'Statut du devis #' . $quote->quote_number . ' changé en "' . $statusLabels[$validated['status']] . '" avec succès.');
     }
 
     public function validateQuote(Request $request, Quote $quote)
@@ -595,12 +621,16 @@ class QuoteController extends Controller
             abort(403, 'Vous n\'avez pas la permission de calculer les matériaux.');
         }
 
-        $quotes = Quote::orderBy('quote_number', 'desc')->get();
+        // Optimiser la requête des devis - seulement les champs nécessaires
+        $quotes = Quote::select('id', 'quote_number', 'client_id', 'date', 'status')
+            ->with('client:id,name')
+            ->orderBy('quote_number', 'desc')
+            ->get();
         $selectedQuote = null;
         $materials = null;
 
         if ($request->filled('quote_id')) {
-            $selectedQuote = Quote::with(['client', 'lines.product'])->findOrFail($request->quote_id);
+            $selectedQuote = Quote::with(['client:id,name', 'lines.product:id,name'])->findOrFail($request->quote_id);
             
             // Calculer les matériaux pour toutes les fenêtres du devis
             $materials = $this->calculateMaterialsForQuote($selectedQuote);
@@ -609,16 +639,51 @@ class QuoteController extends Controller
         return view('quotes.calculate-materials', compact('quotes', 'selectedQuote', 'materials'));
     }
 
+    /**
+     * Exporte le récapitulatif des matériaux en Excel
+     */
+    public function exportMaterials(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user->hasPermission('quotes.calculate-materials')) {
+            abort(403, 'Vous n\'avez pas la permission d\'exporter les matériaux.');
+        }
+
+        if (!$request->filled('quote_id')) {
+            return back()->withErrors(['error' => 'Veuillez sélectionner un devis.']);
+        }
+
+        $quote = Quote::with(['client:id,name', 'lines.product:id,name'])->findOrFail($request->quote_id);
+        $materials = $this->calculateMaterialsForQuote($quote);
+
+        if (!isset($materials['materiaux_avec_prix']) || count($materials['materiaux_avec_prix']) === 0) {
+            return back()->withErrors(['error' => 'Aucun matériau à exporter pour ce devis.']);
+        }
+
+        $export = new MaterialsExport(
+            $materials['materiaux_avec_prix'],
+            $quote->quote_number,
+            $materials['total_general'] ?? 0
+        );
+
+        $fileName = 'materiaux-' . $quote->quote_number . '-' . date('Y-m-d') . '.xlsx';
+
+        return Excel::download($export, $fileName);
+    }
+
     public function printMaterials(Quote $quote)
     {
         $quote->load(['client', 'lines.product']);
         $settings = \App\Models\Setting::getSettings();
         $materials = $this->calculateMaterialsForQuote($quote);
         
+        // Utiliser la vue récapitulative avec prix uniquement
+        $viewName = 'quotes.print-materials-summary';
+        
         if (request()->has('pdf')) {
             try {
                 if (class_exists('\Barryvdh\DomPDF\Facade\Pdf')) {
-                    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('quotes.print-materials', compact('quote', 'settings', 'materials'));
+                    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, compact('quote', 'settings', 'materials'));
                     $pdf->setPaper('a4', 'portrait');
                     $pdf->setOption('enable-local-file-access', true);
                     $pdf->setOption('isHtml5ParserEnabled', true);
@@ -627,25 +692,34 @@ class QuoteController extends Controller
                     $pdf->setOption('enable_php', true);
                     
                     if (request()->has('download')) {
-                        return $pdf->download('materiaux-' . $quote->quote_number . '.pdf');
+                        return $pdf->download('recapitulatif-materiaux-' . $quote->quote_number . '.pdf');
                     }
                     
-                    return $pdf->stream('materiaux-' . $quote->quote_number . '.pdf');
+                    return $pdf->stream('recapitulatif-materiaux-' . $quote->quote_number . '.pdf');
                 }
             } catch (\Exception $e) {
                 \Log::error('Erreur DOMPDF: ' . $e->getMessage());
             }
         }
         
-        return view('quotes.print-materials', compact('quote', 'settings', 'materials'));
+        return view($viewName, compact('quote', 'settings', 'materials'));
     }
 
     private function calculateMaterialsForQuote(Quote $quote)
     {
+        // Totaux pour fenêtres ALU 82
         $totalCadre = 0;
         $totalVento = 0;
         $totalSikane = 0;
         $totalMoustiquaire = 0;
+        // Totaux spécifiques pour fenêtres 3 RAILS
+        $totalRail = 0;
+        $totalMontant = 0;
+        $totalButee = 0;
+        $totalPoignee = 0;
+        $totalRoulette = 0;
+        $totalTete = 0;
+        $totalMoustiquaire3Rails = 0;
         $totalCadrePorte = 0;
         $totalBattantPorte = 0;
         $totalDivision = 0;
@@ -749,41 +823,113 @@ class QuoteController extends Controller
                             // Utiliser la quantité comme nombre de fenêtres
                             $nombreFenetres = (int) $line->quantity;
                             
-                            // Calcul CADRE pour UNE fenêtre = ((largeur + hauteur) * 2 + 50) / 580
-                            // Formule: ((largeur + hauteur) * 2 + 50) / 580
-                            // Exemple: ((200 + 110) * 2 + 50) / 580 = ((310) * 2 + 50) / 580 = (620 + 50) / 580 = 670 / 580 = 1,155
-                            $cadreUnitaire = (($largeur + $hauteur) * 2 + 50) / 580;
+                            // Détecter le type de fenêtre (3 RAILS vs ALU 82)
+                            $is3Rails = false;
+                            $threeRailsKeywords = ['3 rails', '3 rail', 'trois rails', 'trois rail', '3rails', '3rail'];
+                            foreach ($threeRailsKeywords as $keyword) {
+                                if (stripos($productName, $keyword) !== false || stripos($description, $keyword) !== false) {
+                                    $is3Rails = true;
+                                    break;
+                                }
+                            }
                             
-                            // Calcul VENTO pour UNE fenêtre = nombre_cadre * 1.3
-                            $ventoUnitaire = $cadreUnitaire * 1.3;
-                            
-                            // Calcul SIKANE = (hauteur * 2 * nombre_total_fenetres) / 580
-                            // Note: SIKANE est déjà calculé avec le nombre total de fenêtres
-                            $sikane = ($hauteur * 2 * $nombreFenetres) / 580;
-                            
-                            // Calcul MOUSTIQUAIRE pour UNE fenêtre = nombre_vento / 2
-                            $moustiquaireUnitaire = $ventoUnitaire / 2;
-                            
-                            // Calculer les totaux pour cette ligne (multiplier par nombre de fenêtres)
-                            $cadreLigne = $cadreUnitaire * $nombreFenetres;
-                            $ventoLigne = $ventoUnitaire * $nombreFenetres;
-                            $moustiquaireLigne = $moustiquaireUnitaire * $nombreFenetres;
-                            
-                            // Ajouter aux totaux globaux
-                            $totalCadre += $cadreLigne;
-                            $totalVento += $ventoLigne;
-                            $totalSikane += $sikane;
-                            $totalMoustiquaire += $moustiquaireLigne;
-                            
-                            // Stocker les détails
-                            $fenetresDetails[] = [
-                                'line' => $line,
-                                'cadre' => $cadreLigne,
-                                'vento' => $ventoLigne,
-                                'sikane' => $sikane,
-                                'moustiquaire' => $moustiquaireLigne,
-                                'nombre_fenetres' => $nombreFenetres,
-                            ];
+                            if ($is3Rails) {
+                                // FORMULES POUR FENÊTRE 3 RAILS
+                                // 1. RAIL = (Largeur + 10) / 580
+                                $railUnitaire = ($largeur + 10) / 580;
+                                
+                                // 2. MONTANT = ((Hauteur * 2) + Largeur + 30) / 580
+                                $montantUnitaire = (($hauteur * 2) + $largeur + 30) / 580;
+                                
+                                // 3. BUTÉE = ((Hauteur - 4) * 2) / 580
+                                $buteeUnitaire = (($hauteur - 4) * 2) / 580;
+                                
+                                // 4. POIGNÉE = ((Hauteur - 4) * 2) / 580
+                                $poigneeUnitaire = (($hauteur - 4) * 2) / 580;
+                                
+                                // 5. ROULETTE = (Largeur - 18) / 580
+                                $rouletteUnitaire = ($largeur - 18) / 580;
+                                
+                                // 6. TÊTE = (Largeur - 18) / 580
+                                $teteUnitaire = ($largeur - 18) / 580;
+                                
+                                // 7. MOUSTIQUAIRE = (((Hauteur - 4) + (Largeur - 8)) * 2) / 580
+                                $moustiquaireUnitaire = ((($hauteur - 4) + ($largeur - 8)) * 2) / 580;
+                                
+                                // Calculer les totaux pour cette ligne (multiplier par nombre de fenêtres)
+                                $railLigne = $railUnitaire * $nombreFenetres;
+                                $montantLigne = $montantUnitaire * $nombreFenetres;
+                                $buteeLigne = $buteeUnitaire * $nombreFenetres;
+                                $poigneeLigne = $poigneeUnitaire * $nombreFenetres;
+                                $rouletteLigne = $rouletteUnitaire * $nombreFenetres;
+                                $teteLigne = $teteUnitaire * $nombreFenetres;
+                                $moustiquaireLigne = $moustiquaireUnitaire * $nombreFenetres;
+                                
+                                // Ajouter aux totaux spécifiques 3 RAILS (ne pas mélanger avec ALU 82)
+                                $totalRail += $railLigne;
+                                $totalMontant += $montantLigne;
+                                $totalButee += $buteeLigne;
+                                $totalPoignee += $poigneeLigne;
+                                $totalRoulette += $rouletteLigne;
+                                $totalTete += $teteLigne;
+                                $totalMoustiquaire3Rails += $moustiquaireLigne;
+                                
+                                // Stocker les détails pour les fenêtres 3 rails
+                                $fenetresDetails[] = [
+                                    'line' => $line,
+                                    'cadre' => $railLigne + $montantLigne, // Total RAIL + MONTANT
+                                    'vento' => $buteeLigne + $poigneeLigne, // Total BUTÉE + POIGNÉE
+                                    'sikane' => $rouletteLigne + $teteLigne, // Total ROULETTE + TÊTE
+                                    'moustiquaire' => $moustiquaireLigne,
+                                    'nombre_fenetres' => $nombreFenetres,
+                                    'type' => '3_rails',
+                                    // Détails détaillés pour affichage
+                                    'details' => [
+                                        'rail' => $railLigne,
+                                        'montant' => $montantLigne,
+                                        'butee' => $buteeLigne,
+                                        'poignee' => $poigneeLigne,
+                                        'roulette' => $rouletteLigne,
+                                        'tete' => $teteLigne,
+                                        'moustiquaire' => $moustiquaireLigne,
+                                    ],
+                                ];
+                            } else {
+                                // FORMULES POUR FENÊTRE ALU 82 (formules existantes)
+                                // Calcul CADRE pour UNE fenêtre = ((largeur + hauteur) * 2 + 50) / 580
+                                $cadreUnitaire = (($largeur + $hauteur) * 2 + 50) / 580;
+                                
+                                // Calcul VENTO pour UNE fenêtre = nombre_cadre * 1.3
+                                $ventoUnitaire = $cadreUnitaire * 1.3;
+                                
+                                // Calcul SIKANE = (hauteur * 2 * nombre_total_fenetres) / 580
+                                $sikane = ($hauteur * 2 * $nombreFenetres) / 580;
+                                
+                                // Calcul MOUSTIQUAIRE pour UNE fenêtre = nombre_vento / 2
+                                $moustiquaireUnitaire = $ventoUnitaire / 2;
+                                
+                                // Calculer les totaux pour cette ligne (multiplier par nombre de fenêtres)
+                                $cadreLigne = $cadreUnitaire * $nombreFenetres;
+                                $ventoLigne = $ventoUnitaire * $nombreFenetres;
+                                $moustiquaireLigne = $moustiquaireUnitaire * $nombreFenetres;
+                                
+                                // Ajouter aux totaux globaux
+                                $totalCadre += $cadreLigne;
+                                $totalVento += $ventoLigne;
+                                $totalSikane += $sikane;
+                                $totalMoustiquaire += $moustiquaireLigne;
+                                
+                                // Stocker les détails pour les fenêtres ALU 82
+                                $fenetresDetails[] = [
+                                    'line' => $line,
+                                    'cadre' => $cadreLigne,
+                                    'vento' => $ventoLigne,
+                                    'sikane' => $sikane,
+                                    'moustiquaire' => $moustiquaireLigne,
+                                    'nombre_fenetres' => $nombreFenetres,
+                                    'type' => 'alu_82',
+                                ];
+                            }
                         }
                     }
                 }
@@ -844,17 +990,174 @@ class QuoteController extends Controller
             }
         }
 
+        // Récupérer tous les prix unitaires depuis la table matériaux (une seule requête avec cache)
+        $materialsPrices = Material::getAllCached();
+        
+        // Fonction helper pour obtenir le prix
+        $getPrice = function($nom) use ($materialsPrices) {
+            return isset($materialsPrices[$nom]) ? (float) $materialsPrices[$nom] : 0;
+        };
+        
+        // Créer un tableau pour stocker tous les matériaux avec leurs quantités et prix
+        $materiauxAvecPrix = [];
+        
+        // Fenêtres ALU 82
+        if ($totalCadre > 0) {
+            $prixUnitaire = $getPrice('Cadre');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Cadre',
+                'quantite' => $totalCadre,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalCadre * $prixUnitaire,
+            ];
+        }
+        if ($totalVento > 0) {
+            $prixUnitaire = $getPrice('Vento');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Vento',
+                'quantite' => $totalVento,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalVento * $prixUnitaire,
+            ];
+        }
+        if ($totalSikane > 0) {
+            $prixUnitaire = $getPrice('Sikane');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Sikane',
+                'quantite' => $totalSikane,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalSikane * $prixUnitaire,
+            ];
+        }
+        if ($totalMoustiquaire > 0) {
+            $prixUnitaire = $getPrice('Moustiquaire');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Moustiquaire',
+                'quantite' => $totalMoustiquaire,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalMoustiquaire * $prixUnitaire,
+            ];
+        }
+        
+        // Fenêtres 3 RAILS
+        if (($totalRail ?? 0) > 0) {
+            $prixUnitaire = $getPrice('Rail 3R');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Rail 3R',
+                'quantite' => $totalRail,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalRail * $prixUnitaire,
+            ];
+        }
+        if (($totalMontant ?? 0) > 0) {
+            $prixUnitaire = $getPrice('Montant');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Montant',
+                'quantite' => $totalMontant,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalMontant * $prixUnitaire,
+            ];
+        }
+        if (($totalButee ?? 0) > 0) {
+            $prixUnitaire = $getPrice('Butée');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Butée',
+                'quantite' => $totalButee,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalButee * $prixUnitaire,
+            ];
+        }
+        if (($totalPoignee ?? 0) > 0) {
+            $prixUnitaire = $getPrice('Poignée');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Poignée',
+                'quantite' => $totalPoignee,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalPoignee * $prixUnitaire,
+            ];
+        }
+        if (($totalRoulette ?? 0) > 0) {
+            $prixUnitaire = $getPrice('Roulette');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Roulette',
+                'quantite' => $totalRoulette,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalRoulette * $prixUnitaire,
+            ];
+        }
+        if (($totalTete ?? 0) > 0) {
+            $prixUnitaire = $getPrice('Tête');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Tête',
+                'quantite' => $totalTete,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalTete * $prixUnitaire,
+            ];
+        }
+        if (($totalMoustiquaire3Rails ?? 0) > 0) {
+            $prixUnitaire = $getPrice('Moustiquaire 3R');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Moustiquaire 3R',
+                'quantite' => $totalMoustiquaire3Rails,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalMoustiquaire3Rails * $prixUnitaire,
+            ];
+        }
+        
+        // Portes
+        if ($totalCadrePorte > 0) {
+            $prixUnitaire = $getPrice('Cadre Porte');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Cadre Porte',
+                'quantite' => $totalCadrePorte,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalCadrePorte * $prixUnitaire,
+            ];
+        }
+        if ($totalBattantPorte > 0) {
+            $prixUnitaire = $getPrice('Battant Porte');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Battant Porte',
+                'quantite' => $totalBattantPorte,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalBattantPorte * $prixUnitaire,
+            ];
+        }
+        if ($totalDivision > 0) {
+            $prixUnitaire = $getPrice('Division');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Division',
+                'quantite' => $totalDivision,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalDivision * $prixUnitaire,
+            ];
+        }
+        
+        // Calculer le total général
+        $totalGeneral = array_sum(array_column($materiauxAvecPrix, 'total_ligne'));
+
         return [
             'total_cadre' => $totalCadre,
             'total_vento' => $totalVento,
             'total_sikane' => $totalSikane,
             'total_moustiquaire' => $totalMoustiquaire,
+            // Totaux spécifiques pour fenêtres 3 RAILS
+            'total_rail' => $totalRail ?? 0,
+            'total_montant' => $totalMontant ?? 0,
+            'total_butee' => $totalButee ?? 0,
+            'total_poignee' => $totalPoignee ?? 0,
+            'total_roulette' => $totalRoulette ?? 0,
+            'total_tete' => $totalTete ?? 0,
+            'total_moustiquaire_3rails' => $totalMoustiquaire3Rails ?? 0,
             'total_cadre_porte' => $totalCadrePorte,
             'total_battant_porte' => $totalBattantPorte,
             'total_division' => $totalDivision,
             'fenetres_details' => $fenetresDetails,
             'portes_details' => $portesDetails,
             'debug' => $debugInfo,
+            // Nouveau tableau avec prix
+            'materiaux_avec_prix' => $materiauxAvecPrix,
+            'total_general' => $totalGeneral,
         ];
     }
 

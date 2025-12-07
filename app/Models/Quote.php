@@ -10,6 +10,7 @@ class Quote extends Model
 {
     protected $fillable = [
         'client_id',
+        'model_id',
         'created_by',
         'quote_number',
         'date',
@@ -43,6 +44,16 @@ class Quote extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function cutPlans(): HasMany
+    {
+        return $this->hasMany(CutPlan::class)->latest();
+    }
+
+    public function modele(): BelongsTo
+    {
+        return $this->belongsTo(Modele::class, 'model_id');
     }
 
     public function getSubtotalAttribute()

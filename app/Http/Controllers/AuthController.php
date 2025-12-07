@@ -15,7 +15,9 @@ class AuthController extends Controller
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
-        return view('auth.login');
+        // Vérifier s'il y a déjà des utilisateurs dans la base
+        $hasUsers = User::count() > 0;
+        return view('auth.login', compact('hasUsers'));
     }
 
     public function login(Request $request)
@@ -37,31 +39,58 @@ class AuthController extends Controller
 
     public function showRegisterForm()
     {
-        if (Auth::check()) {
-            return redirect()->route('dashboard');
+        // Vérifier s'il y a déjà des utilisateurs
+        $hasUsers = User::count() > 0;
+        
+        // Si des utilisateurs existent, seul un admin peut créer des comptes
+        if ($hasUsers) {
+            if (!Auth::check() || !Auth::user()->hasPermission('users.create')) {
+                abort(403, 'Seul un administrateur peut créer des comptes utilisateurs.');
+            }
         }
-        return view('auth.register');
+        
+        return view('auth.register', compact('hasUsers'));
     }
 
     public function register(Request $request)
     {
+        // Vérifier s'il y a déjà des utilisateurs
+        $hasUsers = User::count() > 0;
+        
+        // Si des utilisateurs existent, seul un admin peut créer des comptes
+        if ($hasUsers) {
+            if (!Auth::check() || !Auth::user()->hasPermission('users.create')) {
+                abort(403, 'Seul un administrateur peut créer des comptes utilisateurs.');
+            }
+        }
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
+        // Si c'est le premier utilisateur, le créer en tant qu'admin
+        // Sinon, créer un utilisateur normal (seul un admin peut accéder à cette méthode)
+        $role = $hasUsers ? 'user' : 'admin';
+
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => 'user', // Par défaut, les nouveaux utilisateurs sont des utilisateurs normaux
+            'role' => $role,
         ]);
 
-        Auth::login($user);
+        // Si c'est le premier utilisateur, le connecter automatiquement
+        if (!$hasUsers) {
+            Auth::login($user);
+            return redirect()->route('dashboard')
+                ->with('success', 'Compte administrateur créé avec succès !');
+        }
 
-        return redirect()->route('dashboard')
-            ->with('success', 'Compte créé avec succès !');
+        // Si un admin crée un compte, rediriger vers la liste des utilisateurs
+        return redirect()->route('users.index')
+            ->with('success', 'Compte utilisateur créé avec succès !');
     }
 
     public function logout(Request $request)
@@ -69,7 +98,7 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('login');
+        return redirect()->route('modeles.index');
     }
 
     public function showProfile()

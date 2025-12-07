@@ -68,7 +68,7 @@
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <a href="{{ route('quotes.print-materials', $selectedQuote) }}" 
+                        <a href="{{ route('quotes.print-materials', $selectedQuote) }}?pdf=1" 
                            target="_blank"
                            class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-teal-600 hover:bg-teal-700"
                            onmouseover="this.style.transform='translateY(-2px)'"
@@ -81,9 +81,21 @@
 
             <!-- Résultats du calcul -->
             <div class="mb-6">
+                @if(count($materials['fenetres_details']) > 0)
+                @php
+                    $has3Rails = collect($materials['fenetres_details'])->contains(function($detail) {
+                        return isset($detail['type']) && $detail['type'] === '3_rails';
+                    });
+                    $hasAlu82 = collect($materials['fenetres_details'])->contains(function($detail) {
+                        return !isset($detail['type']) || $detail['type'] === 'alu_82';
+                    });
+                @endphp
+                
+                @if($hasAlu82)
+                <!-- Totaux pour fenêtres ALU 82 -->
                 <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
                     <i class="fas fa-list-check mr-2" style="color: {{ $settings->primary_color ?? '#3b82f6' }};"></i>
-                    Totaux des Matériaux - Fenêtres
+                    Totaux des Matériaux - Fenêtres Alu 82
                 </h3>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                     <div class="bg-white border-2 border-blue-200 rounded-lg p-4 shadow-md">
@@ -115,6 +127,67 @@
                         <p class="text-xs text-gray-500 mt-1">barres</p>
                     </div>
                 </div>
+                @endif
+                
+                @if($has3Rails && isset($materials['total_rail']))
+                <!-- Totaux pour fenêtres 3 RAILS -->
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-list-check mr-2" style="color: {{ $settings->primary_color ?? '#3b82f6' }};"></i>
+                    Totaux des Matériaux - Fenêtres 3 Rails
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+                    <div class="bg-white border-2 border-blue-200 rounded-lg p-3 shadow-md">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">RAIL</label>
+                        <div class="text-xl font-bold text-blue-700">
+                            {{ number_format($materials['total_rail'], 3, ',', ' ') }}
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                    </div>
+                    <div class="bg-white border-2 border-indigo-200 rounded-lg p-3 shadow-md">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">MONTANT</label>
+                        <div class="text-xl font-bold text-indigo-700">
+                            {{ number_format($materials['total_montant'], 3, ',', ' ') }}
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                    </div>
+                    <div class="bg-white border-2 border-green-200 rounded-lg p-3 shadow-md">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">BUTÉE</label>
+                        <div class="text-xl font-bold text-green-700">
+                            {{ number_format($materials['total_butee'], 3, ',', ' ') }}
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                    </div>
+                    <div class="bg-white border-2 border-teal-200 rounded-lg p-3 shadow-md">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">POIGNÉE</label>
+                        <div class="text-xl font-bold text-teal-700">
+                            {{ number_format($materials['total_poignee'], 3, ',', ' ') }}
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                    </div>
+                    <div class="bg-white border-2 border-purple-200 rounded-lg p-3 shadow-md">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">ROULETTE</label>
+                        <div class="text-xl font-bold text-purple-700">
+                            {{ number_format($materials['total_roulette'], 3, ',', ' ') }}
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                    </div>
+                    <div class="bg-white border-2 border-pink-200 rounded-lg p-3 shadow-md">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">TÊTE</label>
+                        <div class="text-xl font-bold text-pink-700">
+                            {{ number_format($materials['total_tete'], 3, ',', ' ') }}
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                    </div>
+                    <div class="bg-white border-2 border-orange-200 rounded-lg p-3 shadow-md">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">MOUSTIQUAIRE</label>
+                        <div class="text-xl font-bold text-orange-700">
+                            {{ number_format($materials['total_moustiquaire_3rails'] ?? 0, 3, ',', ' ') }}
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                    </div>
+                </div>
+                @endif
+                @endif
                 
                 @if(isset($materials['total_cadre_porte']) && ($materials['total_cadre_porte'] > 0 || $materials['total_battant_porte'] > 0 || $materials['total_division'] > 0))
                 <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -158,67 +231,127 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                                     <i class="fas fa-box mr-2"></i>Produit
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                                     <i class="fas fa-ruler mr-2"></i>Dimensions
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-hashtag mr-2"></i>Nb Fenêtres
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-hashtag mr-2"></i>Nb
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-tag mr-2"></i>Type
+                                </th>
+                                @if(isset($materials['fenetres_details'][0]['type']) && $materials['fenetres_details'][0]['type'] === '3_rails')
+                                <!-- Colonnes pour fenêtres 3 RAILS -->
+                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">RAIL</th>
+                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">MONTANT</th>
+                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">BUTÉE</th>
+                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">POIGNÉE</th>
+                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">ROULETTE</th>
+                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">TÊTE</th>
+                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">MOUSTIQUAIRE</th>
+                                @else
+                                <!-- Colonnes pour fenêtres ALU 82 -->
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
                                     <i class="fas fa-cube mr-2"></i>CADRE
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
                                     <i class="fas fa-cube mr-2"></i>VENTO
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
                                     <i class="fas fa-cube mr-2"></i>SIKANE
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
                                     <i class="fas fa-cube mr-2"></i>MOUSTIQUAIRE
                                 </th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($materials['fenetres_details'] as $detail)
                             <tr class="table-row-hover">
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-4 whitespace-nowrap">
                                     <div class="text-sm font-semibold text-gray-900">
                                         {{ $detail['line']->product->name ?? $detail['line']->description }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-600">
-                                        {{ number_format($detail['line']->width, 0) }} cm × {{ number_format($detail['line']->height, 0) }} cm
+                                        {{ number_format($detail['line']->width, 0) }} × {{ number_format($detail['line']->height, 0) }} cm
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <td class="px-4 py-4 whitespace-nowrap text-center">
                                     <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                         {{ $detail['nombre_fenetres'] }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <td class="px-4 py-4 whitespace-nowrap text-center">
+                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full {{ isset($detail['type']) && $detail['type'] === '3_rails' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
+                                        {{ isset($detail['type']) && $detail['type'] === '3_rails' ? '3 RAILS' : 'ALU 82' }}
+                                    </span>
+                                </td>
+                                @if(isset($detail['type']) && $detail['type'] === '3_rails' && isset($detail['details']))
+                                <!-- Affichage pour fenêtres 3 RAILS -->
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-bold text-blue-700">
+                                        {{ number_format($detail['details']['rail'], 3, ',', ' ') }}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-bold text-indigo-700">
+                                        {{ number_format($detail['details']['montant'], 3, ',', ' ') }}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-bold text-green-700">
+                                        {{ number_format($detail['details']['butee'], 3, ',', ' ') }}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-bold text-teal-700">
+                                        {{ number_format($detail['details']['poignee'], 3, ',', ' ') }}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-bold text-purple-700">
+                                        {{ number_format($detail['details']['roulette'], 3, ',', ' ') }}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-bold text-pink-700">
+                                        {{ number_format($detail['details']['tete'], 3, ',', ' ') }}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-bold text-orange-700">
+                                        {{ number_format($detail['details']['moustiquaire'], 3, ',', ' ') }}
+                                    </span>
+                                </td>
+                                @else
+                                <!-- Affichage pour fenêtres ALU 82 -->
+                                <td class="px-4 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold" style="color: {{ $settings->primary_color ?? '#3b82f6' }};">
                                         {{ number_format($detail['cadre'], 3, ',', ' ') }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <td class="px-4 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-green-700">
                                         {{ number_format($detail['vento'], 3, ',', ' ') }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <td class="px-4 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-purple-700">
                                         {{ number_format($detail['sikane'], 3, ',', ' ') }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <td class="px-4 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-orange-700">
                                         {{ number_format($detail['moustiquaire'], 3, ',', ' ') }}
                                     </span>
                                 </td>
+                                @endif
                             </tr>
                             @endforeach
                         </tbody>
@@ -307,6 +440,85 @@
             </div>
             @endif
 
+            <!-- Tableau récapitulatif avec prix -->
+            @if(isset($materials['materiaux_avec_prix']) && count($materials['materiaux_avec_prix']) > 0)
+            <div class="mt-8">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                    <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-table mr-2" style="color: {{ $settings->primary_color ?? '#3b82f6' }};"></i>
+                        Récapitulatif des Matériaux avec Prix
+                    </h3>
+                    <a href="{{ route('quotes.export-materials', ['quote_id' => $selectedQuote->id]) }}" 
+                       class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-green-600 hover:bg-green-700"
+                       onmouseover="this.style.transform='translateY(-2px)'"
+                       onmouseout="this.style.transform='translateY(0)'">
+                        <i class="fas fa-file-excel mr-2"></i>Exporter en Excel
+                    </a>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        <i class="fas fa-box mr-1"></i>Nom Matériau
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        <i class="fas fa-calculator mr-1"></i>Quantité
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        <i class="fas fa-tag mr-1"></i>Prix Unitaire (GNF)
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        <i class="fas fa-money-bill-wave mr-1"></i>Total par Ligne (GNF)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($materials['materiaux_avec_prix'] as $materiau)
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-semibold text-gray-900">
+                                            {{ $materiau['nom'] }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                                            {{ number_format($materiau['quantite'], 3, ',', ' ') }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="text-sm font-bold text-gray-700">
+                                            {{ number_format($materiau['prix_unitaire'], 0, ',', ' ') }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="text-sm font-bold" style="color: {{ $settings->primary_color ?? '#3b82f6' }};">
+                                            {{ number_format($materiau['total_ligne'], 0, ',', ' ') }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot class="bg-gray-100">
+                                <tr>
+                                    <td colspan="3" class="px-6 py-4 text-right text-sm font-bold text-gray-900">
+                                        <i class="fas fa-calculator mr-2"></i>Total Général des Matériaux :
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="text-lg font-extrabold px-4 py-2 rounded-lg inline-block" 
+                                              style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%); color: white;">
+                                            {{ number_format($materials['total_general'] ?? 0, 0, ',', ' ') }} GNF
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             @if(count($materials['fenetres_details']) == 0 && (!isset($materials['portes_details']) || count($materials['portes_details']) == 0))
             <div class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6 text-center">
                 <i class="fas fa-exclamation-triangle text-yellow-600 text-3xl mb-3"></i>
@@ -373,5 +585,30 @@
         @endif
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Si un quote_id est présent dans l'URL, déclencher automatiquement le calcul
+    const urlParams = new URLSearchParams(window.location.search);
+    const quoteId = urlParams.get('quote_id');
+    
+    if (quoteId) {
+        // S'assurer que le select est bien sélectionné
+        const selectElement = document.getElementById('quote_id');
+        if (selectElement && selectElement.value !== quoteId) {
+            selectElement.value = quoteId;
+        }
+        
+        // Si les résultats ne sont pas encore affichés, soumettre automatiquement le formulaire
+        // (cela se fait déjà côté serveur, mais on peut forcer le scroll vers les résultats)
+        const resultsSection = document.querySelector('[id*="materials"]');
+        if (resultsSection) {
+            setTimeout(() => {
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        }
+    }
+});
+</script>
 @endsection
 

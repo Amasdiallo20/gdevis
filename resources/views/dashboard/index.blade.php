@@ -99,7 +99,7 @@
 
     <!-- Cartes financières -->
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
-        <!-- Montant total des devis -->
+        <!-- Montant Total Devis -->
         <div class="card-modern p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-bold text-gray-900">Montant Total Devis</h3>
@@ -107,6 +107,17 @@
             </div>
             <p class="text-xl sm:text-2xl font-bold whitespace-nowrap" style="color: {{ $settings->primary_color ?? '#3b82f6' }};">
                 {{ number_format($totalQuotesAmount, 0, ',', ' ') }} <span class="text-sm">GNF</span>
+            </p>
+        </div>
+
+        <!-- Montant Total Devis validé -->
+        <div class="card-modern p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-bold text-gray-900">Montant Total Devis validé</h3>
+                <i class="fas fa-check-double text-xl text-emerald-500"></i>
+            </div>
+            <p class="text-xl sm:text-2xl font-bold text-emerald-600 whitespace-nowrap">
+                {{ number_format($totalValidatedQuotesAmount ?? 0, 0, ',', ' ') }} <span class="text-sm">GNF</span>
             </p>
         </div>
 
@@ -121,24 +132,13 @@
             </p>
         </div>
 
-        <!-- Montant en attente -->
-        <div class="card-modern p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-gray-900">Montant en Attente</h3>
-                <i class="fas fa-clock text-xl text-orange-500"></i>
-            </div>
-            <p class="text-xl sm:text-2xl font-bold text-orange-600 whitespace-nowrap">
-                {{ number_format($totalPendingAmount, 0, ',', ' ') }} <span class="text-sm">GNF</span>
-            </p>
-        </div>
-
-        <!-- Montant restant non payé -->
+        <!-- Montant non payé -->
         <a href="{{ route('payments.pending-quotes') }}" class="block">
             <div class="card-modern p-6 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 hover:shadow-lg transition-all duration-200 transform hover:scale-105 cursor-pointer">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-bold text-gray-900">
                         <i class="fas fa-exclamation-circle mr-2 text-orange-500"></i>
-                        Montant Restant Non Payé
+                        Montant non payé
                     </h3>
                     <div class="w-10 h-10 rounded-full flex items-center justify-center" 
                          style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }}20 0%, {{ $settings->secondary_color ?? '#1e40af' }}20 100%);">

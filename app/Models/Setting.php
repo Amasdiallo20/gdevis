@@ -21,14 +21,24 @@ class Setting extends Model
     ];
 
     /**
-     * Récupère les paramètres (singleton)
+     * Récupère les paramètres (singleton avec cache)
      */
     public static function getSettings()
     {
-        $settings = self::first();
-        if (!$settings) {
-            $settings = self::create([]);
-        }
-        return $settings;
+        return \Cache::remember('app_settings', 3600, function () {
+            $settings = self::first();
+            if (!$settings) {
+                $settings = self::create([]);
+            }
+            return $settings;
+        });
+    }
+
+    /**
+     * Clear settings cache
+     */
+    public static function clearCache()
+    {
+        \Cache::forget('app_settings');
     }
 }

@@ -48,6 +48,9 @@ class SettingController extends Controller
         }
 
         $settings->update($validated);
+        
+        // Clear cache après mise à jour
+        Setting::clearCache();
 
         return redirect()->route('settings.index')
             ->with('success', 'Paramètres mis à jour avec succès.');

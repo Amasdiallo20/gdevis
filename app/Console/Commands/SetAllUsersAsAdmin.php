@@ -36,3 +36,5 @@ class SetAllUsersAsAdmin extends Command
     }
 }
 
+
+

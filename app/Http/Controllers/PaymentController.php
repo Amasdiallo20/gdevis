@@ -195,15 +195,35 @@ class PaymentController extends Controller
             ->sortByDesc('date')
             ->values();
         
-        // Calculer le montant total restant
+        // Calculer le montant total restant pour tous les devis affichés
         $totalRemainingAmount = $quotes->sum(function ($quote) {
             return $quote->remaining_amount;
         });
+        
+        // Calculer le montant non payé uniquement pour les devis validés (exactement comme le dashboard)
+        $validatedQuotes = Quote::where('status', 'validated')
+            ->with(['lines', 'payments'])
+            ->get();
+        
+        $totalValidatedQuotesAmount = $validatedQuotes->sum(function($quote) {
+            return $quote->final_amount ?? $quote->subtotal;
+        });
+        
+        $totalPaidAmountForValidated = $validatedQuotes->sum(function($quote) {
+            return $quote->paid_amount;
+        });
+        
+        $totalRemainingAmountForValidated = max(0, $totalValidatedQuotesAmount - $totalPaidAmountForValidated);
 
         // Pour les filtres
         $clients = \App\Models\Client::orderBy('name')->get();
         
-        return view('payments.pending-quotes', compact('quotes', 'totalRemainingAmount', 'clients'));
+        return view('payments.pending-quotes', compact(
+            'quotes', 
+            'totalRemainingAmount', 
+            'totalRemainingAmountForValidated',
+            'clients'
+        ));
     }
 
     public function print(Payment $payment)

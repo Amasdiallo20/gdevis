@@ -84,14 +84,105 @@
             }
         }
         
-        /* Menu mobile */
+        /* Menu mobile optimisé */
         @media (max-width: 640px) {
             .mobile-menu {
                 display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border-top: 1px solid #e5e7eb;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                max-height: calc(100vh - 64px);
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                z-index: 50;
             }
             .mobile-menu.active {
                 display: block;
-                animation: slideIn 0.3s ease-out;
+                animation: slideDown 0.3s ease-out;
+            }
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Sidebar mobile optimisée */
+        .sidebar-mobile {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 85%;
+            max-width: 320px;
+            height: 100vh;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 50;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .sidebar-mobile.active {
+            transform: translateX(0);
+        }
+        
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+            z-index: 45;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Amélioration des boutons tactiles mobile */
+        @media (max-width: 640px) {
+            .mobile-touch-target {
+                min-height: 44px;
+                min-width: 44px;
+                padding: 12px 16px;
+                touch-action: manipulation;
+            }
+            
+            .mobile-menu a,
+            .mobile-menu button {
+                min-height: 48px;
+                display: flex;
+                align-items: center;
+                padding: 14px 16px;
+                font-size: 16px;
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+            }
+            
+            .sidebar-mobile .sidebar-item a {
+                min-height: 48px;
+                padding: 14px 16px;
+                font-size: 15px;
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
             }
         }
         
@@ -127,14 +218,46 @@
             animation: fadeIn 0.4s ease-out;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
+        
+        /* Sidebar latérale */
+        .sidebar {
+            width: 260px;
+            min-height: calc(100vh - 64px);
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-item {
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-item:hover {
+            background-color: #f9fafb;
+        }
+        
+        .sidebar-item.active {
+            background: linear-gradient(135deg, var(--primary-color)15 0%, var(--secondary-color)15 100%);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .sidebar-item.active a {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Navigation -->
     <nav class="bg-white shadow-lg no-print border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
+            <div class="flex justify-between items-center h-16">
                     <!-- Logo et nom -->
                     <div class="flex-shrink-0 flex items-center">
                         @if($settings->logo)
@@ -144,11 +267,18 @@
                         @else
                         <div class="flex flex-col">
                         @endif
-                            <h1 class="text-lg sm:text-xl font-bold" style="color: {{ $settings->primary_color ?? '#3b82f6' }};">
-                                <i class="fas fa-file-invoice-dollar mr-2"></i>
-                                <span class="hidden sm:inline">A2 VitraDevis</span>
-                                <span class="sm:hidden">A2 VitraDevis</span>
-                            </h1>
+                        @php
+                            $homeRoute = Auth::check() ? route('dashboard') : route('home');
+                            $isMobileMenuEnabled = Auth::check();
+                        @endphp
+                        <a href="{{ $homeRoute }}" 
+                           @if($isMobileMenuEnabled)
+                           onclick="if(window.innerWidth < 640) { event.preventDefault(); toggleMobileMenu(); }"
+                           @endif
+                           class="text-lg sm:text-xl font-bold hover:opacity-80 transition-opacity cursor-pointer" 
+                           style="color: {{ $settings->primary_color ?? '#3b82f6' }}; text-decoration: none;">
+                            A2 VitraDevis
+                        </a>
                             <p class="text-xs text-gray-500 italic hidden sm:block">
                                 Votre devis, clair comme le verre.
                             </p>
@@ -156,151 +286,64 @@
                     </div>
                     
                     <!-- Menu desktop -->
-                    <div class="hidden sm:ml-8 sm:flex sm:space-x-1">
+                <div class="hidden sm:flex sm:items-center sm:flex-1 sm:justify-around sm:mx-8">
+                        @auth
                         <a href="{{ route('dashboard') }}" 
-                           class="px-3 py-2 rounded-md text-sm font-medium transition-colors {{ request()->routeIs('dashboard*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
+                           class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center {{ request()->routeIs('dashboard*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
                            style="{{ request()->routeIs('dashboard*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                            <i class="fas fa-chart-line mr-2"></i>Tableau de bord
+                            <i class="fas fa-home mr-2"></i>Accueil
                         </a>
-                        <!-- Menu déroulant Devis -->
+                        <!-- Menu Devis -->
                         @hasAnyPermission(['quotes.view', 'quotes.create', 'payments.view', 'quotes.calculate-materials'])
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" 
+                        <a href="{{ route('quotes.index') }}" 
                                     class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center {{ request()->routeIs('quotes.*') || request()->routeIs('payments.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
                                     style="{{ request()->routeIs('quotes.*') || request()->routeIs('payments.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
                                 <i class="fas fa-file-invoice mr-2"></i>Devis
-                                <i class="fas fa-chevron-down text-xs ml-2" :class="{ 'transform rotate-180': open }"></i>
-                            </button>
-                            
-                            <!-- Sous-menu déroulant -->
-                            <div x-show="open" 
-                                 @click.away="open = false"
-                                 x-transition:enter="transition ease-out duration-100"
-                                 x-transition:enter-start="transform opacity-0 scale-95"
-                                 x-transition:enter-end="transform opacity-100 scale-100"
-                                 x-transition:leave="transition ease-in duration-75"
-                                 x-transition:leave-start="transform opacity-100 scale-100"
-                                 x-transition:leave-end="transform opacity-0 scale-95"
-                                 class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
-                                 style="display: none;">
-                                <div class="py-1">
-                                    @hasPermission('quotes.create')
-                                    <a href="{{ route('quotes.create') }}" 
-                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors {{ request()->routeIs('quotes.create') ? 'font-semibold' : '' }}"
-                                       style="{{ request()->routeIs('quotes.create') ? 'color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                                        <i class="fas fa-plus-circle mr-2"></i>Nouveau devis
-                                    </a>
-                                    @endhasPermission
-                                    @hasPermission('quotes.view')
-                                    <a href="{{ route('quotes.index') }}" 
-                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors {{ request()->routeIs('quotes.index') ? 'font-semibold' : '' }}"
-                                       style="{{ request()->routeIs('quotes.index') ? 'color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                                        <i class="fas fa-list mr-2"></i>Liste
-                                    </a>
-                                    @endhasPermission
-                                    @hasPermission('payments.view')
-                                    <a href="{{ route('payments.index') }}" 
-                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors {{ request()->routeIs('payments.*') ? 'font-semibold' : '' }}"
-                                       style="{{ request()->routeIs('payments.*') ? 'color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                                        <i class="fas fa-money-bill-wave mr-2"></i>Paiement
-                                    </a>
-                                    @endhasPermission
-                                    @hasPermission('quotes.calculate-materials')
-                                    <a href="{{ route('quotes.calculate-materials') }}" 
-                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors {{ request()->routeIs('quotes.calculate-materials') ? 'font-semibold' : '' }}"
-                                       style="{{ request()->routeIs('quotes.calculate-materials') ? 'color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                                        <i class="fas fa-calculator mr-2"></i>Calcul Matériaux
-                                    </a>
-                                    @endhasPermission
-                                </div>
-                            </div>
-                        </div>
+                        </a>
                         @endhasAnyPermission
-                        <!-- Menu déroulant Clients -->
+                        <!-- Menu Clients -->
                         @hasAnyPermission(['clients.view', 'clients.create'])
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" 
+                        <a href="{{ route('clients.index') }}" 
                                     class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center {{ request()->routeIs('clients.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
                                     style="{{ request()->routeIs('clients.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
                                 <i class="fas fa-users mr-2"></i>Clients
-                                <i class="fas fa-chevron-down text-xs ml-2" :class="{ 'transform rotate-180': open }"></i>
-                            </button>
-                            
-                            <!-- Sous-menu déroulant -->
-                            <div x-show="open" 
-                                 @click.away="open = false"
-                                 x-transition:enter="transition ease-out duration-100"
-                                 x-transition:enter-start="transform opacity-0 scale-95"
-                                 x-transition:enter-end="transform opacity-100 scale-100"
-                                 x-transition:leave="transition ease-in duration-75"
-                                 x-transition:leave-start="transform opacity-100 scale-100"
-                                 x-transition:leave-end="transform opacity-0 scale-95"
-                                 class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
-                                 style="display: none;">
-                                <div class="py-1">
-                                    @hasPermission('clients.create')
-                                    <a href="{{ route('clients.create') }}" 
-                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors {{ request()->routeIs('clients.create') ? 'font-semibold' : '' }}"
-                                       style="{{ request()->routeIs('clients.create') ? 'color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                                        <i class="fas fa-plus-circle mr-2"></i>Nouveau
-                                    </a>
-                                    @endhasPermission
-                                    @hasPermission('clients.view')
-                                    <a href="{{ route('clients.index') }}" 
-                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors {{ request()->routeIs('clients.index') ? 'font-semibold' : '' }}"
-                                       style="{{ request()->routeIs('clients.index') ? 'color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                                        <i class="fas fa-list mr-2"></i>Liste
-                                    </a>
-                                    @endhasPermission
-                                </div>
-                            </div>
-                        </div>
+                        </a>
                         @endhasAnyPermission
-                        <!-- Menu déroulant Produits -->
+                        <!-- Menu Produits -->
                         @hasAnyPermission(['products.view', 'products.create'])
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" 
+                        <a href="{{ route('products.index') }}" 
                                     class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center {{ request()->routeIs('products.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
                                     style="{{ request()->routeIs('products.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
                                 <i class="fas fa-box mr-2"></i>Produits
-                                <i class="fas fa-chevron-down text-xs ml-2" :class="{ 'transform rotate-180': open }"></i>
-                            </button>
-                            
-                            <!-- Sous-menu déroulant -->
-                            <div x-show="open" 
-                                 @click.away="open = false"
-                                 x-transition:enter="transition ease-out duration-100"
-                                 x-transition:enter-start="transform opacity-0 scale-95"
-                                 x-transition:enter-end="transform opacity-100 scale-100"
-                                 x-transition:leave="transition ease-in duration-75"
-                                 x-transition:leave-start="transform opacity-100 scale-100"
-                                 x-transition:leave-end="transform opacity-0 scale-95"
-                                 class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
-                                 style="display: none;">
-                                <div class="py-1">
-                                    @hasPermission('products.create')
-                                    <a href="{{ route('products.create') }}" 
-                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors {{ request()->routeIs('products.create') ? 'font-semibold' : '' }}"
-                                       style="{{ request()->routeIs('products.create') ? 'color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                                        <i class="fas fa-plus-circle mr-2"></i>Nouveau
-                                    </a>
-                                    @endhasPermission
-                                    @hasPermission('products.view')
-                                    <a href="{{ route('products.index') }}" 
-                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors {{ request()->routeIs('products.index') ? 'font-semibold' : '' }}"
-                                       style="{{ request()->routeIs('products.index') ? 'color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                                        <i class="fas fa-list mr-2"></i>Liste
-                                    </a>
-                                    @endhasPermission
-                                </div>
-                            </div>
-                        </div>
+                        </a>
                         @endhasAnyPermission
-                    </div>
+                        <!-- Menu Matériaux -->
+                        @hasAnyPermission(['materials.view', 'materials.create'])
+                        <a href="{{ route('materials.index') }}" 
+                                    class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center {{ request()->routeIs('materials.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
+                                    style="{{ request()->routeIs('materials.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
+                                <i class="fas fa-tools mr-2"></i>Matériaux
+                        </a>
+                        @endhasAnyPermission
+                        @endauth
+                        <!-- Menu Catalogue (toujours visible) -->
+                        <a href="{{ route('modeles.index') }}" 
+                                    class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center {{ request()->routeIs('modeles.*') || request()->routeIs('catalogue.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
+                                    style="{{ request()->routeIs('modeles.*') || request()->routeIs('catalogue.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
+                                <i class="fas fa-images mr-2"></i>Catalogue
+                        </a>
                 </div>
                 
                 <!-- Menu utilisateur et bouton mobile -->
                 <div class="flex items-center space-x-4">
+                    @guest
+                    <!-- Bouton Connexion pour les visiteurs -->
+                    <a href="{{ route('login') }}" 
+                       class="hidden sm:inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                       style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Connexion
+                    </a>
+                    @endguest
                     @auth
                     <!-- Menu déroulant utilisateur (desktop) -->
                     <div class="hidden sm:block relative" x-data="{ open: false }">
@@ -353,176 +396,467 @@
                         </div>
                     </div>
                     @endauth
-                    <!-- Bouton menu mobile -->
-                    <div class="sm:hidden flex items-center">
-                        <button type="button" onclick="toggleMobileMenu()" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none">
-                            <i class="fas fa-bars text-xl" id="menu-icon"></i>
+                    <!-- Boutons menu mobile optimisés -->
+                    <div class="sm:hidden flex items-center space-x-2">
+                        <!-- Bouton sidebar mobile -->
+                        <button type="button" onclick="toggleSidebarMobile()" 
+                                class="mobile-touch-target inline-flex items-center justify-center rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-100 active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all"
+                                style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};"
+                                aria-label="Ouvrir le menu de navigation">
+                            <i class="fas fa-bars text-xl" id="sidebar-icon"></i>
+                        </button>
+                        <!-- Bouton menu utilisateur mobile -->
+                        <button type="button" onclick="toggleMobileMenu()" 
+                                class="mobile-touch-target inline-flex items-center justify-center rounded-lg text-gray-700 hover:text-gray-900 hover:bg-gray-100 active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all"
+                                style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};"
+                                aria-label="Ouvrir le menu utilisateur">
+                            <i class="fas fa-user-circle text-xl" id="menu-icon"></i>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Menu mobile -->
+        <!-- Menu mobile optimisé -->
         <div class="sm:hidden mobile-menu" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
-                <a href="{{ route('dashboard') }}" 
-                   class="block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('dashboard*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
-                   style="{{ request()->routeIs('dashboard*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                    <i class="fas fa-chart-line mr-2"></i>Tableau de bord
-                </a>
-                <!-- Menu Devis mobile -->
-                @hasAnyPermission(['quotes.view', 'quotes.create', 'payments.view', 'quotes.calculate-materials'])
-                <div x-data="{ open: false }" class="border-b border-gray-200 pb-2 mb-2">
-                    <button @click="open = !open" 
-                            class="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('quotes.*') || request()->routeIs('payments.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
-                            style="{{ request()->routeIs('quotes.*') || request()->routeIs('payments.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                        <span><i class="fas fa-file-invoice mr-2"></i>Devis</span>
-                        <i class="fas fa-chevron-down text-xs" :class="{ 'transform rotate-180': open }"></i>
-                    </button>
-                    <div x-show="open" 
-                         x-transition:enter="transition ease-out duration-100"
-                         x-transition:enter-start="transform opacity-0"
-                         x-transition:enter-end="transform opacity-100"
-                         x-transition:leave="transition ease-in duration-75"
-                         x-transition:leave-start="transform opacity-100"
-                         x-transition:leave-end="transform opacity-0"
-                         class="pl-4 mt-1 space-y-1">
-                        @hasPermission('quotes.create')
-                        <a href="{{ route('quotes.create') }}" 
-                           class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('quotes.create') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
-                           style="{{ request()->routeIs('quotes.create') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                            <i class="fas fa-plus-circle mr-2"></i>Nouveau devis
-                        </a>
-                        @endhasPermission
-                        @hasPermission('quotes.view')
-                        <a href="{{ route('quotes.index') }}" 
-                           class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('quotes.index') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
-                           style="{{ request()->routeIs('quotes.index') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                            <i class="fas fa-list mr-2"></i>Liste
-                        </a>
-                        @endhasPermission
-                        @hasPermission('payments.view')
-                        <a href="{{ route('payments.index') }}" 
-                           class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('payments.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
-                           style="{{ request()->routeIs('payments.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                            <i class="fas fa-money-bill-wave mr-2"></i>Paiement
-                        </a>
-                        @endhasPermission
-                        @hasPermission('quotes.calculate-materials')
-                        <a href="{{ route('quotes.calculate-materials') }}" 
-                           class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('quotes.calculate-materials') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
-                           style="{{ request()->routeIs('quotes.calculate-materials') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                            <i class="fas fa-calculator mr-2"></i>Calcul Matériaux
-                        </a>
-                        @endhasPermission
-                    </div>
-                </div>
-                @endhasAnyPermission
-                <!-- Menu Clients mobile -->
-                @hasAnyPermission(['clients.view', 'clients.create'])
-                <div x-data="{ open: false }" class="border-b border-gray-200 pb-2 mb-2">
-                    <button @click="open = !open" 
-                            class="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('clients.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
-                            style="{{ request()->routeIs('clients.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                        <span><i class="fas fa-users mr-2"></i>Clients</span>
-                        <i class="fas fa-chevron-down text-xs" :class="{ 'transform rotate-180': open }"></i>
-                    </button>
-                    <div x-show="open" 
-                         x-transition:enter="transition ease-out duration-100"
-                         x-transition:enter-start="transform opacity-0"
-                         x-transition:enter-end="transform opacity-100"
-                         x-transition:leave="transition ease-in duration-75"
-                         x-transition:leave-start="transform opacity-100"
-                         x-transition:leave-end="transform opacity-0"
-                         class="pl-4 mt-1 space-y-1">
-                        @hasPermission('clients.create')
-                        <a href="{{ route('clients.create') }}" 
-                           class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('clients.create') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
-                           style="{{ request()->routeIs('clients.create') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                            <i class="fas fa-plus-circle mr-2"></i>Nouveau
-                        </a>
-                        @endhasPermission
-                        @hasPermission('clients.view')
-                        <a href="{{ route('clients.index') }}" 
-                           class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('clients.index') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
-                           style="{{ request()->routeIs('clients.index') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                            <i class="fas fa-list mr-2"></i>Liste
-                        </a>
-                        @endhasPermission
-                    </div>
-                </div>
-                @endhasAnyPermission
-                <!-- Menu Produits mobile -->
-                @hasAnyPermission(['products.view', 'products.create'])
-                <div x-data="{ open: false }" class="border-b border-gray-200 pb-2 mb-2">
-                    <button @click="open = !open" 
-                            class="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('products.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
-                            style="{{ request()->routeIs('products.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                        <span><i class="fas fa-box mr-2"></i>Produits</span>
-                        <i class="fas fa-chevron-down text-xs" :class="{ 'transform rotate-180': open }"></i>
-                    </button>
-                    <div x-show="open" 
-                         x-transition:enter="transition ease-out duration-100"
-                         x-transition:enter-start="transform opacity-0"
-                         x-transition:enter-end="transform opacity-100"
-                         x-transition:leave="transition ease-in duration-75"
-                         x-transition:leave-start="transform opacity-100"
-                         x-transition:leave-end="transform opacity-0"
-                         class="pl-4 mt-1 space-y-1">
-                        @hasPermission('products.create')
-                        <a href="{{ route('products.create') }}" 
-                           class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('products.create') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
-                           style="{{ request()->routeIs('products.create') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                            <i class="fas fa-plus-circle mr-2"></i>Nouveau
-                        </a>
-                        @endhasPermission
-                        @hasPermission('products.view')
-                        <a href="{{ route('products.index') }}" 
-                           class="block px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('products.index') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
-                           style="{{ request()->routeIs('products.index') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                            <i class="fas fa-list mr-2"></i>Liste
-                        </a>
-                        @endhasPermission
-                    </div>
-                </div>
-                @endhasAnyPermission
+            <div class="px-0 pt-1 pb-2 space-y-0 bg-white">
                 @auth
-                <!-- Menu utilisateur mobile -->
-                <div class="border-t border-gray-200 pt-2 mt-2">
-                    <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <a href="{{ route('dashboard') }}" 
+                   onclick="closeMobileMenu()"
+                   class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('dashboard*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
+                   style="{{ request()->routeIs('dashboard*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
+                    <i class="fas fa-home mr-3 w-5"></i>Accueil
+                </a>
+                @hasAnyPermission(['quotes.view', 'quotes.create', 'payments.view', 'quotes.calculate-materials'])
+                <a href="{{ route('quotes.index') }}" 
+                   onclick="closeMobileMenu()"
+                   class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('quotes.*') || request()->routeIs('payments.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
+                   style="{{ request()->routeIs('quotes.*') || request()->routeIs('payments.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
+                    <i class="fas fa-file-invoice mr-3 w-5"></i>Devis
+                </a>
+                @endhasAnyPermission
+                @hasAnyPermission(['clients.view', 'clients.create'])
+                <a href="{{ route('clients.index') }}" 
+                   onclick="closeMobileMenu()"
+                   class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('clients.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
+                   style="{{ request()->routeIs('clients.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
+                    <i class="fas fa-users mr-3 w-5"></i>Clients
+                </a>
+                @endhasAnyPermission
+                @hasAnyPermission(['products.view', 'products.create'])
+                <a href="{{ route('products.index') }}" 
+                   onclick="closeMobileMenu()"
+                   class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('products.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
+                   style="{{ request()->routeIs('products.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
+                    <i class="fas fa-box mr-3 w-5"></i>Produits
+                </a>
+                @endhasAnyPermission
+                @hasAnyPermission(['materials.view', 'materials.create'])
+                <a href="{{ route('materials.index') }}" 
+                   onclick="closeMobileMenu()"
+                   class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('materials.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
+                   style="{{ request()->routeIs('materials.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
+                    <i class="fas fa-tools mr-3 w-5"></i>Matériaux
+                </a>
+                @endhasAnyPermission
+                @endauth
+                <a href="{{ route('modeles.index') }}" 
+                   onclick="closeMobileMenu()"
+                   class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('modeles.*') || request()->routeIs('catalogue.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
+                   style="{{ request()->routeIs('modeles.*') || request()->routeIs('catalogue.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
+                    <i class="fas fa-images mr-3 w-5"></i>Catalogue
+                </a>
+                @auth
+                <!-- Menu utilisateur mobile optimisé -->
+                <div class="border-t-2 border-gray-200 pt-3 mt-2">
+                    <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center">
                         <i class="fas fa-user-circle mr-2"></i>{{ Auth::user()->name }}
                     </div>
                     @if(Auth::user()->role === 'admin')
                     <a href="{{ route('users.index') }}" 
-                       class="block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('users.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
+                       onclick="closeMobileMenu()"
+                       class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('users.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
                        style="{{ request()->routeIs('users.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                        <i class="fas fa-users-cog mr-2"></i>Utilisateurs
+                        <i class="fas fa-users-cog mr-3 w-5"></i>Utilisateurs
                     </a>
                     @endif
                     <a href="{{ route('settings.index') }}" 
-                       class="block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('settings.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
+                       onclick="closeMobileMenu()"
+                       class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('settings.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
                        style="{{ request()->routeIs('settings.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                        <i class="fas fa-cog mr-2"></i>Paramètres
+                        <i class="fas fa-cog mr-3 w-5"></i>Paramètres
                     </a>
                     <a href="{{ route('profile') }}" 
-                       class="block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('profile') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
+                       onclick="closeMobileMenu()"
+                       class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('profile') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
                        style="{{ request()->routeIs('profile') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
-                        <i class="fas fa-user-circle mr-2"></i>Mon Profil
+                        <i class="fas fa-user-circle mr-3 w-5"></i>Mon Profil
                     </a>
                     <form action="{{ route('logout') }}" method="POST" class="block">
                         @csrf
-                        <button type="submit" class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100">
-                            <i class="fas fa-sign-out-alt mr-2"></i>Déconnexion
+                        <button type="submit" onclick="closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-none text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100 transition-colors">
+                            <i class="fas fa-sign-out-alt mr-3 w-5"></i>Déconnexion
                         </button>
                     </form>
                 </div>
                 @endauth
+                @guest
+                <div class="border-t-2 border-gray-200 pt-3 mt-2">
+                    <a href="{{ route('login') }}" 
+                       onclick="closeMobileMenu()"
+                       class="block px-4 py-3 rounded-none text-base font-medium text-white transition-colors hover:opacity-90 active:opacity-80"
+                       style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                        <i class="fas fa-sign-in-alt mr-3 w-5"></i>Connexion
+                    </a>
+                </div>
+                @endguest
             </div>
         </div>
     </nav>
 
-    <main class="py-6 sm:py-8 bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
+    <!-- Overlay pour sidebar mobile -->
+    <div class="sidebar-overlay lg:hidden" id="sidebar-overlay" onclick="toggleSidebarMobile()"></div>
+
+    <div class="flex no-print">
+        <!-- Sidebar latérale Desktop -->
+        <aside class="sidebar hidden lg:block fixed left-0 top-16 z-40 overflow-y-auto">
+            <div class="p-4">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4 flex items-center">
+                    <i class="fas fa-list mr-2"></i>
+                    Navigation
+                </h3>
+                
+                <nav class="space-y-1">
+                    @php
+                        $currentRoute = request()->route()->getName();
+                    @endphp
+                    
+                    <!-- Sous-menus pour Devis -->
+                    @if(request()->routeIs('quotes.*') || request()->routeIs('payments.*'))
+                        @hasPermission('quotes.view')
+                        <div class="sidebar-item {{ request()->routeIs('quotes.index') ? 'active' : '' }}">
+                            <a href="{{ route('quotes.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                <i class="fas fa-list mr-3 w-5"></i>
+                                Liste
+                            </a>
+                        </div>
+                        @endhasPermission
+                        
+                        @hasPermission('quotes.create')
+                        <div class="sidebar-item {{ request()->routeIs('quotes.create') ? 'active' : '' }}">
+                            <a href="{{ route('quotes.create') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                <i class="fas fa-plus-circle mr-3 w-5"></i>
+                                Nouveau devis
+                            </a>
+                        </div>
+                        @endhasPermission
+                        
+                        @hasPermission('payments.view')
+                        <div class="sidebar-item {{ request()->routeIs('payments.*') ? 'active' : '' }}">
+                            <a href="{{ route('payments.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                <i class="fas fa-money-bill-wave mr-3 w-5"></i>
+                                Paiements
+                            </a>
+                        </div>
+                        @endhasPermission
+                        
+                        @hasPermission('quotes.calculate-materials')
+                        <div class="sidebar-item {{ request()->routeIs('quotes.calculate-materials') || request()->routeIs('quotes.print-materials') ? 'active' : '' }}">
+                            <a href="{{ route('quotes.calculate-materials') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                <i class="fas fa-calculator mr-3 w-5"></i>
+                                Calcul Matériaux
+                            </a>
+                        </div>
+                        @endhasPermission
+                    @endif
+                    
+                    <!-- Sous-menus pour Clients -->
+                    @if(request()->routeIs('clients.*'))
+                        @hasAnyPermission(['clients.view', 'clients.create'])
+                            @hasPermission('clients.view')
+                            <div class="sidebar-item {{ request()->routeIs('clients.index') || request()->routeIs('clients.show') || request()->routeIs('clients.edit') ? 'active' : '' }}">
+                                <a href="{{ route('clients.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                    <i class="fas fa-list mr-3 w-5"></i>
+                                    Liste
+                                </a>
+                            </div>
+                            @endhasPermission
+                            
+                            @hasPermission('clients.create')
+                            <div class="sidebar-item {{ request()->routeIs('clients.create') ? 'active' : '' }}">
+                                <a href="{{ route('clients.create') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                    <i class="fas fa-user-plus mr-3 w-5"></i>
+                                    Nouveau client
+                                </a>
+                            </div>
+                            @endhasPermission
+                        @endhasAnyPermission
+                    @endif
+                    
+                    <!-- Sous-menus pour Produits -->
+                    @if(request()->routeIs('products.*'))
+                        @hasAnyPermission(['products.view', 'products.create'])
+                            @hasPermission('products.view')
+                            <div class="sidebar-item {{ request()->routeIs('products.index') || request()->routeIs('products.show') || request()->routeIs('products.edit') ? 'active' : '' }}">
+                                <a href="{{ route('products.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                    <i class="fas fa-list mr-3 w-5"></i>
+                                    Liste
+                                </a>
+                            </div>
+                            @endhasPermission
+                            
+                            @hasPermission('products.create')
+                            <div class="sidebar-item {{ request()->routeIs('products.create') ? 'active' : '' }}">
+                                <a href="{{ route('products.create') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                    <i class="fas fa-plus-circle mr-3 w-5"></i>
+                                    Nouveau produit
+                                </a>
+                            </div>
+                            @endhasPermission
+                        @endhasAnyPermission
+                    @endif
+                    
+                    <!-- Sous-menus pour Matériaux -->
+                    @if(request()->routeIs('materials.*'))
+                        @hasAnyPermission(['materials.view', 'materials.create'])
+                            @hasPermission('materials.view')
+                            <div class="sidebar-item {{ request()->routeIs('materials.index') || request()->routeIs('materials.show') || request()->routeIs('materials.edit') ? 'active' : '' }}">
+                                <a href="{{ route('materials.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" {{ isset($onclick) ? 'onclick="toggleSidebarMobile()"' : '' }}>
+                                    <i class="fas fa-list mr-3 w-5"></i>
+                                    Liste
+                                </a>
+                            </div>
+                            @endhasPermission
+                            
+                            @hasPermission('materials.create')
+                            <div class="sidebar-item {{ request()->routeIs('materials.create') ? 'active' : '' }}">
+                                <a href="{{ route('materials.create') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" {{ isset($onclick) ? 'onclick="toggleSidebarMobile()"' : '' }}>
+                                    <i class="fas fa-plus-circle mr-3 w-5"></i>
+                                    Nouveau matériau
+                                </a>
+                            </div>
+                            @endhasPermission
+                        @endhasAnyPermission
+                    @endif
+                    
+                    <!-- Sous-menus pour Catalogue -->
+                    @if(request()->routeIs('modeles.*') || request()->routeIs('catalogue.*'))
+                        <div class="sidebar-item {{ request()->routeIs('modeles.index') || request()->routeIs('catalogue.*') ? 'active' : '' }}">
+                            <a href="{{ route('modeles.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                <i class="fas fa-th-large mr-3 w-5"></i>
+                                Tous les modèles
+                            </a>
+                        </div>
+                        @auth
+                        @if(Auth::user()->hasPermission('modeles.create'))
+                        <div class="sidebar-item {{ request()->routeIs('modeles.create') ? 'active' : '' }}">
+                            <a href="{{ route('modeles.create') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                <i class="fas fa-plus-circle mr-3 w-5"></i>
+                                Nouveau modèle
+                            </a>
+                        </div>
+                        @endif
+                        @endauth
+                    @endif
+                    
+                    <!-- Sous-menus pour Dashboard -->
+                    @if(request()->routeIs('dashboard*'))
+                        <div class="sidebar-item active">
+                            <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                <i class="fas fa-chart-bar mr-3 w-5"></i>
+                                Statistiques
+                            </a>
+                        </div>
+                    @endif
+                    
+                    <!-- Sous-menus pour Utilisateurs (Admin) -->
+                    @if(request()->routeIs('users.*') && Auth::user()->role === 'admin')
+                        <div class="sidebar-item {{ request()->routeIs('users.index') ? 'active' : '' }}">
+                            <a href="{{ route('users.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                <i class="fas fa-list mr-3 w-5"></i>
+                                Liste
+                            </a>
+                        </div>
+                        <div class="sidebar-item {{ request()->routeIs('users.create') ? 'active' : '' }}">
+                            <a href="{{ route('users.create') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                <i class="fas fa-user-plus mr-3 w-5"></i>
+                                Nouveau utilisateur
+                            </a>
+                        </div>
+                    @endif
+                    
+                    <!-- Sous-menus pour Paramètres -->
+                    @if(request()->routeIs('settings.*'))
+                        <div class="sidebar-item active">
+                            <a href="{{ route('settings.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                <i class="fas fa-cog mr-3 w-5"></i>
+                                Configuration
+                            </a>
+                        </div>
+                    @endif
+                </nav>
+            </div>
+        </aside>
+        
+        <!-- Sidebar latérale Mobile optimisée -->
+        <aside class="sidebar-mobile lg:hidden" id="sidebar-mobile">
+            <div class="p-4 pb-6">
+                <div class="flex items-center justify-between mb-6 pt-2">
+                    <h3 class="text-base font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-list mr-2" style="color: {{ $settings->primary_color ?? '#3b82f6' }};"></i>
+                        Navigation
+                    </h3>
+                    <button onclick="toggleSidebarMobile()" 
+                            class="mobile-touch-target p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 active:bg-gray-200 focus:outline-none transition-colors"
+                            aria-label="Fermer le menu">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+                
+                <nav class="space-y-1">
+                    <!-- Sous-menus pour Devis -->
+                    @if(request()->routeIs('quotes.*') || request()->routeIs('payments.*'))
+                        @hasPermission('quotes.view')
+                        <div class="sidebar-item {{ request()->routeIs('quotes.index') ? 'active' : '' }}">
+                            <a href="{{ route('quotes.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                <i class="fas fa-list mr-3 w-5"></i>
+                                Liste
+                            </a>
+                        </div>
+                        @endhasPermission
+                        
+                        @hasPermission('quotes.create')
+                        <div class="sidebar-item {{ request()->routeIs('quotes.create') ? 'active' : '' }}">
+                            <a href="{{ route('quotes.create') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                <i class="fas fa-plus-circle mr-3 w-5"></i>
+                                Nouveau devis
+                            </a>
+                        </div>
+                        @endhasPermission
+                        
+                        @hasPermission('payments.view')
+                        <div class="sidebar-item {{ request()->routeIs('payments.*') ? 'active' : '' }}">
+                            <a href="{{ route('payments.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                <i class="fas fa-money-bill-wave mr-3 w-5"></i>
+                                Paiements
+                            </a>
+                        </div>
+                        @endhasPermission
+                        
+                        @hasPermission('quotes.calculate-materials')
+                        <div class="sidebar-item {{ request()->routeIs('quotes.calculate-materials') || request()->routeIs('quotes.print-materials') ? 'active' : '' }}">
+                            <a href="{{ route('quotes.calculate-materials') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                <i class="fas fa-calculator mr-3 w-5"></i>
+                                Calcul Matériaux
+                            </a>
+                        </div>
+                        @endhasPermission
+                    @endif
+                    
+                    <!-- Sous-menus pour Clients -->
+                    @if(request()->routeIs('clients.*'))
+                        @hasAnyPermission(['clients.view', 'clients.create'])
+                            @hasPermission('clients.view')
+                            <div class="sidebar-item {{ request()->routeIs('clients.index') || request()->routeIs('clients.show') || request()->routeIs('clients.edit') ? 'active' : '' }}">
+                                <a href="{{ route('clients.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                    <i class="fas fa-list mr-3 w-5"></i>
+                                    Liste
+                                </a>
+                            </div>
+                            @endhasPermission
+                            
+                            @hasPermission('clients.create')
+                            <div class="sidebar-item {{ request()->routeIs('clients.create') ? 'active' : '' }}">
+                                <a href="{{ route('clients.create') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                    <i class="fas fa-user-plus mr-3 w-5"></i>
+                                    Nouveau client
+                                </a>
+                            </div>
+                            @endhasPermission
+                        @endhasAnyPermission
+                    @endif
+                    
+                    <!-- Sous-menus pour Produits -->
+                    @if(request()->routeIs('products.*'))
+                        @hasAnyPermission(['products.view', 'products.create'])
+                            @hasPermission('products.view')
+                            <div class="sidebar-item {{ request()->routeIs('products.index') || request()->routeIs('products.show') || request()->routeIs('products.edit') ? 'active' : '' }}">
+                                <a href="{{ route('products.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                    <i class="fas fa-list mr-3 w-5"></i>
+                                    Liste
+                                </a>
+                            </div>
+                            @endhasPermission
+                            
+                            @hasPermission('products.create')
+                            <div class="sidebar-item {{ request()->routeIs('products.create') ? 'active' : '' }}">
+                                <a href="{{ route('products.create') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                    <i class="fas fa-plus-circle mr-3 w-5"></i>
+                                    Nouveau produit
+                                </a>
+                            </div>
+                            @endhasPermission
+                        @endhasAnyPermission
+                    @endif
+                    
+                    <!-- Sous-menus pour Matériaux -->
+                    @if(request()->routeIs('materials.*'))
+                        @hasAnyPermission(['materials.view', 'materials.create'])
+                            @hasPermission('materials.view')
+                            <div class="sidebar-item {{ request()->routeIs('materials.index') || request()->routeIs('materials.show') || request()->routeIs('materials.edit') ? 'active' : '' }}">
+                                <a href="{{ route('materials.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                    <i class="fas fa-list mr-3 w-5"></i>
+                                    Liste
+                                </a>
+                            </div>
+                            @endhasPermission
+                            
+                            @hasPermission('materials.create')
+                            <div class="sidebar-item {{ request()->routeIs('materials.create') ? 'active' : '' }}">
+                                <a href="{{ route('materials.create') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                    <i class="fas fa-plus-circle mr-3 w-5"></i>
+                                    Nouveau matériau
+                                </a>
+                            </div>
+                            @endhasPermission
+                        @endhasAnyPermission
+                    @endif
+                    
+                    <!-- Sous-menus pour Catalogue -->
+                    @if(request()->routeIs('modeles.*') || request()->routeIs('catalogue.*'))
+                        <div class="sidebar-item {{ request()->routeIs('modeles.index') || request()->routeIs('catalogue.*') ? 'active' : '' }}">
+                            <a href="{{ route('modeles.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                <i class="fas fa-th-large mr-3 w-5"></i>
+                                Tous les modèles
+                            </a>
+                        </div>
+                        @auth
+                        @if(Auth::user()->hasPermission('modeles.create'))
+                        <div class="sidebar-item {{ request()->routeIs('modeles.create') ? 'active' : '' }}">
+                            <a href="{{ route('modeles.create') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                <i class="fas fa-plus-circle mr-3 w-5"></i>
+                                Nouveau modèle
+                            </a>
+                        </div>
+                        @endif
+                        @endauth
+                    @endif
+                    
+                    <!-- Sous-menus pour Dashboard -->
+                    @if(request()->routeIs('dashboard*'))
+                        <div class="sidebar-item active">
+                            <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                <i class="fas fa-chart-bar mr-3 w-5"></i>
+                                Statistiques
+                            </a>
+                        </div>
+                    @endif
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Contenu principal -->
+        <main class="flex-1 lg:ml-[260px] py-6 sm:py-8 bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen w-full">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             @if(session('success'))
                 <div class="mb-6 notification-success bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 p-4 rounded-lg shadow-md" role="alert">
@@ -560,20 +894,101 @@
             </div>
         </div>
     </main>
+    </div>
 
     <script>
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
-            const icon = document.getElementById('menu-icon');
-            menu.classList.toggle('active');
-            if (menu.classList.contains('active')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
+            const sidebar = document.getElementById('sidebar-mobile');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            // Fermer la sidebar si elle est ouverte
+            if (sidebar && sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+            
+            // Toggle le menu mobile
+            if (menu) {
+                menu.classList.toggle('active');
             }
         }
+        
+        function closeMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu) {
+                menu.classList.remove('active');
+            }
+        }
+        
+        function toggleSidebarMobile() {
+            const sidebar = document.getElementById('sidebar-mobile');
+            const overlay = document.getElementById('sidebar-overlay');
+            const menu = document.getElementById('mobile-menu');
+            
+            // Fermer le menu mobile si il est ouvert
+            if (menu && menu.classList.contains('active')) {
+                menu.classList.remove('active');
+            }
+            
+            // Toggle la sidebar
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+                
+                // Empêcher le scroll du body quand la sidebar est ouverte
+                if (sidebar.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+        
+        // Fermer les menus quand on clique sur l'overlay
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('sidebar-overlay');
+            if (overlay) {
+                overlay.addEventListener('click', function() {
+                    toggleSidebarMobile();
+                });
+            }
+            
+            // Fermer la sidebar mobile quand on clique sur un lien
+            const sidebarLinks = document.querySelectorAll('#sidebar-mobile a');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    setTimeout(() => {
+                        toggleSidebarMobile();
+                    }, 150);
+                });
+            });
+            
+            // Fermer les menus au scroll (optionnel, pour améliorer l'UX)
+            let scrollTimeout;
+            window.addEventListener('scroll', function() {
+                if (window.innerWidth <= 640) {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(function() {
+                        const menu = document.getElementById('mobile-menu');
+                        if (menu && menu.classList.contains('active')) {
+                            menu.classList.remove('active');
+                        }
+                    }, 100);
+                }
+            }, { passive: true });
+            
+            // Fermer les menus avec la touche Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeMobileMenu();
+                    const sidebar = document.getElementById('sidebar-mobile');
+                    if (sidebar && sidebar.classList.contains('active')) {
+                        toggleSidebarMobile();
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>

@@ -12,75 +12,146 @@
         $secondaryColor = $settings->secondary_color ?? '#1e40af';
     @endphp
     <style>
-        @keyframes fadeIn {
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(-10px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease-out;
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
         }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
         .gradient-bg {
             background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+            position: relative;
+            overflow: hidden;
         }
+        
+        .gradient-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+        
         .card-shadow {
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
         }
-        .focus-ring {
-            --tw-ring-color: {{ $primaryColor }};
+        
+        .input-focus:focus {
+            border-color: {{ $primaryColor }};
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+            background-size: 200% 200%;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-gradient:active {
+            transform: translateY(0);
+        }
+        
+        .pattern-dots {
+            background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 gradient-bg">
-    <div class="max-w-md w-full animate-fade-in">
+<body class="min-h-screen flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8 gradient-bg pattern-dots">
+    <div class="max-w-md w-full animate-fade-in-up">
         <!-- Card principale -->
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden card-shadow">
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden card-shadow backdrop-blur-sm bg-white/95">
             <!-- Header avec gradient -->
-            <div class="gradient-bg px-8 py-10 text-center">
-                <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4 shadow-lg overflow-hidden">
-                    @if($settings->logo)
-                        <img src="{{ asset('storage/' . $settings->logo) }}" 
-                             alt="Logo" 
-                             class="h-full w-full object-contain p-2"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="hidden items-center justify-center w-full h-full">
-                            <i class="fas fa-file-invoice-dollar text-4xl" style="color: {{ $primaryColor }};"></i>
-                        </div>
-                    @else
-                        <i class="fas fa-file-invoice-dollar text-4xl" style="color: {{ $primaryColor }};"></i>
-                    @endif
+            <div class="gradient-bg px-6 py-6 text-center relative overflow-hidden">
+                <!-- Effet de brillance animé -->
+                <div class="absolute inset-0 opacity-20">
+                    <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent transform -skew-x-12 animate-shimmer" style="background-size: 200% 100%;"></div>
                 </div>
-                <h1 class="text-2xl font-bold text-white mb-1">
-                    A2 VitraDevis
-                </h1>
-                <p class="text-blue-100 text-xs mb-3 italic">
-                    Votre devis, clair comme le verre.
-                </p>
-                <h2 class="text-xl font-semibold text-white mb-2">
-                    Connexion
-                </h2>
-                <p class="text-blue-100 text-sm">
-                    Accédez à votre espace de gestion
-                </p>
+                
+                <div class="relative z-10">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-xl mb-3 shadow-2xl overflow-hidden transform hover:scale-105 transition-transform duration-300 animate-float">
+                        @if($settings->logo)
+                            <img src="{{ asset('storage/' . $settings->logo) }}" 
+                                 alt="Logo" 
+                                 class="h-full w-full object-contain p-2"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="hidden items-center justify-center w-full h-full">
+                                <span class="text-3xl font-bold" style="color: {{ $primaryColor }};">A2</span>
+                            </div>
+                        @else
+                            <span class="text-3xl font-bold" style="color: {{ $primaryColor }};">A2</span>
+                        @endif
+                    </div>
+                    <h1 class="text-2xl font-extrabold text-white mb-1 tracking-tight">
+                        A2 VitraDevis
+                    </h1>
+                    <p class="text-blue-100 text-xs mb-2 italic font-light">
+                        Votre devis, clair comme le verre.
+                    </p>
+                    <div class="inline-block px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
+                        <h2 class="text-sm font-semibold text-white">
+                            <i class="fas fa-sign-in-alt mr-1.5"></i>Connexion
+                        </h2>
+                    </div>
+                    <p class="text-blue-100 text-xs mt-2 opacity-90">
+                        Accédez à votre espace de gestion
+                    </p>
+                </div>
             </div>
 
             <!-- Formulaire -->
-            <div class="px-8 py-8">
+            <div class="px-6 py-6 bg-gradient-to-b from-white to-gray-50">
                 <form class="space-y-6" action="{{ route('login') }}" method="POST">
                     @csrf
                     
                     @if($errors->any())
-                        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
-                            <div class="flex">
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl shadow-sm animate-fade-in-up">
+                            <div class="flex items-start">
                                 <div class="flex-shrink-0">
-                                    <i class="fas fa-exclamation-circle text-red-500 text-lg"></i>
+                                    <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
                                 </div>
-                                <div class="ml-3">
+                                <div class="ml-3 flex-1">
+                                    <h3 class="text-sm font-semibold text-red-800 mb-1">Erreur de connexion</h3>
                                     <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
                                         @foreach($errors->all() as $error)
                                             <li>{{ $error }}</li>
@@ -92,88 +163,107 @@
                     @endif
 
                     <!-- Champ Email -->
-                    <div>
-                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-envelope mr-2 text-gray-400"></i>Adresse email
+                    <div class="space-y-1.5">
+                        <label for="email" class="block text-xs font-bold text-gray-700">
+                            <i class="fas fa-envelope mr-1.5" style="color: {{ $primaryColor }};"></i>Adresse email
                         </label>
-                        <div class="relative">
+                        <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-envelope text-gray-400"></i>
+                                <i class="fas fa-envelope text-gray-400 group-focus-within:text-blue-500 transition-colors text-sm"></i>
                             </div>
                             <input id="email" name="email" type="email" autocomplete="email" required 
-                                   class="block w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 transition-all text-base placeholder-gray-400"
-                                   style="focus:ring-color: {{ $primaryColor }}; focus:border-color: {{ $primaryColor }};"
+                                   class="input-focus block w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg bg-white text-sm placeholder-gray-400 transition-all duration-200 focus:outline-none"
+                                   style="focus:border-color: {{ $primaryColor }};"
                                    placeholder="votre@email.com" 
                                    value="{{ old('email') }}">
                         </div>
                     </div>
 
                     <!-- Champ Mot de passe -->
-                    <div>
-                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-lock mr-2 text-gray-400"></i>Mot de passe
+                    <div class="space-y-1.5">
+                        <label for="password" class="block text-xs font-bold text-gray-700">
+                            <i class="fas fa-lock mr-1.5" style="color: {{ $primaryColor }};"></i>Mot de passe
                         </label>
-                        <div class="relative">
+                        <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-lock text-gray-400"></i>
+                                <i class="fas fa-lock text-gray-400 group-focus-within:text-blue-500 transition-colors text-sm"></i>
                             </div>
                             <input id="password" name="password" type="password" autocomplete="current-password" required 
-                                   class="block w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 transition-all text-base placeholder-gray-400"
-                                   style="focus:ring-color: {{ $primaryColor }}; focus:border-color: {{ $primaryColor }};"
+                                   class="input-focus block w-full pl-10 pr-3 py-2.5 border-2 border-gray-200 rounded-lg bg-white text-sm placeholder-gray-400 transition-all duration-200 focus:outline-none"
+                                   style="focus:border-color: {{ $primaryColor }};"
                                    placeholder="••••••••">
                         </div>
                     </div>
 
                     <!-- Se souvenir de moi -->
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center">
+                        <div class="flex items-center group cursor-pointer">
                             <input id="remember" name="remember" type="checkbox" 
-                                   class="h-4 w-4 border-gray-300 rounded cursor-pointer"
+                                   class="h-4 w-4 border-2 border-gray-300 rounded cursor-pointer transition-all duration-200"
                                    style="accent-color: {{ $primaryColor }};"
                                    onchange="this.style.accentColor='{{ $primaryColor }}'">
-                            <label for="remember" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                            <label for="remember" class="ml-2 block text-xs font-medium text-gray-700 cursor-pointer group-hover:text-gray-900 transition-colors">
                                 Se souvenir de moi
                             </label>
                         </div>
+                        <a href="#" class="text-xs font-medium transition-colors hover:underline"
+                           style="color: {{ $primaryColor }};"
+                           onmouseover="this.style.color='{{ $secondaryColor }}'"
+                           onmouseout="this.style.color='{{ $primaryColor }}'">
+                            Mot de passe oublié ?
+                        </a>
                     </div>
 
                     <!-- Bouton de connexion -->
-                    <div>
+                    <div class="pt-1">
                         <button type="submit" 
-                                class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-semibold text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-[1.02]"
-                                style="background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%); focus:ring-color: {{ $primaryColor }};">
+                                class="btn-gradient w-full flex justify-center items-center py-2.5 px-4 rounded-lg text-sm font-bold text-white shadow-lg focus:outline-none focus:ring-4 focus:ring-offset-2 transition-all duration-300"
+                                style="focus:ring-color: {{ $primaryColor }}40;">
                             <i class="fas fa-sign-in-alt mr-2"></i>
                             Se connecter
                         </button>
                     </div>
                 </form>
 
-                <!-- Lien vers inscription -->
-                <div class="mt-6 text-center">
-                    <p class="text-sm text-gray-600">
-                        Vous n'avez pas de compte ?
-                        <a href="{{ route('register') }}" class="font-semibold transition-colors"
-                           style="color: {{ $primaryColor }};"
-                           onmouseover="this.style.color='{{ $secondaryColor }}'"
-                           onmouseout="this.style.color='{{ $primaryColor }}'">
-                            Créer un compte
-                        </a>
+                @if(!isset($hasUsers) || !$hasUsers)
+                <!-- Divider - Affiché uniquement lors du premier lancement -->
+                <div class="relative my-4">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div class="relative flex justify-center text-xs">
+                        <span class="px-3 bg-gradient-to-b from-white to-gray-50 text-gray-500 font-medium">Premier lancement</span>
+                    </div>
+                </div>
+
+                <!-- Lien vers inscription - Affiché uniquement lors du premier lancement -->
+                <div class="text-center">
+                    <a href="{{ route('register') }}" 
+                       class="inline-flex items-center justify-center w-full py-2 px-4 border-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-md"
+                       style="border-color: {{ $primaryColor }}; color: {{ $primaryColor }};"
+                       onmouseover="this.style.backgroundColor='{{ $primaryColor }}15';"
+                       onmouseout="this.style.backgroundColor='transparent';">
+                        <i class="fas fa-user-plus mr-1.5"></i>
+                        Créer le compte administrateur
+                    </a>
+                    <p class="text-xs text-gray-500 mt-1.5">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Créez le premier compte administrateur de l'application
                     </p>
                 </div>
+                @endif
             </div>
         </div>
 
         <!-- Footer -->
-        <div class="mt-6 text-center">
-            <p class="text-white text-sm opacity-90">
-                <i class="fas fa-shield-alt mr-1"></i>
-                Connexion sécurisée
-            </p>
+        <div class="mt-8 text-center animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
+                <i class="fas fa-shield-alt mr-2 text-white text-sm"></i>
+                <p class="text-white text-sm font-medium opacity-90">
+                    Connexion sécurisée SSL
+                </p>
+            </div>
         </div>
     </div>
 </body>
 </html>
-
-
-
-
