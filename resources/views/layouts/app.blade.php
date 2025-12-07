@@ -10,15 +10,20 @@
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="{{ $settings->primary_color ?? '#3b82f6' }}">
     
-    <!-- Favicon - Utilise le logo des paramètres si disponible, sinon favicon par défaut -->
+    <!-- Favicon - Priorité au fichier favicon dans public/, sinon utilise le logo des paramètres -->
     @php
         $faviconUrl = null;
-        if ($settings->logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings->logo)) {
-            $faviconUrl = asset('storage/' . $settings->logo);
-        } elseif (file_exists(public_path('favicon.ico'))) {
+        // Priorité 1 : Fichier favicon.ico dans public/
+        if (file_exists(public_path('favicon.ico'))) {
             $faviconUrl = asset('favicon.ico');
-        } elseif (file_exists(public_path('favicon.png'))) {
+        }
+        // Priorité 2 : Fichier favicon.png dans public/
+        elseif (file_exists(public_path('favicon.png'))) {
             $faviconUrl = asset('favicon.png');
+        }
+        // Priorité 3 : Logo des paramètres (fallback)
+        elseif ($settings->logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings->logo)) {
+            $faviconUrl = asset('storage/' . $settings->logo);
         }
     @endphp
     @if($faviconUrl)
@@ -26,7 +31,7 @@
         <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
         <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
     @else
-        <!-- Favicon par défaut si aucun logo n'est configuré -->
+        <!-- Favicon par défaut si aucun n'est trouvé -->
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
         <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
         <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
