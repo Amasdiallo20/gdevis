@@ -1,33 +1,33 @@
-@extends('layouts.app')
 
-@section('title', 'Catalogue de Modèles - A2 VitraDevis')
 
-@section('content')
+<?php $__env->startSection('title', 'Catalogue de Modèles - A2 VitraDevis'); ?>
+
+<?php $__env->startSection('content'); ?>
 <!-- Hero Section -->
 <div class="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 sm:py-12 lg:py-16">
     <div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
             <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl mb-4 sm:mb-6 shadow-lg transform hover:scale-105 transition-transform duration-300 touch-manipulation"
-                 style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                 style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);">
                 <i class="fas fa-images text-white text-2xl sm:text-3xl"></i>
             </div>
             <h1 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-extrabold text-gray-900 mb-2 sm:mb-3 lg:mb-4 px-2">
-                Catalogue de <span style="color: {{ $settings->primary_color ?? '#3b82f6' }};">Modèles</span>
+                Catalogue de <span style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">Modèles</span>
             </h1>
             <p class="text-sm sm:text-base lg:text-xl text-gray-600 max-w-2xl mx-auto mb-4 sm:mb-6 lg:mb-8 px-2">
                 Découvrez notre collection complète de modèles aluminium : fenêtres, portes, garde-corps et bien plus encore
             </p>
-            @auth
-            @if(Auth::user()->hasPermission('modeles.create'))
-            <a href="{{ route('modeles.create') }}" 
+            <?php if(auth()->guard()->check()): ?>
+            <?php if(Auth::user()->hasPermission('modeles.create')): ?>
+            <a href="<?php echo e(route('modeles.create')); ?>" 
                class="inline-flex items-center justify-center px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg text-sm sm:text-base font-medium text-white shadow-sm hover:shadow-md transition-all duration-300 touch-manipulation"
-               style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+               style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);">
                 <i class="fas fa-plus mr-2"></i>
                 <span>Ajouter un Modèle</span>
             </a>
-            @endif
-            @endauth
+            <?php endif; ?>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -39,32 +39,32 @@
         <div class="flex items-center justify-between mb-4 sm:hidden">
             <button type="button" id="toggleFiltersBtn" 
                     class="flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium text-white shadow-sm transition-all duration-200"
-                    style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                    style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);">
                 <i class="fas fa-filter mr-2"></i>
                 <span>Filtres</span>
                 <i class="fas fa-chevron-down ml-2 transform transition-transform" id="filterChevron"></i>
             </button>
-            @if(request()->hasAny(['search', 'categorie']))
-            <a href="{{ route('modeles.index') }}" 
+            <?php if(request()->hasAny(['search', 'categorie'])): ?>
+            <a href="<?php echo e(route('modeles.index')); ?>" 
                class="inline-flex items-center justify-center px-3 py-2 rounded-lg border-2 border-gray-300 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm">
                 <i class="fas fa-times mr-2"></i>Réinitialiser
             </a>
-            @endif
+            <?php endif; ?>
         </div>
         
-        <form method="GET" action="{{ route('modeles.index') }}" class="space-y-4" id="filterForm">
+        <form method="GET" action="<?php echo e(route('modeles.index')); ?>" class="space-y-4" id="filterForm">
             <div id="filtersContainer" class="hidden sm:block">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <!-- Recherche -->
                     <div class="md:col-span-2">
                         <label for="search" class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-search mr-2" style="color: {{ $settings->primary_color ?? '#3b82f6' }};"></i>Rechercher un modèle
+                            <i class="fas fa-search mr-2" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;"></i>Rechercher un modèle
                         </label>
                         <div class="relative">
-                            <input type="text" name="search" id="search" value="{{ request('search') }}" 
+                            <input type="text" name="search" id="search" value="<?php echo e(request('search')); ?>" 
                                 placeholder="Tapez le nom du modèle..."
                                 class="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 pl-12 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all focus:shadow-md"
-                                style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};">
+                                style="focus:ring-color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <i class="fas fa-search text-gray-400"></i>
                             </div>
@@ -74,17 +74,18 @@
                     <!-- Filtre par catégorie -->
                     <div>
                         <label for="categorie" class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-filter mr-2" style="color: {{ $settings->primary_color ?? '#3b82f6' }};"></i>Catégorie
+                            <i class="fas fa-filter mr-2" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;"></i>Catégorie
                         </label>
                         <select name="categorie" id="categorie" 
                             class="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all focus:shadow-md"
-                            style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }}; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23374151\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1em 1em; padding-right: 2.5rem;">
+                            style="focus:ring-color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23374151\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1em 1em; padding-right: 2.5rem;">
                             <option value="">Toutes les catégories</option>
-                            @foreach($categories as $key => $label)
-                            <option value="{{ $key }}" {{ request('categorie') == $key ? 'selected' : '' }}>
-                                {{ $label }}
+                            <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($key); ?>" <?php echo e(request('categorie') == $key ? 'selected' : ''); ?>>
+                                <?php echo e($label); ?>
+
                             </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
 
@@ -92,15 +93,15 @@
                     <div class="flex items-end gap-2">
                         <button type="submit" 
                             class="flex-1 inline-flex items-center justify-center px-6 py-3 rounded-lg text-sm font-medium text-white shadow-sm hover:shadow-md transition-all duration-200"
-                            style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                            style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);">
                             <i class="fas fa-filter mr-2"></i>Filtrer
                         </button>
-                        @if(request()->hasAny(['search', 'categorie']))
-                        <a href="{{ route('modeles.index') }}" 
+                        <?php if(request()->hasAny(['search', 'categorie'])): ?>
+                        <a href="<?php echo e(route('modeles.index')); ?>" 
                            class="inline-flex items-center justify-center px-4 py-3 rounded-xl border-2 border-gray-300 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md">
                             <i class="fas fa-times"></i>
                         </a>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -108,27 +109,28 @@
             <!-- Version mobile compacte -->
             <div class="sm:hidden space-y-3" id="mobileFilters">
                 <div class="relative">
-                    <input type="text" name="search" id="search_mobile" value="{{ request('search') }}" 
+                    <input type="text" name="search" id="search_mobile" value="<?php echo e(request('search')); ?>" 
                         placeholder="Rechercher un modèle..."
                         class="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 pl-12 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
-                        style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};">
+                        style="focus:ring-color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
                 </div>
                 <select name="categorie" id="categorie_mobile" 
                     class="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
-                    style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }}; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23374151\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1em 1em; padding-right: 2.5rem;">
+                    style="focus:ring-color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23374151\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1em 1em; padding-right: 2.5rem;">
                     <option value="">Toutes les catégories</option>
-                    @foreach($categories as $key => $label)
-                    <option value="{{ $key }}" {{ request('categorie') == $key ? 'selected' : '' }}>
-                        {{ $label }}
+                    <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($key); ?>" <?php echo e(request('categorie') == $key ? 'selected' : ''); ?>>
+                        <?php echo e($label); ?>
+
                     </option>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
                 <button type="submit" 
                     class="w-full inline-flex items-center justify-center px-6 py-3 rounded-lg text-sm font-medium text-white shadow-sm hover:shadow-md transition-all duration-200"
-                    style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                    style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);">
                     <i class="fas fa-filter mr-2"></i>Appliquer les filtres
                 </button>
             </div>
@@ -138,39 +140,40 @@
 
 <!-- Grille de modèles -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    @if($modeles->count() > 0)
+    <?php if($modeles->count() > 0): ?>
     <!-- Compteur de résultats -->
     <div class="mb-6 sm:mb-8 flex items-center justify-between">
         <div>
             <p class="text-sm sm:text-base text-gray-600">
-                <span class="font-semibold text-gray-900">{{ $modeles->total() }}</span> 
-                modèle{{ $modeles->total() > 1 ? 's' : '' }} trouvé{{ $modeles->total() > 1 ? 's' : '' }}
+                <span class="font-semibold text-gray-900"><?php echo e($modeles->total()); ?></span> 
+                modèle<?php echo e($modeles->total() > 1 ? 's' : ''); ?> trouvé<?php echo e($modeles->total() > 1 ? 's' : ''); ?>
+
             </p>
         </div>
     </div>
 
     <!-- Grille -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-        @foreach($modeles as $modele)
+        <?php $__currentLoopData = $modeles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $modele): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <div class="group bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 transform hover:-translate-y-1 sm:hover:-translate-y-2">
             <!-- Image -->
             <div class="relative h-48 sm:h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                @if($modele->image)
-                <img src="{{ $modele->thumbnail_url ?? $modele->image_url }}" 
-                     srcset="{{ $modele->thumbnail_url ?? $modele->image_url }} 300w,
-                             {{ $modele->medium_image_url ?? $modele->image_url }} 800w,
-                             {{ $modele->large_image_url ?? $modele->image_url }} 1200w"
+                <?php if($modele->image): ?>
+                <img src="<?php echo e($modele->thumbnail_url ?? $modele->image_url); ?>" 
+                     srcset="<?php echo e($modele->thumbnail_url ?? $modele->image_url); ?> 300w,
+                             <?php echo e($modele->medium_image_url ?? $modele->image_url); ?> 800w,
+                             <?php echo e($modele->large_image_url ?? $modele->image_url); ?> 1200w"
                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                      loading="lazy" 
-                     alt="{{ $modele->nom }}"
+                     alt="<?php echo e($modele->nom); ?>"
                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer touch-manipulation"
-                     onclick="openImageZoom(this, '{{ $modele->nom }}')"
-                     data-zoom-src="{{ $modele->large_image_url ?? $modele->image_url }}">
-                @else
+                     onclick="openImageZoom(this, '<?php echo e($modele->nom); ?>')"
+                     data-zoom-src="<?php echo e($modele->large_image_url ?? $modele->image_url); ?>">
+                <?php else: ?>
                 <div class="w-full h-full flex items-center justify-center">
                     <i class="fas fa-image text-gray-400 text-4xl sm:text-5xl"></i>
                 </div>
-                @endif
+                <?php endif; ?>
                 <!-- Overlay gradient -->
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 
@@ -178,76 +181,78 @@
                 <div class="absolute top-2 sm:top-4 left-2 sm:left-4">
                     <span class="inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold text-white shadow-lg backdrop-blur-sm bg-white/20 border border-white/30">
                         <i class="fas fa-tag mr-1 sm:mr-1.5 text-xs"></i>
-                        <span class="hidden xs:inline">{{ $categories[$modele->categorie] ?? $modele->categorie }}</span>
-                        <span class="xs:hidden">{{ substr($categories[$modele->categorie] ?? $modele->categorie, 0, 3) }}</span>
+                        <span class="hidden xs:inline"><?php echo e($categories[$modele->categorie] ?? $modele->categorie); ?></span>
+                        <span class="xs:hidden"><?php echo e(substr($categories[$modele->categorie] ?? $modele->categorie, 0, 3)); ?></span>
                     </span>
                 </div>
                 
-                @if($modele->statut === 'inactif')
+                <?php if($modele->statut === 'inactif'): ?>
                 <div class="absolute top-2 sm:top-4 right-2 sm:right-4 bg-red-500 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold shadow-lg">
                     Inactif
                 </div>
-                @endif
+                <?php endif; ?>
             </div>
             
             <!-- Contenu -->
             <div class="p-4 sm:p-5">
                 <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-3 sm:mb-4 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                    {{ $modele->nom }}
+                    <?php echo e($modele->nom); ?>
+
                 </h3>
                 
                 <div class="flex flex-col sm:flex-row gap-2">
-                    <a href="{{ route('modeles.show', $modele) }}{{ request()->has('quote_id') ? '?quote_id=' . request('quote_id') : '' }}"
+                    <a href="<?php echo e(route('modeles.show', $modele)); ?><?php echo e(request()->has('quote_id') ? '?quote_id=' . request('quote_id') : ''); ?>"
                        class="flex-1 inline-flex items-center justify-center px-4 py-2.5 sm:px-4 sm:py-3 rounded-lg text-sm font-medium text-white shadow-sm hover:shadow-md transition-all duration-200 touch-manipulation"
-                       style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                       style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);">
                         <i class="fas fa-eye mr-2"></i>
                         <span>Voir les détails</span>
                     </a>
-                    @if(request()->has('quote_id'))
-                    <a href="{{ route('modeles.add-to-quote', $modele) }}?quote_id={{ request('quote_id') }}" 
+                    <?php if(request()->has('quote_id')): ?>
+                    <a href="<?php echo e(route('modeles.add-to-quote', $modele)); ?>?quote_id=<?php echo e(request('quote_id')); ?>" 
                        class="inline-flex items-center justify-center px-4 py-2.5 sm:px-4 sm:py-3 rounded-lg text-sm font-medium text-white bg-green-600 hover:bg-green-700 shadow-sm hover:shadow-md transition-all duration-200 touch-manipulation">
                         <i class="fas fa-link mr-2 sm:mr-0"></i>
                         <span class="sm:hidden">Associer</span>
                     </a>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
-        @endforeach
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </div>
 
     <!-- Pagination -->
     <div class="mt-8 sm:mt-12 flex justify-center">
         <div class="bg-white rounded-xl shadow-md p-2 sm:p-4 overflow-x-auto w-full sm:w-auto">
             <div class="flex justify-center min-w-max">
-                {{ $modeles->links() }}
+                <?php echo e($modeles->links()); ?>
+
             </div>
         </div>
     </div>
-    @else
+    <?php else: ?>
     <!-- État vide -->
     <div class="text-center py-20">
         <div class="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 shadow-lg"
-             style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }}20 0%, {{ $settings->secondary_color ?? '#1e40af' }}20 100%);">
-            <i class="fas fa-images text-5xl" style="color: {{ $settings->primary_color ?? '#3b82f6' }};"></i>
+             style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?>20 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?>20 100%);">
+            <i class="fas fa-images text-5xl" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;"></i>
         </div>
         <h3 class="text-2xl font-bold text-gray-900 mb-3">Aucun modèle trouvé</h3>
         <p class="text-gray-600 max-w-md mx-auto mb-6">
-            @if(request()->hasAny(['search', 'categorie']))
+            <?php if(request()->hasAny(['search', 'categorie'])): ?>
             Aucun modèle ne correspond à vos critères de recherche. Essayez de modifier vos filtres.
-            @else
+            <?php else: ?>
             Le catalogue est vide pour le moment. Revenez bientôt pour découvrir nos modèles.
-            @endif
+            <?php endif; ?>
         </p>
-        @if(request()->hasAny(['search', 'categorie']))
-        <a href="{{ route('modeles.index') }}" 
+        <?php if(request()->hasAny(['search', 'categorie'])): ?>
+        <a href="<?php echo e(route('modeles.index')); ?>" 
            class="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-semibold text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-           style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+           style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);">
             <i class="fas fa-redo mr-2"></i>Réinitialiser les filtres
         </a>
-        @endif
+        <?php endif; ?>
     </div>
-    @endif
+    <?php endif; ?>
 </div>
 
 <style>
@@ -682,4 +687,6 @@ document.addEventListener('click', function(e) {
     }
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\gdevis\resources\views/modeles/index.blade.php ENDPATH**/ ?>

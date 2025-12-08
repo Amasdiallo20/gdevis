@@ -8,6 +8,18 @@ use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware(function ($request, $next) {
+            $user = $request->user();
+            if (!$user || !$user->hasPermission('settings.manage')) {
+                abort(403, 'Vous n\'avez pas la permission d\'accéder aux paramètres.');
+            }
+            return $next($request);
+        });
+    }
+
     public function index()
     {
         $settings = Setting::getSettings();

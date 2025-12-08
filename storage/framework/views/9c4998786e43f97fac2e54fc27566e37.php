@@ -610,6 +610,51 @@ unset($__errorArgs, $__bag); ?>
     </div>
 </div>
 
+<!-- Modale de confirmation pour la modification des prix -->
+<div id="confirmPriceModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" onclick="closeConfirmModal()"></div>
+        
+        <!-- Centrer la modale -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        
+        <!-- Contenu de la modale -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <i class="fas fa-exclamation-triangle text-blue-600 text-xl"></i>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                            Confirmation
+                        </h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500" id="confirmMessage">
+                                Êtes-vous sûr de vouloir modifier le prix M² pour toutes les lignes ?
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button type="button" id="confirmOkBtn" onclick="confirmPriceUpdate()"
+                    class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white sm:ml-3 sm:w-auto sm:text-sm transition-all duration-200"
+                    style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.2)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'">
+                    OK
+                </button>
+                <button type="button" onclick="closeConfirmModal()" 
+                    class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-all duration-200">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // Fonction pour soumettre le formulaire de mise à jour
 function submitUpdateForm() {
@@ -901,6 +946,9 @@ function cancelEdit() {
     document.getElementById('cancelBtn').classList.add('hidden');
 }
 
+// Variables globales pour la modale de confirmation
+let pendingPriceUpdate = null;
+
 function updateAllPrices() {
     const pricePerM2 = document.getElementById('global_price_per_m2').value;
     const productId = document.getElementById('global_product_select').value;
@@ -914,7 +962,42 @@ function updateAllPrices() {
         ? document.getElementById('global_product_select').options[document.getElementById('global_product_select').selectedIndex].text
         : 'toutes les lignes';
     
-    if (!confirm(`Êtes-vous sûr de vouloir modifier le prix M² pour ${productName} ?`)) {
+    // Préparer les données pour la soumission
+    pendingPriceUpdate = {
+        pricePerM2: pricePerM2,
+        productId: productId
+    };
+    
+    // Mettre à jour le message de confirmation
+    const confirmMessage = document.getElementById('confirmMessage');
+    if (confirmMessage) {
+        confirmMessage.textContent = `Êtes-vous sûr de vouloir modifier le prix M² pour ${productName} ?`;
+    }
+    
+    // Afficher la modale
+    showConfirmModal();
+}
+
+function showConfirmModal() {
+    const modal = document.getElementById('confirmPriceModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Empêcher le scroll de la page
+    }
+}
+
+function closeConfirmModal() {
+    const modal = document.getElementById('confirmPriceModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = ''; // Restaurer le scroll
+    }
+    pendingPriceUpdate = null;
+}
+
+function confirmPriceUpdate() {
+    if (!pendingPriceUpdate) {
+        closeConfirmModal();
         return;
     }
     
@@ -931,19 +1014,21 @@ function updateAllPrices() {
     const priceInput = document.createElement('input');
     priceInput.type = 'hidden';
     priceInput.name = 'price_per_m2';
-    priceInput.value = pricePerM2;
+    priceInput.value = pendingPriceUpdate.pricePerM2;
     form.appendChild(priceInput);
     
-    if (productId) {
+    if (pendingPriceUpdate.productId) {
         const productInput = document.createElement('input');
         productInput.type = 'hidden';
         productInput.name = 'product_id';
-        productInput.value = productId;
+        productInput.value = pendingPriceUpdate.productId;
         form.appendChild(productInput);
     }
     
     document.body.appendChild(form);
     form.submit();
+    
+    closeConfirmModal();
 }
 
 function calculateSurfaceAndAmount() {
@@ -1180,6 +1265,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Calculer automatiquement la surface au chargement si les valeurs existent
     calculateSurfaceAndAmount();
+    
+    // Gestionnaire pour fermer la modale avec la touche Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const modal = document.getElementById('confirmPriceModal');
+            if (modal && !modal.classList.contains('hidden')) {
+                closeConfirmModal();
+            }
+        }
+    });
     
     // Le formulaire reste ouvert par défaut
     const formFields = document.getElementById('formFields');

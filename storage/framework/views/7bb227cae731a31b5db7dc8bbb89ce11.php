@@ -1,60 +1,59 @@
-@extends('layouts.app')
 
-@section('title', 'Clients')
 
-@section('content')
+<?php $__env->startSection('title', 'Clients'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="card-modern overflow-hidden">
     <div class="px-6 py-6 border-b border-gray-200 bg-gradient-to-r" 
-         style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }}15 0%, {{ $settings->secondary_color ?? '#1e40af' }}15 100%);">
+         style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?>15 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?>15 100%);">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
-                    <div class="p-2 rounded-lg mr-3" style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                    <div class="p-2 rounded-lg mr-3" style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);">
                         <i class="fas fa-users text-white"></i>
                     </div>
                     Liste des Clients
                 </h2>
                 <p class="mt-2 text-sm text-gray-600">Gérez vos clients et leurs informations</p>
             </div>
-            <a href="{{ route('clients.create') }}" 
-               class="btn-primary inline-flex items-center justify-center px-3 sm:px-5 py-2.5 sm:py-3 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300"
+            <a href="<?php echo e(route('clients.create')); ?>" 
+               class="btn-primary inline-flex items-center justify-center px-5 py-3 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300"
                onmouseover="this.style.transform='translateY(-2px)'"
-               onmouseout="this.style.transform='translateY(0)'"
-               title="Nouveau Client">
-                <i class="fas fa-plus sm:mr-2"></i><span class="hidden sm:inline">Nouveau Client</span>
+               onmouseout="this.style.transform='translateY(0)'">
+                <i class="fas fa-plus mr-2"></i>Nouveau Client
             </a>
         </div>
     </div>
 
     <!-- Filtres -->
     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-        <form method="GET" action="{{ route('clients.index') }}" class="space-y-4">
+        <form method="GET" action="<?php echo e(route('clients.index')); ?>" class="space-y-4">
             <div class="flex flex-col sm:flex-row gap-6">
                 <!-- Recherche -->
                 <div class="flex-1">
                     <label for="search" class="block text-xs font-medium text-gray-700 mb-1">
                         <i class="fas fa-search mr-1"></i>Recherche
                     </label>
-                    <input type="text" name="search" id="search" value="{{ request('search') }}" 
+                    <input type="text" name="search" id="search" value="<?php echo e(request('search')); ?>" 
                         placeholder="Nom, email ou ville"
                         class="block w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
-                        style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};">
+                        style="focus:ring-color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">
                 </div>
 
                 <div class="flex items-end gap-2">
                     <button type="submit" 
                         class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-200"
-                        style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);"
+                        style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);"
                         onmouseover="this.style.transform='translateY(-2px)'"
                         onmouseout="this.style.transform='translateY(0)'">
                         <i class="fas fa-filter mr-2"></i>Filtrer
                     </button>
-                    @if(request()->has('search'))
-                        <a href="{{ route('clients.index') }}" 
+                    <?php if(request()->has('search')): ?>
+                        <a href="<?php echo e(route('clients.index')); ?>" 
                            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200">
                             <i class="fas fa-times mr-2"></i>Réinitialiser
                         </a>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </form>
@@ -82,45 +81,49 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                @forelse($clients as $client)
+                <?php $__empty_1 = true; $__currentLoopData = $clients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $client): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr class="table-row-hover">
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-12 w-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md"
-                                 style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
-                                {{ strtoupper(substr($client->name, 0, 1)) }}
+                                 style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);">
+                                <?php echo e(strtoupper(substr($client->name, 0, 1))); ?>
+
                             </div>
                             <div class="ml-4">
-                                <div class="text-sm font-bold text-gray-900">{{ $client->name }}</div>
-                                <div class="text-xs text-gray-500 md:hidden">{{ $client->email ?? '-' }}</div>
+                                <div class="text-sm font-bold text-gray-900"><?php echo e($client->name); ?></div>
+                                <div class="text-xs text-gray-500 md:hidden"><?php echo e($client->email ?? '-'); ?></div>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 hidden md:table-cell">
-                        <i class="fas fa-envelope mr-2 text-gray-400"></i>{{ $client->email ?? '-' }}
+                        <i class="fas fa-envelope mr-2 text-gray-400"></i><?php echo e($client->email ?? '-'); ?>
+
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 hidden lg:table-cell">
-                        <i class="fas fa-phone mr-2 text-gray-400"></i>{{ $client->phone ?? '-' }}
+                        <i class="fas fa-phone mr-2 text-gray-400"></i><?php echo e($client->phone ?? '-'); ?>
+
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 hidden sm:table-cell">
-                        <i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>{{ $client->city ?? '-' }}
+                        <i class="fas fa-map-marker-alt mr-2 text-gray-400"></i><?php echo e($client->city ?? '-'); ?>
+
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div class="flex justify-end space-x-2">
-                            <a href="{{ route('clients.show', $client) }}" 
+                            <a href="<?php echo e(route('clients.show', $client)); ?>" 
                                class="text-blue-600 hover:text-blue-800 p-2.5 rounded-lg hover:bg-blue-50 transition-all duration-200 transform hover:scale-110"
                                title="Voir">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="{{ route('clients.edit', $client) }}" 
+                            <a href="<?php echo e(route('clients.edit', $client)); ?>" 
                                class="text-indigo-600 hover:text-indigo-800 p-2.5 rounded-lg hover:bg-indigo-50 transition-all duration-200 transform hover:scale-110"
                                title="Modifier">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form action="{{ route('clients.destroy', $client) }}" method="POST" class="inline" 
+                            <form action="<?php echo e(route('clients.destroy', $client)); ?>" method="POST" class="inline" 
                                   onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce client ?');">
-                                @csrf
-                                @method('DELETE')
+                                <?php echo csrf_field(); ?>
+                                <?php echo method_field('DELETE'); ?>
                                 <button type="submit" 
                                         class="text-red-600 hover:text-red-800 p-2.5 rounded-lg hover:bg-red-50 transition-all duration-200 transform hover:scale-110"
                                         title="Supprimer">
@@ -130,17 +133,17 @@
                         </div>
                     </td>
                 </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
                     <td colspan="5" class="px-6 py-16 text-center">
                         <div class="text-gray-400">
                             <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4"
-                                 style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }}20 0%, {{ $settings->secondary_color ?? '#1e40af' }}20 100%);">
-                                <i class="fas fa-users text-4xl" style="color: {{ $settings->primary_color ?? '#3b82f6' }};"></i>
+                                 style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?>20 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?>20 100%);">
+                                <i class="fas fa-users text-4xl" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;"></i>
                             </div>
                             <p class="text-xl font-bold text-gray-900">Aucun client</p>
                             <p class="text-sm text-gray-500 mt-2">Commencez par ajouter votre premier client</p>
-                            <a href="{{ route('clients.create') }}" 
+                            <a href="<?php echo e(route('clients.create')); ?>" 
                                class="mt-6 btn-primary inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300"
                                onmouseover="this.style.transform='translateY(-2px)'"
                                onmouseout="this.style.transform='translateY(0)'">
@@ -149,15 +152,18 @@
                         </div>
                     </td>
                 </tr>
-                @endforelse
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 
-    @if($clients->hasPages())
+    <?php if($clients->hasPages()): ?>
     <div class="px-6 py-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
-        {{ $clients->links() }}
+        <?php echo e($clients->links()); ?>
+
     </div>
-    @endif
+    <?php endif; ?>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\gdevis\resources\views/clients/index.blade.php ENDPATH**/ ?>

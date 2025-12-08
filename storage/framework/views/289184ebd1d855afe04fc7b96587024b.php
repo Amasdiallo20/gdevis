@@ -696,11 +696,13 @@
                                 </a>
                                 <?php endif; ?>
                                 <?php endif; ?>
+                                <?php if (\Illuminate\Support\Facades\Blade::check('hasPermission', 'settings.manage')): ?>
                                 <a href="<?php echo e(route('settings.index')); ?>" 
                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors <?php echo e(request()->routeIs('settings.*') ? 'font-semibold' : ''); ?>"
                                    style="<?php echo e(request()->routeIs('settings.*') ? 'color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : ''); ?>">
                                     <i class="fas fa-cog mr-2"></i>Paramètres
                                 </a>
+                                <?php endif; ?>
                                 <a href="<?php echo e(route('profile')); ?>" 
                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors <?php echo e(request()->routeIs('profile') ? 'font-semibold' : ''); ?>"
                                    style="<?php echo e(request()->routeIs('profile') ? 'color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : ''); ?>">
@@ -802,12 +804,14 @@
                         <i class="fas fa-users-cog mr-3 w-5"></i>Utilisateurs
                     </a>
                     <?php endif; ?>
+                    <?php if (\Illuminate\Support\Facades\Blade::check('hasPermission', 'settings.manage')): ?>
                     <a href="<?php echo e(route('settings.index')); ?>" 
                        onclick="closeMobileMenu()"
                        class="block px-4 py-3 rounded-none text-base font-medium transition-colors <?php echo e(request()->routeIs('settings.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100'); ?>"
                        style="<?php echo e(request()->routeIs('settings.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : ''); ?>">
                         <i class="fas fa-cog mr-3 w-5"></i>Paramètres
                     </a>
+                    <?php endif; ?>
                     <a href="<?php echo e(route('profile')); ?>" 
                        onclick="closeMobileMenu()"
                        class="block px-4 py-3 rounded-none text-base font-medium transition-colors <?php echo e(request()->routeIs('profile') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100'); ?>"
@@ -1008,13 +1012,15 @@
                     <?php endif; ?>
                     
                     <!-- Sous-menus pour Paramètres -->
-                    <?php if(request()->routeIs('settings.*')): ?>
-                        <div class="sidebar-item active">
-                            <a href="<?php echo e(route('settings.index')); ?>" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
-                                <i class="fas fa-cog mr-3 w-5"></i>
-                                Configuration
-                            </a>
-                        </div>
+                    <?php if (\Illuminate\Support\Facades\Blade::check('hasPermission', 'settings.manage')): ?>
+                        <?php if(request()->routeIs('settings.*')): ?>
+                            <div class="sidebar-item active">
+                                <a href="<?php echo e(route('settings.index')); ?>" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                    <i class="fas fa-cog mr-3 w-5"></i>
+                                    Configuration
+                                </a>
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </nav>
             </div>

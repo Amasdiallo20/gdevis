@@ -853,8 +853,8 @@ class QuoteController extends Controller
                                 // 6. TÊTE = (Largeur - 18) / 580
                                 $teteUnitaire = ($largeur - 18) / 580;
                                 
-                                // 7. MOUSTIQUAIRE = (((Hauteur - 4)*2) + Largeur) / 580
-                                $moustiquaireUnitaire = ((($hauteur - 4) * 2) + $largeur) / 580;
+                                // 7. MOUSTIQUAIRE = (((Hauteur - 4) + (Largeur - 8)) * 2) / 580
+                                $moustiquaireUnitaire = ((($hauteur - 4) + ($largeur - 8)) * 2) / 580;
                                 
                                 // Calculer les totaux pour cette ligne (multiplier par nombre de fenêtres)
                                 $railLigne = $railUnitaire * $nombreFenetres;

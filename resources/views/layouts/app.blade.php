@@ -407,9 +407,39 @@
                 font-size: 1.5rem !important; /* 24px */
             }
             
+            /* Optimisation des boutons pour mobile - privilégier les icônes */
+            button[class*="inline-flex"], 
+            a[class*="inline-flex"][class*="items-center"],
+            .btn-primary {
+                padding-left: 0.75rem !important; /* px-3 */
+                padding-right: 0.75rem !important;
+            }
+            
+            /* Masquer le texte dans les boutons sur mobile si une icône est présente */
+            button[class*="inline-flex"] i + span:not(.hidden),
+            a[class*="inline-flex"][class*="items-center"] i + span:not(.hidden),
+            .btn-primary i + span:not(.hidden) {
+                display: none !important;
+            }
+            
+            /* Afficher le texte uniquement sur desktop */
+            button[class*="inline-flex"] i + span.hidden.sm\:inline,
+            a[class*="inline-flex"][class*="items-center"] i + span.hidden.sm\:inline,
+            .btn-primary i + span.hidden.sm\:inline {
+                display: inline !important;
+            }
+            
             /* Réduction des icônes dans les boutons */
             button i, a i, .btn-primary i {
-                font-size: 0.6875rem !important; /* 11px */
+                font-size: 0.875rem !important; /* 14px - taille confortable pour mobile */
+                margin-right: 0 !important; /* Pas de marge sur mobile */
+            }
+            
+            /* Restaurer la marge sur desktop */
+            @media (min-width: 640px) {
+                button i, a i, .btn-primary i {
+                    margin-right: 0.5rem !important; /* mr-2 */
+                }
             }
             
             .table-responsive {
@@ -696,11 +726,13 @@
                                 </a>
                                 @endif
                                 @endauth
+                                @hasPermission('settings.manage')
                                 <a href="{{ route('settings.index') }}" 
                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors {{ request()->routeIs('settings.*') ? 'font-semibold' : '' }}"
                                    style="{{ request()->routeIs('settings.*') ? 'color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
                                     <i class="fas fa-cog mr-2"></i>Paramètres
                                 </a>
+                                @endhasPermission
                                 <a href="{{ route('profile') }}" 
                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors {{ request()->routeIs('profile') ? 'font-semibold' : '' }}"
                                    style="{{ request()->routeIs('profile') ? 'color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
@@ -801,12 +833,14 @@
                         <i class="fas fa-users-cog mr-3 w-5"></i>Utilisateurs
                     </a>
                     @endif
+                    @hasPermission('settings.manage')
                     <a href="{{ route('settings.index') }}" 
                        onclick="closeMobileMenu()"
                        class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('settings.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
                        style="{{ request()->routeIs('settings.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
                         <i class="fas fa-cog mr-3 w-5"></i>Paramètres
                     </a>
+                    @endhasPermission
                     <a href="{{ route('profile') }}" 
                        onclick="closeMobileMenu()"
                        class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('profile') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
@@ -1007,14 +1041,16 @@
                     @endif
                     
                     <!-- Sous-menus pour Paramètres -->
-                    @if(request()->routeIs('settings.*'))
-                        <div class="sidebar-item active">
-                            <a href="{{ route('settings.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
-                                <i class="fas fa-cog mr-3 w-5"></i>
-                                Configuration
-                            </a>
-                        </div>
-                    @endif
+                    @hasPermission('settings.manage')
+                        @if(request()->routeIs('settings.*'))
+                            <div class="sidebar-item active">
+                                <a href="{{ route('settings.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                    <i class="fas fa-cog mr-3 w-5"></i>
+                                    Configuration
+                                </a>
+                            </div>
+                        @endif
+                    @endhasPermission
                 </nav>
             </div>
         </aside>

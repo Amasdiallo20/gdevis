@@ -77,6 +77,12 @@ class PaymentController extends Controller
                 ->with('error', 'Seuls les devis acceptés ou validés peuvent avoir des paiements.');
         }
 
+        // Empêcher l'ajout de paiements si le devis est déjà soldé
+        if ($quote->is_fully_paid) {
+            return redirect()->route('quotes.show', $quote)
+                ->with('error', 'Ce devis est déjà totalement payé.');
+        }
+
         return view('payments.create', compact('quote'));
     }
 
@@ -85,6 +91,12 @@ class PaymentController extends Controller
         // Vérifier que le devis est accepté ou validé
         if (!in_array($quote->status, ['accepted', 'validated'])) {
             return back()->withErrors(['error' => 'Seuls les devis acceptés ou validés peuvent avoir des paiements.']);
+        }
+
+        // Bloquer tout nouveau paiement si le devis est déjà soldé
+        if ($quote->is_fully_paid) {
+            return redirect()->route('quotes.show', $quote)
+                ->with('error', 'Ce devis est déjà totalement payé.');
         }
 
         $validated = $request->validate([

@@ -282,26 +282,19 @@ class ImageOptimizationService
         // Vérifier si le chemin contient déjà une taille
         $baseDirectory = '';
         $filename = basename($imagePath);
-        $existingSize = null;
-        $sizeIndex = -1;
+        $hasSizeInPath = false;
         
         foreach ($pathParts as $index => $part) {
             if (in_array($part, $sizeNames)) {
-                $existingSize = $part;
-                $sizeIndex = $index;
+                $hasSizeInPath = true;
                 // Reconstruire le répertoire de base sans la taille
                 $baseDirectory = implode('/', array_slice($pathParts, 0, $index));
                 break;
             }
         }
         
-        // Si le chemin contient déjà la taille demandée, retourner directement
-        if ($existingSize === $size) {
-            return Storage::url($imagePath);
-        }
-        
-        if ($sizeIndex === -1) {
-            // Chemin normal sans taille, extraire directory
+        if (!$hasSizeInPath) {
+            // Chemin normal, extraire directory
             $directory = dirname($imagePath);
             $baseDirectory = $directory === '.' ? '' : $directory;
         }
@@ -309,7 +302,7 @@ class ImageOptimizationService
         $nameWithoutExt = pathinfo($filename, PATHINFO_FILENAME);
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
 
-        // Construire le chemin optimisé avec la taille demandée
+        // Construire le chemin optimisé
         if ($baseDirectory) {
             $optimizedPath = $baseDirectory . '/' . $size . '/' . $nameWithoutExt . '.webp';
         } else {
@@ -332,7 +325,7 @@ class ImageOptimizationService
             return Storage::url($optimizedPath);
         }
 
-        // Fallback sur l'original si la taille demandée n'existe pas
+        // Fallback sur l'original
         return Storage::url($imagePath);
     }
 }

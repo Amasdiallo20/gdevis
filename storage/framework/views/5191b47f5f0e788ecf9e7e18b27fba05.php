@@ -40,12 +40,19 @@
                 </a>
                 <?php endif; ?>
                 <?php if($quote->status === 'validated'): ?>
-                <a href="<?php echo e(route('payments.create', $quote)); ?>" 
-                   class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-green-600 hover:bg-green-700"
-                   onmouseover="this.style.transform='translateY(-2px)'"
-                   onmouseout="this.style.transform='translateY(0)'">
-                    <i class="fas fa-money-bill-wave mr-2"></i><span class="hidden sm:inline">Payer</span><span class="sm:hidden">Pay.</span>
-                </a>
+                    <?php if($quote->is_fully_paid): ?>
+                    <span class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-gray-400 bg-gray-200 cursor-not-allowed"
+                          title="Ce devis est déjà totalement payé.">
+                        <i class="fas fa-money-bill-wave mr-2"></i><span class="hidden sm:inline">Payer</span><span class="sm:hidden">Pay.</span>
+                    </span>
+                    <?php else: ?>
+                    <a href="<?php echo e(route('payments.create', $quote)); ?>" 
+                       class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-green-600 hover:bg-green-700"
+                       onmouseover="this.style.transform='translateY(-2px)'"
+                       onmouseout="this.style.transform='translateY(0)'">
+                        <i class="fas fa-money-bill-wave mr-2"></i><span class="hidden sm:inline">Payer</span><span class="sm:hidden">Pay.</span>
+                    </a>
+                    <?php endif; ?>
                 <?php endif; ?>
                 <a href="<?php echo e(route('quotes.print', $quote)); ?>" target="_blank" 
                    class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-teal-600 hover:bg-teal-700"
@@ -553,57 +560,151 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const optimizeBtn = document.getElementById('optimizeCutsBtn');
-    if (optimizeBtn) {
-        optimizeBtn.addEventListener('click', function() {
-            // Désactiver le bouton pendant le traitement
-            const originalText = optimizeBtn.innerHTML;
-            optimizeBtn.disabled = true;
-            optimizeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Traitement...';
-            
-            // Appel AJAX
-            fetch('<?php echo e(route("quotes.cut-optimize", $quote)); ?>', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Afficher un message de succès
-                    alert('Plan de coupe généré avec succès !');
-                    // Rediriger vers la page du plan
-                    if (data.redirect_url) {
-                        window.location.href = data.redirect_url;
-                    } else {
-                        window.location.reload();
-                    }
-                } else {
-                    // Afficher l'erreur
-                    alert(data.message || 'Une erreur est survenue lors de la génération du plan de coupe.');
-                    optimizeBtn.disabled = false;
-                    optimizeBtn.innerHTML = originalText;
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue lors de la génération du plan de coupe.');
-                optimizeBtn.disabled = false;
-                optimizeBtn.innerHTML = originalText;
-            });
-        });
-    }
-});
-</script>
+<!-- Modale de succès pour le plan de coupe -->
+<div id="successModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="success-modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" onclick="closeSuccessModal()"></div>
+        
+        <!-- Centrer la modale -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        
+        <!-- Contenu de la modale -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="success-modal-title">
+                            Succès
+                        </h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500" id="successMessage">
+                                Plan de coupe généré avec succès !
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button type="button" id="successOkBtn" onclick="closeSuccessModal()"
+                    class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white sm:ml-3 sm:w-auto sm:text-sm transition-all duration-200"
+                    style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.2)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-<?php $__env->startPush('scripts'); ?>
+<!-- Modale d'erreur -->
+<div id="errorModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="error-modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" onclick="closeErrorModal()"></div>
+        
+        <!-- Centrer la modale -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        
+        <!-- Contenu de la modale -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="error-modal-title">
+                            Erreur
+                        </h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500" id="errorMessage">
+                                Une erreur est survenue.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button type="button" id="errorOkBtn" onclick="closeErrorModal()"
+                    class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white sm:ml-3 sm:w-auto sm:text-sm transition-all duration-200 bg-red-600 hover:bg-red-700"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.2)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+// Variables globales pour la redirection après succès
+let pendingRedirectUrl = null;
+
+// Fonctions pour gérer les modales
+function showSuccessModal(message, redirectUrl = null) {
+    const modal = document.getElementById('successModal');
+    const messageElement = document.getElementById('successMessage');
+    if (modal && messageElement) {
+        messageElement.textContent = message;
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        pendingRedirectUrl = redirectUrl;
+    }
+}
+
+function closeSuccessModal() {
+    const modal = document.getElementById('successModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        
+        // Rediriger après fermeture de la modale
+        if (pendingRedirectUrl) {
+            window.location.href = pendingRedirectUrl;
+        } else {
+            window.location.reload();
+        }
+        pendingRedirectUrl = null;
+    }
+}
+
+function showErrorModal(message) {
+    const modal = document.getElementById('errorModal');
+    const messageElement = document.getElementById('errorMessage');
+    if (modal && messageElement) {
+        messageElement.textContent = message;
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeErrorModal() {
+    const modal = document.getElementById('errorModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+}
+
+// Gestionnaires pour fermer les modales avec la touche Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const successModal = document.getElementById('successModal');
+        const errorModal = document.getElementById('errorModal');
+        if (successModal && !successModal.classList.contains('hidden')) {
+            closeSuccessModal();
+        }
+        if (errorModal && !errorModal.classList.contains('hidden')) {
+            closeErrorModal();
+        }
+    }
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     const optimizeBtn = document.getElementById('optimizeCutsBtn');
     if (optimizeBtn) {
@@ -626,24 +727,18 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Afficher un message de succès
-                    alert('Plan de coupe généré avec succès !');
-                    // Rediriger vers la page du plan
-                    if (data.redirect_url) {
-                        window.location.href = data.redirect_url;
-                    } else {
-                        window.location.reload();
-                    }
+                    // Afficher un message de succès avec modale personnalisée
+                    showSuccessModal('Plan de coupe généré avec succès !', data.redirect_url || null);
                 } else {
-                    // Afficher l'erreur
-                    alert(data.message || 'Une erreur est survenue lors de la génération du plan de coupe.');
+                    // Afficher l'erreur avec modale personnalisée
+                    showErrorModal(data.message || 'Une erreur est survenue lors de la génération du plan de coupe.');
                     optimizeBtn.disabled = false;
                     optimizeBtn.innerHTML = originalText;
                 }
             })
             .catch(error => {
                 console.error('Erreur:', error);
-                alert('Une erreur est survenue lors de la génération du plan de coupe.');
+                showErrorModal('Une erreur est survenue lors de la génération du plan de coupe.');
                 optimizeBtn.disabled = false;
                 optimizeBtn.innerHTML = originalText;
             });
@@ -651,7 +746,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-<?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
 
 
