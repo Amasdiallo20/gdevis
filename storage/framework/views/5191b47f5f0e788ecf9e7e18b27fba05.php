@@ -20,65 +20,72 @@
             <div class="flex flex-wrap gap-2">
                 <?php if($quote->status !== 'validated'): ?>
                 <a href="<?php echo e(route('quotes.edit', $quote)); ?>" 
-                   class="btn-primary inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300"
+                   class="btn-primary inline-flex items-center justify-center px-3 sm:px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300"
                    onmouseover="this.style.transform='translateY(-2px)'"
-                   onmouseout="this.style.transform='translateY(0)'">
-                    <i class="fas fa-edit mr-2"></i><span class="hidden sm:inline">Modifier</span><span class="sm:hidden">Modif.</span>
+                   onmouseout="this.style.transform='translateY(0)'"
+                   title="Modifier">
+                    <i class="fas fa-edit sm:mr-2"></i><span class="hidden sm:inline">Modifier</span>
                 </a>
                 <?php else: ?>
-                <span class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-gray-400 bg-gray-200 cursor-not-allowed"
+                <span class="inline-flex items-center justify-center px-3 sm:px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-gray-400 bg-gray-200 cursor-not-allowed"
                       title="Un devis validé ne peut pas être modifié. Annulez d'abord la validation.">
-                    <i class="fas fa-edit mr-2"></i><span class="hidden sm:inline">Modifier</span><span class="sm:hidden">Modif.</span>
+                    <i class="fas fa-edit sm:mr-2"></i><span class="hidden sm:inline">Modifier</span>
                 </span>
                 <?php endif; ?>
                 <?php if($quote->status === 'accepted'): ?>
                 <a href="<?php echo e(route('quotes.show-validation', $quote)); ?>" 
-                   class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-emerald-600 hover:bg-emerald-700"
+                   class="inline-flex items-center justify-center px-3 sm:px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-emerald-600 hover:bg-emerald-700"
                    onmouseover="this.style.transform='translateY(-2px)'"
-                   onmouseout="this.style.transform='translateY(0)'">
-                    <i class="fas fa-check-circle mr-2"></i><span class="hidden sm:inline">Valider</span><span class="sm:hidden">Val.</span>
+                   onmouseout="this.style.transform='translateY(0)'"
+                   title="Valider">
+                    <i class="fas fa-check-circle sm:mr-2"></i><span class="hidden sm:inline">Valider</span>
                 </a>
                 <?php endif; ?>
                 <?php if($quote->status === 'validated'): ?>
                     <?php if($quote->is_fully_paid): ?>
-                    <span class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-gray-400 bg-gray-200 cursor-not-allowed"
+                    <span class="inline-flex items-center justify-center px-3 sm:px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-gray-400 bg-gray-200 cursor-not-allowed"
                           title="Ce devis est déjà totalement payé.">
-                        <i class="fas fa-money-bill-wave mr-2"></i><span class="hidden sm:inline">Payer</span><span class="sm:hidden">Pay.</span>
+                        <i class="fas fa-money-bill-wave sm:mr-2"></i><span class="hidden sm:inline">Payer</span>
                     </span>
                     <?php else: ?>
                     <a href="<?php echo e(route('payments.create', $quote)); ?>" 
-                       class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-green-600 hover:bg-green-700"
+                       class="inline-flex items-center justify-center px-3 sm:px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-green-600 hover:bg-green-700"
                        onmouseover="this.style.transform='translateY(-2px)'"
-                       onmouseout="this.style.transform='translateY(0)'">
-                        <i class="fas fa-money-bill-wave mr-2"></i><span class="hidden sm:inline">Payer</span><span class="sm:hidden">Pay.</span>
+                       onmouseout="this.style.transform='translateY(0)'"
+                       title="Payer">
+                        <i class="fas fa-money-bill-wave sm:mr-2"></i><span class="hidden sm:inline">Payer</span>
                     </a>
                     <?php endif; ?>
                 <?php endif; ?>
                 <a href="<?php echo e(route('quotes.print', $quote)); ?>" target="_blank" 
-                   class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-teal-600 hover:bg-teal-700"
+                   class="inline-flex items-center justify-center px-3 sm:px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-teal-600 hover:bg-teal-700"
                    onmouseover="this.style.transform='translateY(-2px)'"
-                   onmouseout="this.style.transform='translateY(0)'">
-                    <i class="fas fa-print mr-2"></i><span class="hidden sm:inline">Imprimer</span><span class="sm:hidden">Print</span>
+                   onmouseout="this.style.transform='translateY(0)'"
+                   title="Imprimer">
+                    <i class="fas fa-print sm:mr-2"></i><span class="hidden sm:inline">Imprimer</span>
                 </a>
                 <?php if (\Illuminate\Support\Facades\Blade::check('hasPermission', 'quotes.calculate-materials')): ?>
                 <a href="<?php echo e(route('quotes.calculate-materials', ['quote_id' => $quote->id])); ?>" 
-                   class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-orange-600 hover:bg-orange-700"
+                   class="inline-flex items-center justify-center px-3 sm:px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-orange-600 hover:bg-orange-700"
                    onmouseover="this.style.transform='translateY(-2px)'"
-                   onmouseout="this.style.transform='translateY(0)'">
-                    <i class="fas fa-calculator mr-2"></i><span class="hidden sm:inline">Calcul Matériaux</span><span class="sm:hidden">Matériaux</span>
+                   onmouseout="this.style.transform='translateY(0)'"
+                   title="Calcul Matériaux">
+                    <i class="fas fa-calculator sm:mr-2"></i><span class="hidden sm:inline">Calcul Matériaux</span>
                 </a>
                 <?php endif; ?>
                 <button type="button" id="optimizeCutsBtn" 
-                   class="inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-purple-600 hover:bg-purple-700"
+                   class="inline-flex items-center justify-center px-3 sm:px-4 py-2.5 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300 bg-purple-600 hover:bg-purple-700"
                    onmouseover="this.style.transform='translateY(-2px)'"
-                   onmouseout="this.style.transform='translateY(0)'">
-                    <i class="fas fa-cut mr-2"></i><span class="hidden sm:inline">Optimiser Coupes</span><span class="sm:hidden">Coupes</span>
+                   onmouseout="this.style.transform='translateY(0)'"
+                   title="Optimiser Coupes">
+                    <i class="fas fa-cut sm:mr-2"></i><span class="hidden sm:inline">Optimiser Coupes</span>
                 </button>
                 <a href="<?php echo e(route('quotes.index')); ?>" 
-                   class="inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 rounded-lg shadow-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300"
+                   class="inline-flex items-center justify-center px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg shadow-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300"
                    onmouseover="this.style.transform='translateY(-2px)'"
-                   onmouseout="this.style.transform='translateY(0)'">
-                    <i class="fas fa-arrow-left mr-2"></i><span class="hidden sm:inline">Retour</span><span class="sm:hidden">Ret.</span>
+                   onmouseout="this.style.transform='translateY(0)'"
+                   title="Retour">
+                    <i class="fas fa-arrow-left sm:mr-2"></i><span class="hidden sm:inline">Retour</span>
                 </a>
             </div>
             </div>

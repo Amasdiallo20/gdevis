@@ -17,10 +17,11 @@
                 <p class="mt-2 text-xs sm:text-sm text-gray-600">Gérez tous vos devis et factures</p>
             </div>
             <a href="<?php echo e(route('quotes.create')); ?>" 
-               class="btn-primary inline-flex items-center justify-center px-2 py-1.5 sm:px-5 sm:py-3 border border-transparent rounded-lg shadow-sm text-xs sm:text-sm font-medium text-white transition-all duration-300"
+               class="btn-primary inline-flex items-center justify-center px-3 sm:px-5 py-2.5 sm:py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-300"
                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.2)'"
-               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'">
-                <i class="fas fa-plus mr-2"></i>Nouveau Devis
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'"
+               title="Nouveau Devis">
+                <i class="fas fa-plus sm:mr-2"></i><span class="hidden sm:inline">Nouveau Devis</span>
             </a>
         </div>
     </div>
@@ -99,16 +100,18 @@
 
             <div class="flex flex-wrap gap-2">
                 <button type="submit" 
-                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-200"
+                    class="inline-flex items-center justify-center px-3 sm:px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-200"
                     style="background: linear-gradient(135deg, <?php echo e($settings->primary_color ?? '#3b82f6'); ?> 0%, <?php echo e($settings->secondary_color ?? '#1e40af'); ?> 100%);"
                     onmouseover="this.style.transform='translateY(-2px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <i class="fas fa-filter mr-2"></i>Filtrer
+                    onmouseout="this.style.transform='translateY(0)'"
+                    title="Filtrer">
+                    <i class="fas fa-filter sm:mr-2"></i><span class="hidden sm:inline">Filtrer</span>
                 </button>
                 <?php if(request()->hasAny(['search', 'status', 'client_id', 'date_from', 'date_to'])): ?>
                     <a href="<?php echo e(route('quotes.index')); ?>" 
-                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200">
-                        <i class="fas fa-times mr-2"></i>Réinitialiser
+                       class="inline-flex items-center justify-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
+                       title="Réinitialiser">
+                        <i class="fas fa-times sm:mr-2"></i><span class="hidden sm:inline">Réinitialiser</span>
                     </a>
                 <?php endif; ?>
             </div>
