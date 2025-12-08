@@ -17,10 +17,11 @@
                 <p class="mt-2 text-sm text-gray-600">Gérez vos clients et leurs informations</p>
             </div>
             <a href="<?php echo e(route('clients.create')); ?>" 
-               class="btn-primary inline-flex items-center justify-center px-5 py-3 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300"
+               class="btn-primary inline-flex items-center justify-center px-3 sm:px-5 py-2.5 sm:py-3 border border-transparent rounded-lg shadow-lg text-sm font-semibold text-white transition-all duration-300"
                onmouseover="this.style.transform='translateY(-2px)'"
-               onmouseout="this.style.transform='translateY(0)'">
-                <i class="fas fa-plus mr-2"></i>Nouveau Client
+               onmouseout="this.style.transform='translateY(0)'"
+               title="Nouveau Client">
+                <i class="fas fa-plus sm:mr-2"></i><span class="hidden sm:inline">Nouveau Client</span>
             </a>
         </div>
     </div>

@@ -45,15 +45,17 @@
             
             <div class="flex flex-wrap gap-2">
                 <a href="{{ route('modeles.index') }}" 
-                   class="inline-flex items-center justify-center px-3 py-2 rounded-lg border-2 border-gray-300 text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md">
-                    <i class="fas fa-arrow-left mr-1.5"></i><span class="hidden sm:inline">Retour au Catalogue</span><span class="sm:hidden">Retour</span>
+                   class="inline-flex items-center justify-center px-3 sm:px-3 py-2 rounded-lg border-2 border-gray-300 text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
+                   title="Retour au Catalogue">
+                    <i class="fas fa-arrow-left sm:mr-1.5"></i><span class="hidden sm:inline">Retour au Catalogue</span>
                 </a>
                 @auth
                 @if(Auth::user()->hasPermission('modeles.update'))
                 <a href="{{ route('modeles.edit', $modele) }}" 
                    class="inline-flex items-center justify-center px-3 py-2 rounded-lg text-xs font-semibold text-white transition-all duration-200 shadow-md hover:shadow-lg"
-                   style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
-                    <i class="fas fa-edit mr-1.5"></i>Modifier
+                   style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);"
+                   title="Modifier">
+                    <i class="fas fa-edit sm:mr-1.5"></i><span class="hidden sm:inline">Modifier</span>
                 </a>
                 @endif
                 @if(Auth::user()->hasPermission('modeles.delete'))
@@ -62,8 +64,9 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit" 
-                            class="inline-flex items-center justify-center px-3 py-2 rounded-lg text-xs font-semibold text-white bg-red-600 hover:bg-red-700 transition-all duration-200 shadow-md hover:shadow-lg">
-                        <i class="fas fa-trash mr-1.5"></i>Supprimer
+                            class="inline-flex items-center justify-center px-3 py-2 rounded-lg text-xs font-semibold text-white bg-red-600 hover:bg-red-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                            title="Supprimer">
+                        <i class="fas fa-trash sm:mr-1.5"></i><span class="hidden sm:inline">Supprimer</span>
                     </button>
                 </form>
                 @endif
@@ -179,10 +182,11 @@
                     <div class="pt-4 border-t border-gray-200">
                         @if(request()->has('quote_id'))
                             <a href="{{ route('modeles.add-to-quote', $modele) }}?quote_id={{ request('quote_id') }}" 
-                               class="w-full inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm font-extrabold text-white transition-all duration-300 shadow-xl hover:shadow-2xl"
-                               style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
-                                <i class="fas fa-link mr-2 text-base"></i>
-                                Associer à ce Devis
+                               class="w-full inline-flex items-center justify-center px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl text-sm font-extrabold text-white transition-all duration-300 shadow-xl hover:shadow-2xl"
+                               style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);"
+                               title="Associer à ce Devis">
+                                <i class="fas fa-link sm:mr-2 text-base"></i>
+                                <span class="hidden sm:inline">Associer à ce Devis</span>
                             </a>
                             <p class="text-xs text-gray-500 mt-2 text-center leading-relaxed">
                                 <i class="fas fa-check-circle mr-1"></i>
@@ -190,10 +194,11 @@
                             </p>
                         @else
                             <a href="{{ route('modeles.add-to-quote', $modele) }}" 
-                               class="w-full inline-flex items-center justify-center px-5 py-3 rounded-xl text-sm font-extrabold text-white transition-all duration-300 shadow-xl hover:shadow-2xl"
-                               style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
-                                <i class="fas fa-link mr-2 text-base"></i>
-                                Associer au Devis
+                               class="w-full inline-flex items-center justify-center px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl text-sm font-extrabold text-white transition-all duration-300 shadow-xl hover:shadow-2xl"
+                               style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);"
+                               title="Associer au Devis">
+                                <i class="fas fa-link sm:mr-2 text-base"></i>
+                                <span class="hidden sm:inline">Associer au Devis</span>
                             </a>
                             <p class="text-xs text-gray-500 mt-2 text-center leading-relaxed">
                                 <i class="fas fa-info-circle mr-1"></i>

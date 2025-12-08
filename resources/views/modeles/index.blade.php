@@ -34,26 +34,10 @@
 
 <!-- Filtres et Recherche -->
 <div class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        <!-- Bouton toggle pour mobile -->
-        <div class="flex items-center justify-between mb-4 sm:hidden">
-            <button type="button" id="toggleFiltersBtn" 
-                    class="flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium text-white shadow-sm transition-all duration-200"
-                    style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
-                <i class="fas fa-filter mr-2"></i>
-                <span>Filtres</span>
-                <i class="fas fa-chevron-down ml-2 transform transition-transform" id="filterChevron"></i>
-            </button>
-            @if(request()->hasAny(['search', 'categorie']))
-            <a href="{{ route('modeles.index') }}" 
-               class="inline-flex items-center justify-center px-3 py-2 rounded-lg border-2 border-gray-300 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm">
-                <i class="fas fa-times mr-2"></i>Réinitialiser
-            </a>
-            @endif
-        </div>
-        
-        <form method="GET" action="{{ route('modeles.index') }}" class="space-y-4" id="filterForm">
-            <div id="filtersContainer" class="hidden sm:block">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6">
+        <form method="GET" action="{{ route('modeles.index') }}" class="space-y-3 sm:space-y-4" id="filterForm">
+            <!-- Version Desktop -->
+            <div class="hidden sm:block">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <!-- Recherche -->
                     <div class="md:col-span-2">
@@ -66,7 +50,7 @@
                                 class="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 pl-12 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all focus:shadow-md"
                                 style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <i class="fas fa-search text-gray-400"></i>
+                                <i class="fas fa-search" style="color: {{ $settings->primary_color ?? '#3b82f6' }}; width: 18px; text-align: center;"></i>
                             </div>
                         </div>
                     </div>
@@ -97,7 +81,8 @@
                         </button>
                         @if(request()->hasAny(['search', 'categorie']))
                         <a href="{{ route('modeles.index') }}" 
-                           class="inline-flex items-center justify-center px-4 py-3 rounded-xl border-2 border-gray-300 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md">
+                           class="inline-flex items-center justify-center px-4 py-3 rounded-xl border-2 border-gray-300 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
+                           title="Réinitialiser">
                             <i class="fas fa-times"></i>
                         </a>
                         @endif
@@ -105,32 +90,56 @@
                 </div>
             </div>
             
-            <!-- Version mobile compacte -->
-            <div class="sm:hidden space-y-3" id="mobileFilters">
+            <!-- Version Mobile - Recherche toujours visible -->
+            <div class="sm:hidden space-y-2">
+                <!-- Barre de recherche principale - toujours visible -->
                 <div class="relative">
                     <input type="text" name="search" id="search_mobile" value="{{ request('search') }}" 
                         placeholder="Rechercher un modèle..."
-                        class="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 pl-12 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
-                        style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <i class="fas fa-search text-gray-400"></i>
+                        class="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3.5 pl-14 pr-12 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all touch-manipulation"
+                        style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }}; -webkit-appearance: none;"
+                        autocomplete="off">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                        <i class="fas fa-search text-lg" style="color: {{ $settings->primary_color ?? '#3b82f6' }}; width: 20px; text-align: center;"></i>
                     </div>
+                    @if(request('search'))
+                    <button type="button" onclick="document.getElementById('search_mobile').value=''; document.getElementById('search').value='';" 
+                            class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-700 z-10 touch-manipulation"
+                            title="Effacer">
+                        <i class="fas fa-times text-base"></i>
+                    </button>
+                    @endif
                 </div>
-                <select name="categorie" id="categorie_mobile" 
-                    class="block w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-sm shadow-sm focus:ring-2 focus:border-transparent transition-all"
-                    style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }}; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23374151\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1em 1em; padding-right: 2.5rem;">
-                    <option value="">Toutes les catégories</option>
-                    @foreach($categories as $key => $label)
-                    <option value="{{ $key }}" {{ request('categorie') == $key ? 'selected' : '' }}>
-                        {{ $label }}
-                    </option>
-                    @endforeach
-                </select>
-                <button type="submit" 
-                    class="w-full inline-flex items-center justify-center px-6 py-3 rounded-lg text-sm font-medium text-white shadow-sm hover:shadow-md transition-all duration-200"
-                    style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
-                    <i class="fas fa-filter mr-2"></i>Appliquer les filtres
-                </button>
+                
+                <!-- Filtres supplémentaires - pliable -->
+                <div class="space-y-2" id="mobileFilters">
+                    <div class="flex items-center gap-2">
+                        <select name="categorie" id="categorie_mobile" 
+                            class="flex-1 rounded-xl border-2 border-gray-300 bg-white px-4 py-3.5 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all touch-manipulation"
+                            style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }}; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23374151\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1em 1em; padding-right: 2.5rem;">
+                            <option value="">Toutes les catégories</option>
+                            @foreach($categories as $key => $label)
+                            <option value="{{ $key }}" {{ request('categorie') == $key ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @if(request()->hasAny(['search', 'categorie']))
+                        <a href="{{ route('modeles.index') }}" 
+                           class="inline-flex items-center justify-center px-4 py-3.5 rounded-xl border-2 border-gray-300 text-base font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-sm touch-manipulation"
+                           title="Réinitialiser">
+                            <i class="fas fa-times"></i>
+                        </a>
+                        @endif
+                    </div>
+                    <button type="submit" 
+                        class="w-full inline-flex items-center justify-center px-6 py-3.5 rounded-lg text-base font-medium text-white shadow-sm hover:shadow-md transition-all duration-200 touch-manipulation"
+                        style="background: linear-gradient(135deg, {{ $settings->primary_color ?? '#3b82f6' }} 0%, {{ $settings->secondary_color ?? '#1e40af' }} 100%);">
+                        <i class="fas fa-filter sm:mr-2"></i>
+                        <span class="hidden sm:inline">Appliquer les filtres</span>
+                        <span class="sm:hidden">Filtrer</span>
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -154,7 +163,8 @@
         @foreach($modeles as $modele)
         <div class="group bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 transform hover:-translate-y-1 sm:hover:-translate-y-2">
             <!-- Image -->
-            <div class="relative h-48 sm:h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+            <a href="{{ route('modeles.show', $modele) }}{{ request()->has('quote_id') ? '?quote_id=' . request('quote_id') : '' }}" 
+               class="relative block h-48 sm:h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden group/image">
                 @if($modele->image)
                 <img src="{{ $modele->thumbnail_url ?? $modele->image_url }}" 
                      srcset="{{ $modele->thumbnail_url ?? $modele->image_url }} 300w,
@@ -164,7 +174,7 @@
                      loading="lazy" 
                      alt="{{ $modele->nom }}"
                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer touch-manipulation"
-                     onclick="openImageZoom(this, '{{ $modele->nom }}')"
+                     oncontextmenu="event.preventDefault(); openImageZoom(this, '{{ $modele->nom }}'); return false;"
                      data-zoom-src="{{ $modele->large_image_url ?? $modele->image_url }}">
                 @else
                 <div class="w-full h-full flex items-center justify-center">
@@ -172,10 +182,10 @@
                 </div>
                 @endif
                 <!-- Overlay gradient -->
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 
                 <!-- Badge catégorie -->
-                <div class="absolute top-2 sm:top-4 left-2 sm:left-4">
+                <div class="absolute top-2 sm:top-4 left-2 sm:left-4 z-20 pointer-events-none">
                     <span class="inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold text-white shadow-lg backdrop-blur-sm bg-white/20 border border-white/30">
                         <i class="fas fa-tag mr-1 sm:mr-1.5 text-xs"></i>
                         <span class="hidden xs:inline">{{ $categories[$modele->categorie] ?? $modele->categorie }}</span>
@@ -184,17 +194,28 @@
                 </div>
                 
                 @if($modele->statut === 'inactif')
-                <div class="absolute top-2 sm:top-4 right-2 sm:right-4 bg-red-500 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold shadow-lg">
+                <div class="absolute top-2 sm:top-4 right-2 sm:right-4 bg-red-500 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-bold shadow-lg z-20 pointer-events-none">
                     Inactif
                 </div>
                 @endif
-            </div>
+                
+                <!-- Indicateur visuel au survol -->
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 bg-black/30 z-10 pointer-events-none">
+                    <div class="bg-white/95 rounded-full px-4 py-2.5 shadow-xl">
+                        <span class="text-sm font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-eye mr-2"></i>Voir les détails
+                        </span>
+                    </div>
+                </div>
+            </a>
             
             <!-- Contenu -->
             <div class="p-4 sm:p-5">
-                <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-3 sm:mb-4 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                    {{ $modele->nom }}
-                </h3>
+                <a href="{{ route('modeles.show', $modele) }}{{ request()->has('quote_id') ? '?quote_id=' . request('quote_id') : '' }}">
+                    <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-3 sm:mb-4 line-clamp-2 group-hover:text-blue-600 transition-colors cursor-pointer hover:underline">
+                        {{ $modele->nom }}
+                    </h3>
+                </a>
                 
                 <div class="flex flex-col sm:flex-row gap-2">
                     <a href="{{ route('modeles.show', $modele) }}{{ request()->has('quote_id') ? '?quote_id=' . request('quote_id') : '' }}"
@@ -257,54 +278,69 @@
         linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
     background-size: 20px 20px;
 }
+
+/* Améliorations pour la zone de recherche mobile */
+@media (max-width: 640px) {
+    #filterForm input[type="text"],
+    #filterForm select {
+        font-size: 16px !important; /* Évite le zoom automatique sur iOS */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+    
+    #filterForm input[type="text"]:focus {
+        outline: none;
+    }
+    
+    /* Amélioration de l'espacement pour les boutons tactiles */
+    #filterForm button,
+    #filterForm a[class*="inline-flex"] {
+        min-height: 48px;
+        touch-action: manipulation;
+    }
+}
 </style>
 
 <script>
 // Sauvegarder les filtres dans localStorage pour mode hors-ligne
 document.addEventListener('DOMContentLoaded', function() {
     const filterForm = document.getElementById('filterForm');
-    const toggleFiltersBtn = document.getElementById('toggleFiltersBtn');
-    const filtersContainer = document.getElementById('filtersContainer');
-    const mobileFilters = document.getElementById('mobileFilters');
-    const filterChevron = document.getElementById('filterChevron');
     
-    // Toggle des filtres sur mobile
-    if (toggleFiltersBtn && mobileFilters) {
-        let filtersVisible = false;
-        toggleFiltersBtn.addEventListener('click', function() {
-            filtersVisible = !filtersVisible;
-            if (filtersVisible) {
-                mobileFilters.classList.remove('hidden');
-                filterChevron.classList.add('rotate-180');
-            } else {
-                mobileFilters.classList.add('hidden');
-                filterChevron.classList.remove('rotate-180');
-            }
+    // Synchroniser les champs mobile et desktop
+    const searchDesktop = document.getElementById('search');
+    const searchMobile = document.getElementById('search_mobile');
+    const categorieDesktop = document.getElementById('categorie');
+    const categorieMobile = document.getElementById('categorie_mobile');
+    
+    if (searchDesktop && searchMobile) {
+        searchMobile.addEventListener('input', function() {
+            searchDesktop.value = this.value;
         });
-        
-        // Synchroniser les champs mobile et desktop
-        const searchDesktop = document.getElementById('search');
-        const searchMobile = document.getElementById('search_mobile');
-        const categorieDesktop = document.getElementById('categorie');
-        const categorieMobile = document.getElementById('categorie_mobile');
-        
-        if (searchDesktop && searchMobile) {
-            searchMobile.addEventListener('input', function() {
-                searchDesktop.value = this.value;
-            });
-            searchDesktop.addEventListener('input', function() {
-                searchMobile.value = this.value;
-            });
-        }
-        
-        if (categorieDesktop && categorieMobile) {
-            categorieMobile.addEventListener('change', function() {
-                categorieDesktop.value = this.value;
-            });
-            categorieDesktop.addEventListener('change', function() {
-                categorieMobile.value = this.value;
-            });
-        }
+        searchDesktop.addEventListener('input', function() {
+            searchMobile.value = this.value;
+        });
+    }
+    
+    if (categorieDesktop && categorieMobile) {
+        categorieMobile.addEventListener('change', function() {
+            categorieDesktop.value = this.value;
+        });
+        categorieDesktop.addEventListener('change', function() {
+            categorieMobile.value = this.value;
+        });
+    }
+    
+    // Recherche en temps réel sur mobile (optionnel - soumission automatique après 500ms)
+    let searchTimeout;
+    if (searchMobile) {
+        searchMobile.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            // Optionnel : soumission automatique après 1 seconde d'inactivité
+            // searchTimeout = setTimeout(() => {
+            //     filterForm.submit();
+            // }, 1000);
+        });
     }
     
     if (filterForm) {
