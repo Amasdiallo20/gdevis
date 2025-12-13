@@ -7,6 +7,8 @@ use App\Models\Client;
 use App\Models\Product;
 use App\Models\QuoteLine;
 use App\Models\Material;
+use App\Models\Chantier;
+use App\Models\Tache;
 use App\Exports\MaterialsExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -231,8 +233,40 @@ class QuoteController extends Controller
             'status' => 'validated',
         ]);
 
+        // Créer automatiquement un chantier si il n'existe pas déjà
+        if (!$quote->chantier) {
+            $chantierNumber = $this->generateChantierNumber();
+            $chantier = Chantier::create([
+                'quote_id' => $quote->id,
+                'chantier_number' => $chantierNumber,
+                'status' => 'planifié',
+                'progress' => 0,
+                'created_by' => Auth::id(),
+            ]);
+
+            // Créer les tâches par défaut
+            $tachesParDefaut = [
+                ['nom' => 'Coupe', 'type' => 'coupe', 'ordre' => 1],
+                ['nom' => 'Assemblage', 'type' => 'assemblage', 'ordre' => 2],
+                ['nom' => 'Découpe vitres', 'type' => 'decoupe_vitres', 'ordre' => 3],
+                ['nom' => 'Pose', 'type' => 'pose', 'ordre' => 4],
+                ['nom' => 'Finitions', 'type' => 'finitions', 'ordre' => 5],
+            ];
+
+            foreach ($tachesParDefaut as $tacheData) {
+                Tache::create([
+                    'chantier_id' => $chantier->id,
+                    'nom' => $tacheData['nom'],
+                    'type' => $tacheData['type'],
+                    'status' => 'a_faire',
+                    'progress' => 0,
+                    'ordre' => $tacheData['ordre'],
+                ]);
+            }
+        }
+
         return redirect()->route('quotes.show', $quote)
-            ->with('success', 'Devis validé avec succès. Le montant final de ' . number_format($validated['final_amount'], 0, ',', ' ') . ' GNF a été enregistré.');
+            ->with('success', 'Devis validé avec succès. Le montant final de ' . number_format($validated['final_amount'], 0, ',', ' ') . ' GNF a été enregistré. Un chantier a été créé automatiquement.');
     }
 
     public function cancelQuote(Quote $quote)
@@ -1561,6 +1595,18 @@ class QuoteController extends Controller
         $number = $lastQuote ? (int) substr($lastQuote->quote_number, -4) + 1 : 1;
 
         return 'DEV-' . $year . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
+    }
+
+    private function generateChantierNumber(): string
+    {
+        $year = Carbon::now()->year;
+        $lastChantier = Chantier::whereYear('created_at', $year)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $number = $lastChantier ? (int) substr($lastChantier->chantier_number, -4) + 1 : 1;
+
+        return 'CHT-' . $year . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
 }
 

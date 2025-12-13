@@ -52,6 +52,10 @@ class PermissionSeeder extends Seeder
             ['name' => 'Supprimer les utilisateurs', 'slug' => 'users.delete', 'description' => 'Permet de supprimer les utilisateurs', 'category' => 'users'],
             ['name' => 'Gérer les permissions', 'slug' => 'users.manage-permissions', 'description' => 'Permet de gérer les permissions des utilisateurs', 'category' => 'users'],
 
+            // Permissions pour les chantiers
+            ['name' => 'Voir les chantiers', 'slug' => 'chantiers.view', 'description' => 'Permet de voir la liste des chantiers', 'category' => 'chantiers'],
+            ['name' => 'Modifier les chantiers', 'slug' => 'chantiers.edit', 'description' => 'Permet de modifier les chantiers', 'category' => 'chantiers'],
+
             // Permissions générales
             ['name' => 'Voir le tableau de bord', 'slug' => 'dashboard.view', 'description' => 'Permet d\'accéder au tableau de bord', 'category' => 'general'],
             ['name' => 'Gérer les paramètres', 'slug' => 'settings.manage', 'description' => 'Permet de gérer les paramètres de l\'application', 'category' => 'general'],

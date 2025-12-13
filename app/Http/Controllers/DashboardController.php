@@ -15,6 +15,13 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
+        
+        // Vérifier que l'utilisateur a la permission d'accéder au tableau de bord
+        if (!$user->hasPermission('dashboard.view')) {
+            abort(403, 'Accès refusé au tableau de bord. Veuillez contacter votre administrateur pour obtenir les permissions nécessaires.');
+        }
+        
         // Utiliser des requêtes optimisées avec cache pour les statistiques
         $cacheKey = 'dashboard_stats_' . date('Y-m-d-H');
         

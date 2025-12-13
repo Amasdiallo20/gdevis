@@ -12,6 +12,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CutPlanController;
 use App\Http\Controllers\ModeleController;
 use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\ChantierController;
 
 // Routes d'authentification (publiques)
 Route::middleware(['guest'])->group(function () {
@@ -50,6 +51,38 @@ Route::middleware(['auth'])->group(function () {
 
     // Routes pour les matériaux
     Route::resource('materials', MaterialController::class);
+
+    // Routes pour les chantiers
+    Route::get('chantiers', [ChantierController::class, 'index'])->name('chantiers.index');
+    Route::get('chantiers/activities', [ChantierController::class, 'activities'])->name('chantiers.activities');
+    Route::get('chantiers/{chantier}', [ChantierController::class, 'show'])->name('chantiers.show');
+    Route::post('chantiers/{chantier}/update-status', [ChantierController::class, 'updateStatus'])->name('chantiers.update-status');
+    Route::post('chantiers/{chantier}/update-progress', [ChantierController::class, 'updateProgress'])->name('chantiers.update-progress');
+    Route::post('chantiers/{chantier}/update-dates', [ChantierController::class, 'updateDates'])->name('chantiers.update-dates');
+    Route::post('chantiers/{chantier}/update-notes', [ChantierController::class, 'updateNotes'])->name('chantiers.update-notes');
+    
+    // Routes pour les tâches
+    Route::post('chantiers/{chantier}/taches', [ChantierController::class, 'storeTache'])->name('chantiers.taches.store');
+    Route::post('chantiers/{chantier}/taches/{tache}', [ChantierController::class, 'updateTache'])->name('chantiers.taches.update');
+    Route::delete('chantiers/{chantier}/taches/{tache}', [ChantierController::class, 'deleteTache'])->name('chantiers.taches.destroy');
+    Route::post('chantiers/{chantier}/taches/{tache}/assign-techniciens', [ChantierController::class, 'assignTechniciens'])->name('chantiers.taches.assign-techniciens');
+    
+    // Routes pour les matériaux de chantier
+    Route::post('chantiers/{chantier}/materiaux', [ChantierController::class, 'storeMateriau'])->name('chantiers.materiaux.store');
+    Route::post('chantiers/{chantier}/materiaux/{materiau}', [ChantierController::class, 'updateMateriau'])->name('chantiers.materiaux.update');
+    Route::delete('chantiers/{chantier}/materiaux/{materiau}', [ChantierController::class, 'deleteMateriau'])->name('chantiers.materiaux.destroy');
+    
+    // Routes pour les photos de chantier
+    Route::post('chantiers/{chantier}/photos', [ChantierController::class, 'storePhoto'])->name('chantiers.photos.store');
+    Route::post('chantiers/{chantier}/photos/{photo}', [ChantierController::class, 'updatePhoto'])->name('chantiers.photos.update');
+    Route::delete('chantiers/{chantier}/photos/{photo}', [ChantierController::class, 'deletePhoto'])->name('chantiers.photos.destroy');
+    
+    // Routes pour les techniciens - gestion de leurs tâches
+    Route::get('mes-taches', [ChantierController::class, 'mesTaches'])->name('chantiers.mes-taches');
+    Route::post('taches/{tache}/update-progress', [ChantierController::class, 'updateTacheProgress'])->name('taches.update-progress');
+    Route::post('taches/{tache}/photos', [ChantierController::class, 'storePhotoTache'])->name('taches.photos.store');
+    Route::post('taches/{tache}/photos/{photo}/comment', [ChantierController::class, 'updatePhotoTacheComment'])->name('taches.photos.comment');
+    Route::delete('taches/{tache}/photos/{photo}', [ChantierController::class, 'deletePhotoTache'])->name('taches.photos.destroy');
 
     // Routes pour les devis
     // Route spécifique AVANT la route resource pour éviter les conflits

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Quote extends Model
 {
@@ -54,6 +55,11 @@ class Quote extends Model
     public function modele(): BelongsTo
     {
         return $this->belongsTo(Modele::class, 'model_id');
+    }
+
+    public function chantier(): HasOne
+    {
+        return $this->hasOne(Chantier::class);
     }
 
     public function getSubtotalAttribute()

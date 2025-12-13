@@ -622,7 +622,7 @@
                         <div class="flex flex-col">
                         <?php endif; ?>
                         <?php
-                            $homeRoute = Auth::check() ? route('dashboard') : route('home');
+                            $homeRoute = Auth::check() && Auth::user()->hasPermission('dashboard.view') ? route('dashboard') : (Auth::check() && Auth::user()->role !== 'admin' ? route('chantiers.mes-taches') : route('modeles.index'));
                             $isMobileMenuEnabled = Auth::check();
                         ?>
                         <a href="<?php echo e($homeRoute); ?>" 
@@ -639,11 +639,13 @@
                     <!-- Menu desktop -->
                 <div class="hidden sm:flex sm:items-center sm:flex-1 sm:justify-around sm:mx-8">
                         <?php if(auth()->guard()->check()): ?>
+                        <?php if (\Illuminate\Support\Facades\Blade::check('hasPermission', 'dashboard.view')): ?>
                         <a href="<?php echo e(route('dashboard')); ?>" 
                            class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center <?php echo e(request()->routeIs('dashboard*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'); ?>"
                            style="<?php echo e(request()->routeIs('dashboard*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : ''); ?>">
                             <i class="fas fa-home mr-2"></i>Accueil
                         </a>
+                        <?php endif; ?>
                         <!-- Menu Devis -->
                         <?php if (\Illuminate\Support\Facades\Blade::check('hasAnyPermission', ['quotes.view', 'quotes.create', 'payments.view', 'quotes.calculate-materials'])): ?>
                         <a href="<?php echo e(route('quotes.index')); ?>" 
@@ -674,6 +676,22 @@
                                     class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center <?php echo e(request()->routeIs('materials.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'); ?>"
                                     style="<?php echo e(request()->routeIs('materials.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : ''); ?>">
                                 <i class="fas fa-tools mr-2"></i>Matériaux
+                        </a>
+                        <?php endif; ?>
+                        <!-- Menu Chantiers -->
+                        <?php if (\Illuminate\Support\Facades\Blade::check('hasAnyPermission', ['chantiers.view', 'chantiers.edit'])): ?>
+                        <a href="<?php echo e(route('chantiers.index')); ?>" 
+                                    class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center <?php echo e(request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'); ?>"
+                                    style="<?php echo e(request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : ''); ?>">
+                                <i class="fas fa-hard-hat mr-2"></i>Chantiers
+                        </a>
+                        <?php endif; ?>
+                        <!-- Menu Mes Tâches (pour les techniciens uniquement, pas pour les admins) -->
+                        <?php if(Auth::check() && Auth::user()->role !== 'admin'): ?>
+                        <a href="<?php echo e(route('chantiers.mes-taches')); ?>" 
+                                    class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center <?php echo e(request()->routeIs('chantiers.mes-taches') || request()->routeIs('taches.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'); ?>"
+                                    style="<?php echo e(request()->routeIs('chantiers.mes-taches') || request()->routeIs('taches.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : ''); ?>">
+                                <i class="fas fa-tasks mr-2"></i>Mes Tâches
                         </a>
                         <?php endif; ?>
                         <?php endif; ?>
@@ -774,12 +792,14 @@
         <div class="sm:hidden mobile-menu" id="mobile-menu">
             <div class="px-0 pt-1 pb-2 space-y-0 bg-white">
                 <?php if(auth()->guard()->check()): ?>
+                <?php if (\Illuminate\Support\Facades\Blade::check('hasPermission', 'dashboard.view')): ?>
                 <a href="<?php echo e(route('dashboard')); ?>" 
                    onclick="closeMobileMenu()"
                    class="block px-4 py-3 rounded-none text-base font-medium transition-colors <?php echo e(request()->routeIs('dashboard*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100'); ?>"
                    style="<?php echo e(request()->routeIs('dashboard*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : ''); ?>">
                     <i class="fas fa-home mr-3 w-5"></i>Accueil
                 </a>
+                <?php endif; ?>
                 <?php if (\Illuminate\Support\Facades\Blade::check('hasAnyPermission', ['quotes.view', 'quotes.create', 'payments.view', 'quotes.calculate-materials'])): ?>
                 <a href="<?php echo e(route('quotes.index')); ?>" 
                    onclick="closeMobileMenu()"
@@ -810,6 +830,22 @@
                    class="block px-4 py-3 rounded-none text-base font-medium transition-colors <?php echo e(request()->routeIs('materials.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100'); ?>"
                    style="<?php echo e(request()->routeIs('materials.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : ''); ?>">
                     <i class="fas fa-tools mr-3 w-5"></i>Matériaux
+                </a>
+                <?php endif; ?>
+                <?php if (\Illuminate\Support\Facades\Blade::check('hasAnyPermission', ['chantiers.view', 'chantiers.edit'])): ?>
+                <a href="<?php echo e(route('chantiers.index')); ?>" 
+                   onclick="closeMobileMenu()"
+                   class="block px-4 py-3 rounded-none text-base font-medium transition-colors <?php echo e(request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100'); ?>"
+                   style="<?php echo e(request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : ''); ?>">
+                    <i class="fas fa-hard-hat mr-3 w-5"></i>Chantiers
+                </a>
+                <?php endif; ?>
+                <?php if(Auth::check() && Auth::user()->role !== 'admin'): ?>
+                <a href="<?php echo e(route('chantiers.mes-taches')); ?>" 
+                   onclick="closeMobileMenu()"
+                   class="block px-4 py-3 rounded-none text-base font-medium transition-colors <?php echo e(request()->routeIs('chantiers.mes-taches') || request()->routeIs('taches.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100'); ?>"
+                   style="<?php echo e(request()->routeIs('chantiers.mes-taches') || request()->routeIs('taches.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : ''); ?>">
+                    <i class="fas fa-tasks mr-3 w-5"></i>Mes Tâches
                 </a>
                 <?php endif; ?>
                 <?php endif; ?>
@@ -995,6 +1031,28 @@
                         <?php endif; ?>
                     <?php endif; ?>
                     
+                    <!-- Sous-menus pour Chantiers -->
+                    <?php if(request()->routeIs('chantiers.*')): ?>
+                        <?php if (\Illuminate\Support\Facades\Blade::check('hasAnyPermission', ['chantiers.view', 'chantiers.edit'])): ?>
+                            <?php if (\Illuminate\Support\Facades\Blade::check('hasPermission', 'chantiers.view')): ?>
+                            <div class="sidebar-item <?php echo e(request()->routeIs('chantiers.index') || request()->routeIs('chantiers.show') ? 'active' : ''); ?>">
+                                <a href="<?php echo e(route('chantiers.index')); ?>" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                    <i class="fas fa-list mr-3 w-5"></i>
+                                    Liste
+                                </a>
+                            </div>
+                            <?php endif; ?>
+                            <?php if(Auth::check() && Auth::user()->role === 'admin'): ?>
+                            <div class="sidebar-item <?php echo e(request()->routeIs('chantiers.activities') ? 'active' : ''); ?>">
+                                <a href="<?php echo e(route('chantiers.activities')); ?>" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                    <i class="fas fa-history mr-3 w-5"></i>
+                                    Activités
+                                </a>
+                            </div>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    
                     <!-- Sous-menus pour Catalogue -->
                     <?php if(request()->routeIs('modeles.*') || request()->routeIs('catalogue.*')): ?>
                         <div class="sidebar-item <?php echo e(request()->routeIs('modeles.index') || request()->routeIs('catalogue.*') ? 'active' : ''); ?>">
@@ -1017,12 +1075,14 @@
                     
                     <!-- Sous-menus pour Dashboard -->
                     <?php if(request()->routeIs('dashboard*')): ?>
+                        <?php if (\Illuminate\Support\Facades\Blade::check('hasPermission', 'dashboard.view')): ?>
                         <div class="sidebar-item active">
                             <a href="<?php echo e(route('dashboard')); ?>" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
                                 <i class="fas fa-chart-bar mr-3 w-5"></i>
                                 Statistiques
                             </a>
                         </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                     
                     <!-- Sous-menus pour Utilisateurs (Admin) -->
@@ -1180,6 +1240,28 @@
                         <?php endif; ?>
                     <?php endif; ?>
                     
+                    <!-- Sous-menus pour Chantiers -->
+                    <?php if(request()->routeIs('chantiers.*')): ?>
+                        <?php if (\Illuminate\Support\Facades\Blade::check('hasAnyPermission', ['chantiers.view', 'chantiers.edit'])): ?>
+                            <?php if (\Illuminate\Support\Facades\Blade::check('hasPermission', 'chantiers.view')): ?>
+                            <div class="sidebar-item <?php echo e(request()->routeIs('chantiers.index') || request()->routeIs('chantiers.show') ? 'active' : ''); ?>">
+                                <a href="<?php echo e(route('chantiers.index')); ?>" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                    <i class="fas fa-list mr-3 w-5"></i>
+                                    Liste
+                                </a>
+                            </div>
+                            <?php endif; ?>
+                            <?php if(Auth::check() && Auth::user()->role === 'admin'): ?>
+                            <div class="sidebar-item <?php echo e(request()->routeIs('chantiers.activities') ? 'active' : ''); ?>">
+                                <a href="<?php echo e(route('chantiers.activities')); ?>" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                    <i class="fas fa-history mr-3 w-5"></i>
+                                    Activités
+                                </a>
+                            </div>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    
                     <!-- Sous-menus pour Catalogue -->
                     <?php if(request()->routeIs('modeles.*') || request()->routeIs('catalogue.*')): ?>
                         <div class="sidebar-item <?php echo e(request()->routeIs('modeles.index') || request()->routeIs('catalogue.*') ? 'active' : ''); ?>">
@@ -1202,12 +1284,14 @@
                     
                     <!-- Sous-menus pour Dashboard -->
                     <?php if(request()->routeIs('dashboard*')): ?>
+                        <?php if (\Illuminate\Support\Facades\Blade::check('hasPermission', 'dashboard.view')): ?>
                         <div class="sidebar-item active">
                             <a href="<?php echo e(route('dashboard')); ?>" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
                                 <i class="fas fa-chart-bar mr-3 w-5"></i>
                                 Statistiques
                             </a>
                         </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </nav>
             </div>

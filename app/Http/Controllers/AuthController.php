@@ -13,7 +13,15 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            $user = Auth::user();
+            // Rediriger selon les permissions
+            if ($user->hasPermission('dashboard.view')) {
+                return redirect()->route('dashboard');
+            } elseif ($user->role !== 'admin') {
+                return redirect()->route('chantiers.mes-taches');
+            } else {
+                return redirect()->route('modeles.index');
+            }
         }
         // Vérifier s'il y a déjà des utilisateurs dans la base
         $hasUsers = User::count() > 0;
@@ -29,7 +37,20 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended(route('dashboard'));
+            
+            $user = Auth::user();
+            
+            // Rediriger vers le tableau de bord si l'utilisateur a la permission
+            // Sinon, rediriger vers "Mes Tâches" pour les techniciens, ou vers le catalogue
+            if ($user->hasPermission('dashboard.view')) {
+                return redirect()->intended(route('dashboard'));
+            } elseif ($user->role !== 'admin') {
+                // Pour les techniciens, rediriger vers "Mes Tâches"
+                return redirect()->intended(route('chantiers.mes-taches'));
+            } else {
+                // Pour les admins sans permission (ne devrait pas arriver), rediriger vers le catalogue
+                return redirect()->intended(route('modeles.index'));
+            }
         }
 
         throw ValidationException::withMessages([

@@ -622,7 +622,7 @@
                         <div class="flex flex-col">
                         @endif
                         @php
-                            $homeRoute = Auth::check() ? route('dashboard') : route('home');
+                            $homeRoute = Auth::check() && Auth::user()->hasPermission('dashboard.view') ? route('dashboard') : (Auth::check() && Auth::user()->role !== 'admin' ? route('chantiers.mes-taches') : route('modeles.index'));
                             $isMobileMenuEnabled = Auth::check();
                         @endphp
                         <a href="{{ $homeRoute }}" 
@@ -639,11 +639,13 @@
                     <!-- Menu desktop -->
                 <div class="hidden sm:flex sm:items-center sm:flex-1 sm:justify-around sm:mx-8">
                         @auth
+                        @hasPermission('dashboard.view')
                         <a href="{{ route('dashboard') }}" 
                            class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center {{ request()->routeIs('dashboard*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
                            style="{{ request()->routeIs('dashboard*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
                             <i class="fas fa-home mr-2"></i>Accueil
                         </a>
+                        @endhasPermission
                         <!-- Menu Devis -->
                         @hasAnyPermission(['quotes.view', 'quotes.create', 'payments.view', 'quotes.calculate-materials'])
                         <a href="{{ route('quotes.index') }}" 
@@ -676,6 +678,22 @@
                                 <i class="fas fa-tools mr-2"></i>Matériaux
                         </a>
                         @endhasAnyPermission
+                        <!-- Menu Chantiers -->
+                        @hasAnyPermission(['chantiers.view', 'chantiers.edit'])
+                        <a href="{{ route('chantiers.index') }}" 
+                                    class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center {{ request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
+                                    style="{{ request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
+                                <i class="fas fa-hard-hat mr-2"></i>Chantiers
+                        </a>
+                        @endhasAnyPermission
+                        <!-- Menu Mes Tâches (pour les techniciens uniquement, pas pour les admins) -->
+                        @if(Auth::check() && Auth::user()->role !== 'admin')
+                        <a href="{{ route('chantiers.mes-taches') }}" 
+                                    class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center {{ request()->routeIs('chantiers.mes-taches') || request()->routeIs('taches.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
+                                    style="{{ request()->routeIs('chantiers.mes-taches') || request()->routeIs('taches.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
+                                <i class="fas fa-tasks mr-2"></i>Mes Tâches
+                        </a>
+                        @endif
                         @endauth
                         <!-- Menu Catalogue (toujours visible) -->
                         <a href="{{ route('modeles.index') }}" 
@@ -774,12 +792,14 @@
         <div class="sm:hidden mobile-menu" id="mobile-menu">
             <div class="px-0 pt-1 pb-2 space-y-0 bg-white">
                 @auth
+                @hasPermission('dashboard.view')
                 <a href="{{ route('dashboard') }}" 
                    onclick="closeMobileMenu()"
                    class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('dashboard*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
                    style="{{ request()->routeIs('dashboard*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
                     <i class="fas fa-home mr-3 w-5"></i>Accueil
                 </a>
+                @endhasPermission
                 @hasAnyPermission(['quotes.view', 'quotes.create', 'payments.view', 'quotes.calculate-materials'])
                 <a href="{{ route('quotes.index') }}" 
                    onclick="closeMobileMenu()"
@@ -812,6 +832,22 @@
                     <i class="fas fa-tools mr-3 w-5"></i>Matériaux
                 </a>
                 @endhasAnyPermission
+                @hasAnyPermission(['chantiers.view', 'chantiers.edit'])
+                <a href="{{ route('chantiers.index') }}" 
+                   onclick="closeMobileMenu()"
+                   class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
+                   style="{{ request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
+                    <i class="fas fa-hard-hat mr-3 w-5"></i>Chantiers
+                </a>
+                @endhasAnyPermission
+                @if(Auth::check() && Auth::user()->role !== 'admin')
+                <a href="{{ route('chantiers.mes-taches') }}" 
+                   onclick="closeMobileMenu()"
+                   class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('chantiers.mes-taches') || request()->routeIs('taches.*') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
+                   style="{{ request()->routeIs('chantiers.mes-taches') || request()->routeIs('taches.*') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
+                    <i class="fas fa-tasks mr-3 w-5"></i>Mes Tâches
+                </a>
+                @endif
                 @endauth
                 <a href="{{ route('modeles.index') }}" 
                    onclick="closeMobileMenu()"
@@ -994,6 +1030,28 @@
                         @endhasAnyPermission
                     @endif
                     
+                    <!-- Sous-menus pour Chantiers -->
+                    @if(request()->routeIs('chantiers.*'))
+                        @hasAnyPermission(['chantiers.view', 'chantiers.edit'])
+                            @hasPermission('chantiers.view')
+                            <div class="sidebar-item {{ request()->routeIs('chantiers.index') || request()->routeIs('chantiers.show') ? 'active' : '' }}">
+                                <a href="{{ route('chantiers.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                    <i class="fas fa-list mr-3 w-5"></i>
+                                    Liste
+                                </a>
+                            </div>
+                            @endhasPermission
+                            @if(Auth::check() && Auth::user()->role === 'admin')
+                            <div class="sidebar-item {{ request()->routeIs('chantiers.activities') ? 'active' : '' }}">
+                                <a href="{{ route('chantiers.activities') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                    <i class="fas fa-history mr-3 w-5"></i>
+                                    Activités
+                                </a>
+                            </div>
+                            @endif
+                        @endhasAnyPermission
+                    @endif
+                    
                     <!-- Sous-menus pour Catalogue -->
                     @if(request()->routeIs('modeles.*') || request()->routeIs('catalogue.*'))
                         <div class="sidebar-item {{ request()->routeIs('modeles.index') || request()->routeIs('catalogue.*') ? 'active' : '' }}">
@@ -1016,12 +1074,14 @@
                     
                     <!-- Sous-menus pour Dashboard -->
                     @if(request()->routeIs('dashboard*'))
+                        @hasPermission('dashboard.view')
                         <div class="sidebar-item active">
                             <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
                                 <i class="fas fa-chart-bar mr-3 w-5"></i>
                                 Statistiques
                             </a>
                         </div>
+                        @endhasPermission
                     @endif
                     
                     <!-- Sous-menus pour Utilisateurs (Admin) -->
@@ -1179,6 +1239,28 @@
                         @endhasAnyPermission
                     @endif
                     
+                    <!-- Sous-menus pour Chantiers -->
+                    @if(request()->routeIs('chantiers.*'))
+                        @hasAnyPermission(['chantiers.view', 'chantiers.edit'])
+                            @hasPermission('chantiers.view')
+                            <div class="sidebar-item {{ request()->routeIs('chantiers.index') || request()->routeIs('chantiers.show') ? 'active' : '' }}">
+                                <a href="{{ route('chantiers.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                    <i class="fas fa-list mr-3 w-5"></i>
+                                    Liste
+                                </a>
+                            </div>
+                            @endhasPermission
+                            @if(Auth::check() && Auth::user()->role === 'admin')
+                            <div class="sidebar-item {{ request()->routeIs('chantiers.activities') ? 'active' : '' }}">
+                                <a href="{{ route('chantiers.activities') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                    <i class="fas fa-history mr-3 w-5"></i>
+                                    Activités
+                                </a>
+                            </div>
+                            @endif
+                        @endhasAnyPermission
+                    @endif
+                    
                     <!-- Sous-menus pour Catalogue -->
                     @if(request()->routeIs('modeles.*') || request()->routeIs('catalogue.*'))
                         <div class="sidebar-item {{ request()->routeIs('modeles.index') || request()->routeIs('catalogue.*') ? 'active' : '' }}">
@@ -1201,12 +1283,14 @@
                     
                     <!-- Sous-menus pour Dashboard -->
                     @if(request()->routeIs('dashboard*'))
+                        @hasPermission('dashboard.view')
                         <div class="sidebar-item active">
                             <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
                                 <i class="fas fa-chart-bar mr-3 w-5"></i>
                                 Statistiques
                             </a>
                         </div>
+                        @endhasPermission
                     @endif
                 </nav>
             </div>
