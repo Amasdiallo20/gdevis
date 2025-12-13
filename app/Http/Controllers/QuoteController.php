@@ -712,6 +712,15 @@ class QuoteController extends Controller
         $totalVento = 0;
         $totalSikane = 0;
         $totalMoustiquaire = 0;
+        // Nouveaux totaux pour fenêtres ALU A82
+        $totalFermetureA82 = 0;
+        $totalRouletteA82 = 0;
+        $totalRouletteMoustiquaire = 0;
+        $totalEquaireMoustiquaire = 0;
+        $totalBrosseA82M = 0;
+        $totalJointVitrageM = 0;
+        $totalJointMoustiquaireM = 0;
+        $totalVitre = 0;
         // Totaux spécifiques pour fenêtres 3 RAILS
         $totalRail = 0;
         $totalMontant = 0;
@@ -720,9 +729,24 @@ class QuoteController extends Controller
         $totalRoulette = 0;
         $totalTete = 0;
         $totalMoustiquaire3Rails = 0;
+        // Nouveaux totaux pour fenêtres 3 RAILS
+        $totalFermeture3Rails = 0;
+        $totalRouletteVento3Rails = 0;
+        $totalRouletteMoustiquaire3Rails = 0;
+        $totalEquaireMoustiquaire3Rails = 0;
+        $totalBrosseLibanaisM = 0;
+        $totalJointVitrage3RailsM = 0;
+        $totalJointMoustiquaire3RailsM = 0;
+        $totalGrillageMoustiquaire3RailsM = 0;
+        $totalVitre3Rails = 0;
         $totalCadrePorte = 0;
         $totalBattantPorte = 0;
         $totalDivision = 0;
+        // Nouveaux totaux pour portes
+        $totalBrosseA82PorteM = 0;
+        $totalPomelles = 0;
+        $totalVitrePorte = 0;
+        $totalJointVitragePorteM = 0;
         $fenetresDetails = [];
         $portesDetails = [];
 
@@ -750,21 +774,33 @@ class QuoteController extends Controller
                         'porte', 'portes',
                     ];
                     
+                    // Détecter aussi les noms de modèles spécifiques
+                    $modeleName = strtolower($line->product ? $line->product->name : '');
                     $isPorte = false;
                     $porteType = null; // '1_battant' ou '2_battants'
                     
-                    foreach ($porteKeywords as $keyword) {
-                        if (strpos($productName, $keyword) !== false || strpos($description, $keyword) !== false) {
-                            $isPorte = true;
-                            // Déterminer le type de porte
-                            if (strpos($productName, '2 battants') !== false || strpos($description, '2 battants') !== false ||
-                                strpos($productName, '2 battant') !== false || strpos($description, '2 battant') !== false ||
-                                strpos($productName, 'deux battants') !== false || strpos($description, 'deux battants') !== false) {
-                                $porteType = '2_battants';
-                            } else {
-                                $porteType = '1_battant';
+                    // Vérifier d'abord les noms de modèles spécifiques
+                    if (strpos($modeleName, 'porte_1_battant') !== false || strpos($productName, 'porte_1_battant') !== false || strpos($description, 'porte_1_battant') !== false) {
+                        $isPorte = true;
+                        $porteType = '1_battant';
+                    } elseif (strpos($modeleName, 'porte_2_battants') !== false || strpos($productName, 'porte_2_battants') !== false || strpos($description, 'porte_2_battants') !== false) {
+                        $isPorte = true;
+                        $porteType = '2_battants';
+                    } else {
+                        // Sinon, utiliser la détection par mots-clés
+                        foreach ($porteKeywords as $keyword) {
+                            if (strpos($productName, $keyword) !== false || strpos($description, $keyword) !== false) {
+                                $isPorte = true;
+                                // Déterminer le type de porte
+                                if (strpos($productName, '2 battants') !== false || strpos($description, '2 battants') !== false ||
+                                    strpos($productName, '2 battant') !== false || strpos($description, '2 battant') !== false ||
+                                    strpos($productName, 'deux battants') !== false || strpos($description, 'deux battants') !== false) {
+                                    $porteType = '2_battants';
+                                } else {
+                                    $porteType = '1_battant';
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
                     
@@ -794,6 +830,37 @@ class QuoteController extends Controller
                         $totalBattantPorte += $battantPorteLigne;
                         $totalDivision += $division;
                         
+                        // NOUVEAUX CALCULS POUR PORTES
+                        // 1. Brosse A82 selon le type de porte
+                        if ($porteType === '1_battant') {
+                            $brosseA82PorteMLigne = 8 * $nombrePortes;
+                        } elseif ($porteType === '2_battants') {
+                            $brosseA82PorteMLigne = 10 * $nombrePortes;
+                        } else {
+                            // Par défaut, considérer comme 1 battant si non spécifié
+                            $brosseA82PorteMLigne = 8 * $nombrePortes;
+                        }
+                        $totalBrosseA82PorteM += $brosseA82PorteMLigne;
+                        
+                        // 2. Pomelles (charnières) - 1 porte = 1 set de pomelles
+                        $pomellesLigne = $nombrePortes;
+                        $totalPomelles += $pomellesLigne;
+                        
+                        // 3. Calcul vitre pour portes selon le type
+                        if ($porteType === '1_battant') {
+                            // PORTE 1 BATTANT: Vitre = ((largeur-10)/100 * (Hauteur-15)/100)/3,531
+                            $vitrePorteM2 = ((($largeur - 10) / 100) * (($hauteur - 15) / 100)) / 3.531;
+                        } else {
+                            // PORTE 2 BATTANTS: Vitre = ((largeur-15)/100 * (Hauteur-15)/100)/3,531
+                            $vitrePorteM2 = ((($largeur - 15) / 100) * (($hauteur - 15) / 100)) / 3.531;
+                        }
+                        $vitrePorteLigne = $vitrePorteM2 * $nombrePortes;
+                        $totalVitrePorte += $vitrePorteLigne;
+                        
+                        // 4. Joint de vitrage pour portes
+                        $jointVitragePorteMLigne = (((($largeur + $hauteur) * 2) * 4) / 50) * $nombrePortes;
+                        $totalJointVitragePorteM += $jointVitragePorteMLigne;
+                        
                         // Stocker les détails
                         $portesDetails[] = [
                             'line' => $line,
@@ -802,6 +869,11 @@ class QuoteController extends Controller
                             'division' => $division,
                             'nombre_portes' => $nombrePortes,
                             'type' => $porteType,
+                            // Nouveaux matériaux pour portes
+                            'brosse_a82_m' => $brosseA82PorteMLigne,
+                            'pomelles' => $pomellesLigne,
+                            'vitre_m2' => $vitrePorteLigne,
+                            'joint_vitrage_m' => $jointVitragePorteMLigne,
                         ];
                     } else {
                         // Vérifier si c'est une fenêtre - chercher dans le nom du produit ou la description
@@ -874,6 +946,67 @@ class QuoteController extends Controller
                                 $totalTete += $teteLigne;
                                 $totalMoustiquaire3Rails += $moustiquaireLigne;
                                 
+                                // NOUVEAUX CALCULS POUR FENÊTRE 3 RAILS
+                                // 1. Éléments par fenêtre
+                                $fermeture3RailsLigne = $nombreFenetres;
+                                $rouletteVento3RailsLigne = $nombreFenetres;
+                                $rouletteMoustiquaire3RailsLigne = $nombreFenetres;
+                                $equaireMoustiquaire3RailsLigne = $nombreFenetres;
+                                
+                                $totalFermeture3Rails += $fermeture3RailsLigne;
+                                $totalRouletteVento3Rails += $rouletteVento3RailsLigne;
+                                $totalRouletteMoustiquaire3Rails += $rouletteMoustiquaire3RailsLigne;
+                                $totalEquaireMoustiquaire3Rails += $equaireMoustiquaire3RailsLigne;
+                                
+                                // 2. Détecter le type de battant pour la brosse libanais
+                                $typeBattant3Rails = null;
+                                $battantKeywords1 = ['1 battant', '1 battants', 'un battant'];
+                                $battantKeywords2 = ['2 battants', '2 battant', 'deux battants'];
+                                
+                                foreach ($battantKeywords1 as $keyword) {
+                                    if (stripos($productName, $keyword) !== false || stripos($description, $keyword) !== false) {
+                                        $typeBattant3Rails = '1 battant';
+                                        break;
+                                    }
+                                }
+                                
+                                if ($typeBattant3Rails === null) {
+                                    foreach ($battantKeywords2 as $keyword) {
+                                        if (stripos($productName, $keyword) !== false || stripos($description, $keyword) !== false) {
+                                            $typeBattant3Rails = '2 battants';
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                // Calcul de la brosse libanais selon le type de battant
+                                if ($typeBattant3Rails === '1 battant') {
+                                    $brosseLibanaisMLigne = 8 * $nombreFenetres;
+                                } elseif ($typeBattant3Rails === '2 battants') {
+                                    $brosseLibanaisMLigne = 10 * $nombreFenetres;
+                                } else {
+                                    // Par défaut, considérer comme 1 battant si non spécifié
+                                    $brosseLibanaisMLigne = 8 * $nombreFenetres;
+                                }
+                                $totalBrosseLibanaisM += $brosseLibanaisMLigne;
+                                
+                                // 3. Joint de vitrage
+                                $jointVitrage3RailsMLigne = (((($largeur + $hauteur) * 2) * 4) / 50) * $nombreFenetres;
+                                $totalJointVitrage3RailsM += $jointVitrage3RailsMLigne;
+                                
+                                // 4. Joint de moustiquaire
+                                $jointMoustiquaire3RailsMLigne = 5 * $nombreFenetres;
+                                $totalJointMoustiquaire3RailsM += $jointMoustiquaire3RailsMLigne;
+                                
+                                // Grillage moustiquaire
+                                $grillageMoustiquaire3RailsMLigne = 1 * $nombreFenetres;
+                                $totalGrillageMoustiquaire3RailsM += $grillageMoustiquaire3RailsMLigne;
+                                
+                                // 5. Calcul vitre pour fenêtres 3 RAILS
+                                $vitre3RailsFenetre = (((($largeur / 2) - 7) / 100) * (($hauteur - 10) / 100)) / 3.531;
+                                $vitre3RailsLigne = $vitre3RailsFenetre * $nombreFenetres;
+                                $totalVitre3Rails += $vitre3RailsLigne;
+                                
                                 // Stocker les détails pour les fenêtres 3 rails
                                 $fenetresDetails[] = [
                                     'line' => $line,
@@ -893,6 +1026,16 @@ class QuoteController extends Controller
                                         'tete' => $teteLigne,
                                         'moustiquaire' => $moustiquaireLigne,
                                     ],
+                                    // Nouveaux matériaux pour fenêtres 3 RAILS
+                                    'fermeture_3rails' => $fermeture3RailsLigne,
+                                    'roulette_vento_3rails' => $rouletteVento3RailsLigne,
+                                    'roulette_moustiquaire_3rails' => $rouletteMoustiquaire3RailsLigne,
+                                    'equaire_moustiquaire_3rails' => $equaireMoustiquaire3RailsLigne,
+                                    'brosse_libanais_m' => $brosseLibanaisMLigne,
+                                    'joint_vitrage_3rails_m' => $jointVitrage3RailsMLigne,
+                                    'joint_moustiquaire_3rails_m' => $jointMoustiquaire3RailsMLigne,
+                                    'grillage_moustiquaire_3rails_m' => $grillageMoustiquaire3RailsMLigne,
+                                    'vitre_3rails' => $vitre3RailsLigne,
                                 ];
                             } else {
                                 // FORMULES POUR FENÊTRE ALU 82 (formules existantes)
@@ -919,6 +1062,32 @@ class QuoteController extends Controller
                                 $totalSikane += $sikane;
                                 $totalMoustiquaire += $moustiquaireLigne;
                                 
+                                // NOUVEAUX CALCULS POUR FENÊTRE ALU A82
+                                // 1. Éléments par fenêtre
+                                $fermetureA82Ligne = $nombreFenetres;
+                                $rouletteA82Ligne = $nombreFenetres;
+                                // Roulette Moustiquaire = quantité de fenêtres (par paire)
+                                $rouletteMoustiquaireLigne = $nombreFenetres;
+                                $equaireMoustiquaireLigne = $nombreFenetres;
+                                
+                                $totalFermetureA82 += $fermetureA82Ligne;
+                                $totalRouletteA82 += $rouletteA82Ligne;
+                                $totalRouletteMoustiquaire += $rouletteMoustiquaireLigne;
+                                $totalEquaireMoustiquaire += $equaireMoustiquaireLigne;
+                                
+                                // 2. Joint de vitrage
+                                $jointVitrageMLigne = 5 * $nombreFenetres;
+                                $totalJointVitrageM += $jointVitrageMLigne;
+                                
+                                // 4. Joint de moustiquaire
+                                $jointMoustiquaireMLigne = 5 * $nombreFenetres;
+                                $totalJointMoustiquaireM += $jointMoustiquaireMLigne;
+                                
+                                // 5. Calcul vitre
+                                $vitreFenetre = ((($largeur - 22) / 100) * (($hauteur - 16) / 100)) / 3.531;
+                                $vitreLigne = $vitreFenetre * $nombreFenetres;
+                                $totalVitre += $vitreLigne;
+                                
                                 // Stocker les détails pour les fenêtres ALU 82
                                 $fenetresDetails[] = [
                                     'line' => $line,
@@ -928,6 +1097,14 @@ class QuoteController extends Controller
                                     'moustiquaire' => $moustiquaireLigne,
                                     'nombre_fenetres' => $nombreFenetres,
                                     'type' => 'alu_82',
+                                    // Nouveaux matériaux ALU A82
+                                    'fermeture_a82' => $fermetureA82Ligne,
+                                    'roulette_a82' => $rouletteA82Ligne,
+                                    'roulette_moustiquaire' => $rouletteMoustiquaireLigne,
+                                    'equaire_moustiquaire' => $equaireMoustiquaireLigne,
+                                    'joint_vitrage_m' => $jointVitrageMLigne,
+                                    'joint_moustiquaire_m' => $jointMoustiquaireMLigne,
+                                    'vitre' => $vitreLigne,
                                 ];
                             }
                         }
@@ -1039,6 +1216,93 @@ class QuoteController extends Controller
             ];
         }
         
+        // Nouveaux matériaux pour fenêtres ALU A82
+        if ($totalFermetureA82 > 0) {
+            $prixUnitaire = $getPrice('Fermeture A82');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Fermeture A82',
+                'quantite' => $totalFermetureA82,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalFermetureA82 * $prixUnitaire,
+                'unite' => 'Paire',
+            ];
+        }
+        if ($totalRouletteA82 > 0) {
+            $prixUnitaire = $getPrice('Roulette A82');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Roulette A82',
+                'quantite' => $totalRouletteA82,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalRouletteA82 * $prixUnitaire,
+                'unite' => 'Paire',
+            ];
+        }
+        if ($totalRouletteMoustiquaire > 0) {
+            $prixUnitaire = $getPrice('Roulette Moustiquaire');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Roulette Moustiquaire',
+                'quantite' => $totalRouletteMoustiquaire,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalRouletteMoustiquaire * $prixUnitaire,
+                'unite' => 'Paire',
+            ];
+        }
+        if ($totalEquaireMoustiquaire > 0) {
+            $prixUnitaire = $getPrice('Equaire Moustiquaire');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Equaire Moustiquaire',
+                'quantite' => $totalEquaireMoustiquaire,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalEquaireMoustiquaire * $prixUnitaire,
+                'unite' => 'Paire',
+            ];
+        }
+        // Brosse A82 uniquement pour les portes
+        if ($totalBrosseA82PorteM > 0) {
+            $prixUnitaire = $getPrice('Brosse A82');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Brosse A82',
+                'quantite' => $totalBrosseA82PorteM,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalBrosseA82PorteM * $prixUnitaire,
+                'unite' => 'm',
+            ];
+        }
+        // Combiner les joints de vitrage des fenêtres ALU 82 et des portes (même matériau)
+        $totalJointVitrageCombined = $totalJointVitrageM + $totalJointVitragePorteM;
+        if ($totalJointVitrageCombined > 0) {
+            $prixUnitaire = $getPrice('Joint Vitrage');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Joint Vitrage',
+                'quantite' => $totalJointVitrageCombined,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalJointVitrageCombined * $prixUnitaire,
+                'unite' => 'm',
+            ];
+        }
+        if ($totalJointMoustiquaireM > 0) {
+            $prixUnitaire = $getPrice('Joint Moustiquaire');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Joint Moustiquaire',
+                'quantite' => $totalJointMoustiquaireM,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalJointMoustiquaireM * $prixUnitaire,
+                'unite' => 'm',
+            ];
+        }
+        // Combiner les vitres des fenêtres et des portes (même matériau)
+        $totalVitreCombined = $totalVitre + $totalVitrePorte;
+        if ($totalVitreCombined > 0) {
+            $prixUnitaire = $getPrice('Vitre');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Vitre',
+                'quantite' => $totalVitreCombined,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalVitreCombined * $prixUnitaire,
+                'unite' => 'feuille',
+            ];
+        }
+        
         // Fenêtres 3 RAILS
         if (($totalRail ?? 0) > 0) {
             $prixUnitaire = $getPrice('Rail 3R');
@@ -1104,6 +1368,98 @@ class QuoteController extends Controller
             ];
         }
         
+        // Nouveaux matériaux pour fenêtres 3 RAILS
+        if ($totalFermeture3Rails > 0) {
+            $prixUnitaire = $getPrice('Fermeture 3R');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Fermeture 3R',
+                'quantite' => $totalFermeture3Rails,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalFermeture3Rails * $prixUnitaire,
+                'unite' => 'Paire',
+            ];
+        }
+        if ($totalRouletteVento3Rails > 0) {
+            $prixUnitaire = $getPrice('Roulette Vento 3R');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Roulette Vento 3R',
+                'quantite' => $totalRouletteVento3Rails,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalRouletteVento3Rails * $prixUnitaire,
+                'unite' => 'Paire',
+            ];
+        }
+        if ($totalRouletteMoustiquaire3Rails > 0) {
+            $prixUnitaire = $getPrice('Roulette Moustiquaire 3R');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Roulette Moustiquaire 3R',
+                'quantite' => $totalRouletteMoustiquaire3Rails,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalRouletteMoustiquaire3Rails * $prixUnitaire,
+                'unite' => 'Paire',
+            ];
+        }
+        if ($totalEquaireMoustiquaire3Rails > 0) {
+            $prixUnitaire = $getPrice('Equaire Moustiquaire 3R');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Equaire Moustiquaire 3R',
+                'quantite' => $totalEquaireMoustiquaire3Rails,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalEquaireMoustiquaire3Rails * $prixUnitaire,
+                'unite' => 'Paire',
+            ];
+        }
+        if ($totalBrosseLibanaisM > 0) {
+            $prixUnitaire = $getPrice('Brosse Libanais');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Brosse Libanais',
+                'quantite' => $totalBrosseLibanaisM,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalBrosseLibanaisM * $prixUnitaire,
+                'unite' => 'm',
+            ];
+        }
+        if ($totalJointVitrage3RailsM > 0) {
+            $prixUnitaire = $getPrice('Joint Vitrage 3R');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Joint Vitrage 3R',
+                'quantite' => $totalJointVitrage3RailsM,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalJointVitrage3RailsM * $prixUnitaire,
+                'unite' => 'm',
+            ];
+        }
+        if ($totalJointMoustiquaire3RailsM > 0) {
+            $prixUnitaire = $getPrice('Joint Moustiquaire 3R');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Joint Moustiquaire 3R',
+                'quantite' => $totalJointMoustiquaire3RailsM,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalJointMoustiquaire3RailsM * $prixUnitaire,
+                'unite' => 'm',
+            ];
+        }
+        if ($totalGrillageMoustiquaire3RailsM > 0) {
+            $prixUnitaire = $getPrice('Grillage Moustiquaire 3R');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Grillage Moustiquaire 3R',
+                'quantite' => $totalGrillageMoustiquaire3RailsM,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalGrillageMoustiquaire3RailsM * $prixUnitaire,
+                'unite' => 'm',
+            ];
+        }
+        if ($totalVitre3Rails > 0) {
+            $prixUnitaire = $getPrice('Vitre 3R');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Vitre 3R',
+                'quantite' => $totalVitre3Rails,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalVitre3Rails * $prixUnitaire,
+                'unite' => 'feuille',
+            ];
+        }
+        
         // Portes
         if ($totalCadrePorte > 0) {
             $prixUnitaire = $getPrice('Cadre Porte');
@@ -1133,6 +1489,17 @@ class QuoteController extends Controller
             ];
         }
         
+        // Nouveaux matériaux pour portes
+        if ($totalPomelles > 0) {
+            $prixUnitaire = $getPrice('Pomelles');
+            $materiauxAvecPrix[] = [
+                'nom' => 'Pomelles',
+                'quantite' => $totalPomelles,
+                'prix_unitaire' => $prixUnitaire,
+                'total_ligne' => $totalPomelles * $prixUnitaire,
+            ];
+        }
+        
         // Calculer le total général
         $totalGeneral = array_sum(array_column($materiauxAvecPrix, 'total_ligne'));
 
@@ -1141,6 +1508,14 @@ class QuoteController extends Controller
             'total_vento' => $totalVento,
             'total_sikane' => $totalSikane,
             'total_moustiquaire' => $totalMoustiquaire,
+            // Nouveaux totaux pour fenêtres ALU A82
+            'total_fermeture_a82' => $totalFermetureA82,
+            'total_roulette_a82' => $totalRouletteA82,
+            'total_roulette_moustiquaire' => $totalRouletteMoustiquaire,
+            'total_equaire_moustiquaire' => $totalEquaireMoustiquaire,
+            'total_joint_vitrage_m' => $totalJointVitrageM,
+            'total_joint_moustiquaire_m' => $totalJointMoustiquaireM,
+            'total_vitre' => $totalVitre,
             // Totaux spécifiques pour fenêtres 3 RAILS
             'total_rail' => $totalRail ?? 0,
             'total_montant' => $totalMontant ?? 0,
@@ -1149,9 +1524,24 @@ class QuoteController extends Controller
             'total_roulette' => $totalRoulette ?? 0,
             'total_tete' => $totalTete ?? 0,
             'total_moustiquaire_3rails' => $totalMoustiquaire3Rails ?? 0,
+            // Nouveaux totaux pour fenêtres 3 RAILS
+            'total_fermeture_3rails' => $totalFermeture3Rails,
+            'total_roulette_vento_3rails' => $totalRouletteVento3Rails,
+            'total_roulette_moustiquaire_3rails' => $totalRouletteMoustiquaire3Rails,
+            'total_equaire_moustiquaire_3rails' => $totalEquaireMoustiquaire3Rails,
+            'total_brosse_libanais_m' => $totalBrosseLibanaisM,
+            'total_joint_vitrage_3rails_m' => $totalJointVitrage3RailsM,
+            'total_joint_moustiquaire_3rails_m' => $totalJointMoustiquaire3RailsM,
+            'total_grillage_moustiquaire_3rails_m' => $totalGrillageMoustiquaire3RailsM,
+            'total_vitre_3rails' => $totalVitre3Rails,
             'total_cadre_porte' => $totalCadrePorte,
             'total_battant_porte' => $totalBattantPorte,
             'total_division' => $totalDivision,
+            // Nouveaux totaux pour portes
+            'total_brosse_a82_porte_m' => $totalBrosseA82PorteM,
+            'total_pomelles' => $totalPomelles,
+            'total_vitre_porte' => $totalVitrePorte,
+            'total_joint_vitrage_porte_m' => $totalJointVitragePorteM,
             'fenetres_details' => $fenetresDetails,
             'portes_details' => $portesDetails,
             'debug' => $debugInfo,

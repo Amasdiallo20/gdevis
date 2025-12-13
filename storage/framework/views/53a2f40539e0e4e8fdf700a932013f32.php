@@ -157,6 +157,7 @@
             <tr>
                 <th>Nom Matériau</th>
                 <th class="text-center">Quantité</th>
+                <th class="text-center">Unité</th>
                 <th class="text-center">Prix Unitaire (GNF)</th>
                 <th class="text-center">Total par Ligne (GNF)</th>
             </tr>
@@ -166,7 +167,16 @@
             <tr>
                 <td class="material-name"><?php echo e($materiau['nom']); ?></td>
                 <td class="text-center">
-                    <span class="quantity-badge"><?php echo e(number_format($materiau['quantite'], 3, ',', ' ')); ?></span>
+                    <span class="quantity-badge">
+                        <?php echo e(number_format($materiau['quantite'], 3, ',', ' ')); ?>
+
+                    </span>
+                </td>
+                <td class="text-center">
+                    <span class="text-sm text-gray-600">
+                        <?php echo e($materiau['unite'] ?? '-'); ?>
+
+                    </span>
                 </td>
                 <td class="text-center price-value"><?php echo e(number_format($materiau['prix_unitaire'], 0, ',', ' ')); ?></td>
                 <td class="text-center price-value"><?php echo e(number_format($materiau['total_ligne'], 0, ',', ' ')); ?></td>
@@ -175,7 +185,7 @@
         </tbody>
         <tfoot>
             <tr class="total-row">
-                <td colspan="3" class="text-right" style="padding-right: 20px;">
+                <td colspan="4" class="text-right" style="padding-right: 20px;">
                     <strong>Total Général des Matériaux :</strong>
                 </td>
                 <td class="text-center total-value">

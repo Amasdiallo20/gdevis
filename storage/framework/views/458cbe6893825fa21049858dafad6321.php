@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Devis'); ?>
 
 <?php $__env->startSection('content'); ?>

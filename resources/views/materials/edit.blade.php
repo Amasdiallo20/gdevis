@@ -51,14 +51,75 @@
                 <label for="unite" class="block text-sm font-medium text-gray-700 mb-2">
                     <i class="fas fa-ruler mr-1 text-gray-400"></i>Unité *
                 </label>
-                <input type="text" name="unite" id="unite" value="{{ old('unite', $material->unite) }}" required
+                <select name="unite" id="unite" required
                     class="block w-full rounded-lg border-2 border-gray-400 bg-white px-4 py-3 text-gray-900 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all @error('unite') border-red-500 bg-red-50 @enderror"
                     style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};"
-                    placeholder="Ex: barre, mètre, kg">
+                    onchange="handleUniteChange(this)">
+                    <option value="">Sélectionner une unité</option>
+                    <option value="barre" {{ old('unite', $material->unite) == 'barre' ? 'selected' : '' }}>barre</option>
+                    <option value="m" {{ old('unite', $material->unite) == 'm' ? 'selected' : '' }}>m (mètre)</option>
+                    <option value="Paire" {{ old('unite', $material->unite) == 'Paire' ? 'selected' : '' }}>Paire</option>
+                    <option value="unité" {{ old('unite', $material->unite) == 'unité' ? 'selected' : '' }}>unité</option>
+                    <option value="feuille" {{ old('unite', $material->unite) == 'feuille' ? 'selected' : '' }}>feuille</option>
+                    <option value="rouleau" {{ old('unite', $material->unite) == 'rouleau' ? 'selected' : '' }}>rouleau</option>
+                    <option value="kg" {{ old('unite', $material->unite) == 'kg' ? 'selected' : '' }}>kg (kilogramme)</option>
+                    <option value="__custom__">Autre (saisie libre)</option>
+                </select>
+                <input type="text" name="unite_custom" id="unite_custom" value="{{ old('unite', $material->unite) }}" 
+                    class="hidden mt-2 block w-full rounded-lg border-2 border-gray-400 bg-white px-4 py-3 text-gray-900 text-base shadow-sm focus:ring-2 focus:border-transparent transition-all @error('unite') border-red-500 bg-red-50 @enderror"
+                    style="focus:ring-color: {{ $settings->primary_color ?? '#3b82f6' }};"
+                    placeholder="Saisir une unité personnalisée">
                 @error('unite')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
+
+            <script>
+                function handleUniteChange(select) {
+                    const customInput = document.getElementById('unite_custom');
+                    if (select.value === '__custom__') {
+                        customInput.classList.remove('hidden');
+                        customInput.required = true;
+                        select.required = false;
+                        customInput.value = '';
+                        customInput.focus();
+                    } else {
+                        customInput.classList.add('hidden');
+                        customInput.required = false;
+                        select.required = true;
+                    }
+                }
+
+                // Vérifier si l'unité actuelle n'est pas dans la liste
+                document.addEventListener('DOMContentLoaded', function() {
+                    const select = document.getElementById('unite');
+                    const currentUnite = '{{ old('unite', $material->unite) }}';
+                    const options = Array.from(select.options).map(opt => opt.value);
+                    
+                    if (currentUnite && !options.includes(currentUnite)) {
+                        // L'unité actuelle n'est pas dans la liste, afficher le champ personnalisé
+                        select.value = '__custom__';
+                        handleUniteChange(select);
+                        document.getElementById('unite_custom').value = currentUnite;
+                    }
+                });
+
+                // Gérer la soumission du formulaire
+                document.querySelector('form').addEventListener('submit', function(e) {
+                    const select = document.getElementById('unite');
+                    const customInput = document.getElementById('unite_custom');
+                    
+                    if (select.value === '__custom__') {
+                        // Utiliser la valeur du champ personnalisé
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'unite';
+                        hiddenInput.value = customInput.value;
+                        this.appendChild(hiddenInput);
+                        select.disabled = true;
+                    }
+                });
+            </script>
 
             <div class="mt-6 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 border-t pt-6">
                 <a href="{{ route('materials.index') }}" 

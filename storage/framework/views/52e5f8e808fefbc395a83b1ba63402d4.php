@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', $modele->nom . ' - A2 VitraDevis'); ?>
 
 <?php

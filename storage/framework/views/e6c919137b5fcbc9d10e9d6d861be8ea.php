@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Calcul des Matériaux'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -100,39 +98,111 @@
                     <i class="fas fa-list-check mr-2" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;"></i>
                     Totaux des Matériaux - Fenêtres Alu 82
                 </h3>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-white border-2 border-blue-200 rounded-lg p-4 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Total CADRE</label>
-                        <div class="text-2xl font-bold" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">
+                <div class="grid gap-3 mb-6" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); align-items: stretch;">
+                    <div class="bg-white border-2 border-blue-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Total CADRE</label>
+                        <div class="text-2xl font-bold whitespace-nowrap mb-1" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">
                             <?php echo e(number_format($materials['total_cadre'], 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 font-medium">barres</p>
                     </div>
-                    <div class="bg-white border-2 border-green-200 rounded-lg p-4 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Total VENTO</label>
-                        <div class="text-2xl font-bold text-green-700">
+                    <div class="bg-white border-2 border-green-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Total VENTO</label>
+                        <div class="text-2xl font-bold text-green-700 whitespace-nowrap mb-1">
                             <?php echo e(number_format($materials['total_vento'], 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 font-medium">barres</p>
                     </div>
-                    <div class="bg-white border-2 border-purple-200 rounded-lg p-4 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Total SIKANE</label>
-                        <div class="text-2xl font-bold text-purple-700">
+                    <div class="bg-white border-2 border-purple-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Total SIKANE</label>
+                        <div class="text-2xl font-bold text-purple-700 whitespace-nowrap mb-1">
                             <?php echo e(number_format($materials['total_sikane'], 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 font-medium">barres</p>
                     </div>
-                    <div class="bg-white border-2 border-orange-200 rounded-lg p-4 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Total MOUSTIQUAIRE</label>
-                        <div class="text-2xl font-bold text-orange-700">
+                    <div class="bg-white border-2 border-orange-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Total MOUSTIQUAIRE</label>
+                        <div class="text-2xl font-bold text-orange-700 whitespace-nowrap mb-1">
                             <?php echo e(number_format($materials['total_moustiquaire'], 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 font-medium">barres</p>
                     </div>
+                    
+                    <!-- Nouveaux matériaux ALU A82 -->
+                    <?php if(isset($materials['total_fermeture_a82']) && $materials['total_fermeture_a82'] > 0): ?>
+                    <div class="bg-white border-2 border-cyan-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Fermeture A82</label>
+                        <div class="text-2xl font-bold text-cyan-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_fermeture_a82'], 0, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">Paire</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_roulette_a82']) && $materials['total_roulette_a82'] > 0): ?>
+                    <div class="bg-white border-2 border-pink-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Roulette A82</label>
+                        <div class="text-2xl font-bold text-pink-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_roulette_a82'], 0, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">Paire</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_roulette_moustiquaire']) && $materials['total_roulette_moustiquaire'] > 0): ?>
+                    <div class="bg-white border-2 border-yellow-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Roulette Moustiquaire</label>
+                        <div class="text-2xl font-bold text-yellow-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_roulette_moustiquaire'], 0, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">Paire</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_equaire_moustiquaire']) && $materials['total_equaire_moustiquaire'] > 0): ?>
+                    <div class="bg-white border-2 border-indigo-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Equaire Moustiquaire</label>
+                        <div class="text-2xl font-bold text-indigo-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_equaire_moustiquaire'], 0, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">Paire</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_joint_vitrage_m']) && $materials['total_joint_vitrage_m'] > 0): ?>
+                    <div class="bg-white border-2 border-amber-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Joint Vitrage</label>
+                        <div class="text-2xl font-bold text-amber-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_joint_vitrage_m'], 2, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">m</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_joint_moustiquaire_m']) && $materials['total_joint_moustiquaire_m'] > 0): ?>
+                    <div class="bg-white border-2 border-rose-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Joint Moustiquaire</label>
+                        <div class="text-2xl font-bold text-rose-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_joint_moustiquaire_m'], 2, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">m</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_vitre']) && $materials['total_vitre'] > 0): ?>
+                    <div class="bg-white border-2 border-emerald-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Vitre</label>
+                        <div class="text-2xl font-bold text-emerald-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_vitre'], 2, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">feuille</p>
+                    </div>
+                    <?php endif; ?>
                 </div>
                 <?php endif; ?>
                 
@@ -142,97 +212,235 @@
                     <i class="fas fa-list-check mr-2" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;"></i>
                     Totaux des Matériaux - Fenêtres 3 Rails
                 </h3>
-                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
-                    <div class="bg-white border-2 border-blue-200 rounded-lg p-3 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">RAIL</label>
-                        <div class="text-xl font-bold text-blue-700">
+                <div class="grid gap-3 mb-6" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); align-items: stretch;">
+                    <div class="bg-white border-2 border-blue-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">RAIL</label>
+                        <div class="text-2xl font-bold text-blue-700 whitespace-nowrap mb-1">
                             <?php echo e(number_format($materials['total_rail'], 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 font-medium">barres</p>
                     </div>
-                    <div class="bg-white border-2 border-indigo-200 rounded-lg p-3 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">MONTANT</label>
-                        <div class="text-xl font-bold text-indigo-700">
+                    <div class="bg-white border-2 border-indigo-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">MONTANT</label>
+                        <div class="text-2xl font-bold text-indigo-700 whitespace-nowrap mb-1">
                             <?php echo e(number_format($materials['total_montant'], 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 font-medium">barres</p>
                     </div>
-                    <div class="bg-white border-2 border-green-200 rounded-lg p-3 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">BUTÉE</label>
-                        <div class="text-xl font-bold text-green-700">
+                    <div class="bg-white border-2 border-green-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">BUTÉE</label>
+                        <div class="text-2xl font-bold text-green-700 whitespace-nowrap mb-1">
                             <?php echo e(number_format($materials['total_butee'], 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 font-medium">barres</p>
                     </div>
-                    <div class="bg-white border-2 border-teal-200 rounded-lg p-3 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">POIGNÉE</label>
-                        <div class="text-xl font-bold text-teal-700">
+                    <div class="bg-white border-2 border-teal-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">POIGNÉE</label>
+                        <div class="text-2xl font-bold text-teal-700 whitespace-nowrap mb-1">
                             <?php echo e(number_format($materials['total_poignee'], 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 font-medium">barres</p>
                     </div>
-                    <div class="bg-white border-2 border-purple-200 rounded-lg p-3 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">ROULETTE</label>
-                        <div class="text-xl font-bold text-purple-700">
+                    <div class="bg-white border-2 border-purple-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">ROULETTE</label>
+                        <div class="text-2xl font-bold text-purple-700 whitespace-nowrap mb-1">
                             <?php echo e(number_format($materials['total_roulette'], 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 font-medium">barres</p>
                     </div>
-                    <div class="bg-white border-2 border-pink-200 rounded-lg p-3 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">TÊTE</label>
-                        <div class="text-xl font-bold text-pink-700">
+                    <div class="bg-white border-2 border-pink-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">TÊTE</label>
+                        <div class="text-2xl font-bold text-pink-700 whitespace-nowrap mb-1">
                             <?php echo e(number_format($materials['total_tete'], 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 font-medium">barres</p>
                     </div>
-                    <div class="bg-white border-2 border-orange-200 rounded-lg p-3 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">MOUSTIQUAIRE</label>
-                        <div class="text-xl font-bold text-orange-700">
+                    <div class="bg-white border-2 border-orange-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">MOUSTIQUAIRE</label>
+                        <div class="text-2xl font-bold text-orange-700 whitespace-nowrap mb-1">
                             <?php echo e(number_format($materials['total_moustiquaire_3rails'] ?? 0, 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 font-medium">barres</p>
                     </div>
+                    
+                    <!-- Nouveaux matériaux pour fenêtres 3 RAILS -->
+                    <?php if(isset($materials['total_fermeture_3rails']) && $materials['total_fermeture_3rails'] > 0): ?>
+                    <div class="bg-white border-2 border-cyan-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Fermeture 3R</label>
+                        <div class="text-2xl font-bold text-cyan-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_fermeture_3rails'], 0, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">Paire</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_roulette_vento_3rails']) && $materials['total_roulette_vento_3rails'] > 0): ?>
+                    <div class="bg-white border-2 border-lime-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Roulette Vento 3R</label>
+                        <div class="text-2xl font-bold text-lime-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_roulette_vento_3rails'], 0, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">Paire</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_roulette_moustiquaire_3rails']) && $materials['total_roulette_moustiquaire_3rails'] > 0): ?>
+                    <div class="bg-white border-2 border-yellow-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Roul. Moust. 3R</label>
+                        <div class="text-2xl font-bold text-yellow-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_roulette_moustiquaire_3rails'], 0, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">Paire</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_equaire_moustiquaire_3rails']) && $materials['total_equaire_moustiquaire_3rails'] > 0): ?>
+                    <div class="bg-white border-2 border-violet-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Equaire Moust. 3R</label>
+                        <div class="text-2xl font-bold text-violet-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_equaire_moustiquaire_3rails'], 0, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">Paire</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_brosse_libanais_m']) && $materials['total_brosse_libanais_m'] > 0): ?>
+                    <div class="bg-white border-2 border-sky-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Brosse Libanais</label>
+                        <div class="text-2xl font-bold text-sky-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_brosse_libanais_m'], 2, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">m</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_joint_vitrage_3rails_m']) && $materials['total_joint_vitrage_3rails_m'] > 0): ?>
+                    <div class="bg-white border-2 border-amber-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Joint Vitrage 3R</label>
+                        <div class="text-2xl font-bold text-amber-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_joint_vitrage_3rails_m'], 2, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">m</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_joint_moustiquaire_3rails_m']) && $materials['total_joint_moustiquaire_3rails_m'] > 0): ?>
+                    <div class="bg-white border-2 border-fuchsia-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Joint Moust. 3R</label>
+                        <div class="text-2xl font-bold text-fuchsia-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_joint_moustiquaire_3rails_m'], 2, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">m</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_grillage_moustiquaire_3rails_m']) && $materials['total_grillage_moustiquaire_3rails_m'] > 0): ?>
+                    <div class="bg-white border-2 border-emerald-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Grillage Moust. 3R</label>
+                        <div class="text-2xl font-bold text-emerald-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_grillage_moustiquaire_3rails_m'], 2, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">m</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_vitre_3rails']) && $materials['total_vitre_3rails'] > 0): ?>
+                    <div class="bg-white border-2 border-slate-200 rounded-lg p-3.5 shadow-md flex flex-col justify-between">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 whitespace-nowrap">Vitre 3R</label>
+                        <div class="text-2xl font-bold text-slate-700 whitespace-nowrap mb-1">
+                            <?php echo e(number_format($materials['total_vitre_3rails'], 2, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 font-medium">feuille</p>
+                    </div>
+                    <?php endif; ?>
                 </div>
                 <?php endif; ?>
                 <?php endif; ?>
                 
-                <?php if(isset($materials['total_cadre_porte']) && ($materials['total_cadre_porte'] > 0 || $materials['total_battant_porte'] > 0 || $materials['total_division'] > 0)): ?>
+                <?php if(isset($materials['total_cadre_porte']) && ($materials['total_cadre_porte'] > 0 || $materials['total_battant_porte'] > 0 || $materials['total_division'] > 0 || ($materials['total_brosse_a82_porte_m'] ?? 0) > 0 || ($materials['total_pomelles'] ?? 0) > 0 || ($materials['total_vitre_porte'] ?? 0) > 0 || ($materials['total_joint_vitrage_porte_m'] ?? 0) > 0)): ?>
                 <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
                     <i class="fas fa-door-open mr-2" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;"></i>
                     Totaux des Matériaux - Portes
                 </h3>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    <div class="bg-white border-2 border-indigo-200 rounded-lg p-4 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Total CADRE PORTE</label>
-                        <div class="text-2xl font-bold text-indigo-700">
+                <div class="grid gap-2.5 mb-6" style="grid-template-columns: repeat(auto-fit, minmax(140px, max-content)); justify-content: start;">
+                    <?php if(isset($materials['total_cadre_porte']) && $materials['total_cadre_porte'] > 0): ?>
+                    <div class="bg-white border-2 border-indigo-200 rounded-lg p-2.5 shadow-md flex flex-col min-w-[140px]">
+                        <label class="block text-xs font-medium text-gray-600 mb-1 whitespace-nowrap">Total CADRE PORTE</label>
+                        <div class="text-lg font-bold text-indigo-700 whitespace-nowrap">
                             <?php echo e(number_format($materials['total_cadre_porte'], 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 mt-0.5">barres</p>
                     </div>
-                    <div class="bg-white border-2 border-teal-200 rounded-lg p-4 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Total BATTANT PORTE</label>
-                        <div class="text-2xl font-bold text-teal-700">
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_battant_porte']) && $materials['total_battant_porte'] > 0): ?>
+                    <div class="bg-white border-2 border-teal-200 rounded-lg p-2.5 shadow-md flex flex-col min-w-[140px]">
+                        <label class="block text-xs font-medium text-gray-600 mb-1 whitespace-nowrap">Total BATTANT PORTE</label>
+                        <div class="text-lg font-bold text-teal-700 whitespace-nowrap">
                             <?php echo e(number_format($materials['total_battant_porte'], 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 mt-0.5">barres</p>
                     </div>
-                    <div class="bg-white border-2 border-pink-200 rounded-lg p-4 shadow-md">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Total DIVISION</label>
-                        <div class="text-2xl font-bold text-pink-700">
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_division']) && $materials['total_division'] > 0): ?>
+                    <div class="bg-white border-2 border-pink-200 rounded-lg p-2.5 shadow-md flex flex-col min-w-[140px]">
+                        <label class="block text-xs font-medium text-gray-600 mb-1 whitespace-nowrap">Total DIVISION</label>
+                        <div class="text-lg font-bold text-pink-700 whitespace-nowrap">
                             <?php echo e(number_format($materials['total_division'], 3, ',', ' ')); ?>
 
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">barres</p>
+                        <p class="text-xs text-gray-500 mt-0.5">barres</p>
                     </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_brosse_a82_porte_m']) && $materials['total_brosse_a82_porte_m'] > 0): ?>
+                    <div class="bg-white border-2 border-cyan-200 rounded-lg p-2.5 shadow-md flex flex-col min-w-[140px]">
+                        <label class="block text-xs font-medium text-gray-600 mb-1 whitespace-nowrap">Brosse A82</label>
+                        <div class="text-lg font-bold text-cyan-700 whitespace-nowrap">
+                            <?php echo e(number_format($materials['total_brosse_a82_porte_m'], 2, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 mt-0.5">m</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_pomelles']) && $materials['total_pomelles'] > 0): ?>
+                    <div class="bg-white border-2 border-purple-200 rounded-lg p-2.5 shadow-md flex flex-col min-w-[140px]">
+                        <label class="block text-xs font-medium text-gray-600 mb-1 whitespace-nowrap">Pomelles</label>
+                        <div class="text-lg font-bold text-purple-700 whitespace-nowrap">
+                            <?php echo e(number_format($materials['total_pomelles'], 0, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 mt-0.5">unité</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_vitre_porte']) && $materials['total_vitre_porte'] > 0): ?>
+                    <div class="bg-white border-2 border-emerald-200 rounded-lg p-2.5 shadow-md flex flex-col min-w-[140px]">
+                        <label class="block text-xs font-medium text-gray-600 mb-1 whitespace-nowrap">Vitre</label>
+                        <div class="text-lg font-bold text-emerald-700 whitespace-nowrap">
+                            <?php echo e(number_format($materials['total_vitre_porte'], 2, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 mt-0.5">feuille</p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if(isset($materials['total_joint_vitrage_porte_m']) && $materials['total_joint_vitrage_porte_m'] > 0): ?>
+                    <div class="bg-white border-2 border-amber-200 rounded-lg p-2.5 shadow-md flex flex-col min-w-[140px]">
+                        <label class="block text-xs font-medium text-gray-600 mb-1 whitespace-nowrap">Joint Vitrage</label>
+                        <div class="text-lg font-bold text-amber-700 whitespace-nowrap">
+                            <?php echo e(number_format($materials['total_joint_vitrage_porte_m'], 2, ',', ' ')); ?>
+
+                        </div>
+                        <p class="text-xs text-gray-500 mt-0.5">m</p>
+                    </div>
+                    <?php endif; ?>
                 </div>
                 <?php endif; ?>
             </div>
@@ -248,41 +456,59 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-box mr-2"></i>Produit
+                                <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-box mr-1 text-[9px]"></i>Produit
                                 </th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-ruler mr-2"></i>Dimensions
+                                <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-ruler mr-1 text-[9px]"></i>Dimensions
                                 </th>
-                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-hashtag mr-2"></i>Nb
+                                <th class="px-4 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-hashtag mr-1 text-[9px]"></i>Nb
                                 </th>
-                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-tag mr-2"></i>Type
+                                <th class="px-4 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-tag mr-1 text-[9px]"></i>Type
                                 </th>
                                 <?php if(isset($materials['fenetres_details'][0]['type']) && $materials['fenetres_details'][0]['type'] === '3_rails'): ?>
                                 <!-- Colonnes pour fenêtres 3 RAILS -->
-                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">RAIL</th>
-                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">MONTANT</th>
-                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">BUTÉE</th>
-                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">POIGNÉE</th>
-                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">ROULETTE</th>
-                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">TÊTE</th>
-                                <th class="px-3 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">MOUSTIQUAIRE</th>
+                                <th class="px-3 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">RAIL</th>
+                                <th class="px-3 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">MONTANT</th>
+                                <th class="px-3 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">BUTÉE</th>
+                                <th class="px-3 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">POIGNÉE</th>
+                                <th class="px-3 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">ROULETTE</th>
+                                <th class="px-3 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">TÊTE</th>
+                                <th class="px-3 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">MOUSTIQUAIRE</th>
+                                <!-- Nouveaux matériaux pour fenêtres 3 RAILS -->
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Ferm. 3R</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Roul. Vento</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Roul. Moust.</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Equaire</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Brosse Lib.</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Joint Vit.</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Joint Moust.</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Grillage</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Vitre 3R</th>
                                 <?php else: ?>
                                 <!-- Colonnes pour fenêtres ALU 82 -->
-                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-cube mr-2"></i>CADRE
+                                <th class="px-3 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-cube mr-1 text-[9px]"></i>CADRE
                                 </th>
-                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-cube mr-2"></i>VENTO
+                                <th class="px-3 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-cube mr-1 text-[9px]"></i>VENTO
                                 </th>
-                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-cube mr-2"></i>SIKANE
+                                <th class="px-3 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-cube mr-1 text-[9px]"></i>SIKANE
                                 </th>
-                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-cube mr-2"></i>MOUSTIQUAIRE
+                                <th class="px-3 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-cube mr-1 text-[9px]"></i>MOUSTIQUAIRE
                                 </th>
+                                <!-- Nouveaux matériaux ALU A82 -->
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Ferm. A82</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Roul. A82</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Roul. Moust.</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Equaire</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Joint Vit.</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Joint Moust.</th>
+                                <th class="px-2 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">Vitre</th>
                                 <?php endif; ?>
                             </tr>
                         </thead>
@@ -319,68 +545,196 @@
                                         <?php echo e(number_format($detail['details']['rail'], 3, ',', ' ')); ?>
 
                                     </span>
+                                    <p class="text-xs text-gray-400">barres</p>
                                 </td>
                                 <td class="px-3 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-indigo-700">
                                         <?php echo e(number_format($detail['details']['montant'], 3, ',', ' ')); ?>
 
                                     </span>
+                                    <p class="text-xs text-gray-400">barres</p>
                                 </td>
                                 <td class="px-3 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-green-700">
                                         <?php echo e(number_format($detail['details']['butee'], 3, ',', ' ')); ?>
 
                                     </span>
+                                    <p class="text-xs text-gray-400">barres</p>
                                 </td>
                                 <td class="px-3 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-teal-700">
                                         <?php echo e(number_format($detail['details']['poignee'], 3, ',', ' ')); ?>
 
                                     </span>
+                                    <p class="text-xs text-gray-400">barres</p>
                                 </td>
                                 <td class="px-3 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-purple-700">
                                         <?php echo e(number_format($detail['details']['roulette'], 3, ',', ' ')); ?>
 
                                     </span>
+                                    <p class="text-xs text-gray-400">barres</p>
                                 </td>
                                 <td class="px-3 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-pink-700">
                                         <?php echo e(number_format($detail['details']['tete'], 3, ',', ' ')); ?>
 
                                     </span>
+                                    <p class="text-xs text-gray-400">barres</p>
                                 </td>
                                 <td class="px-3 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-orange-700">
                                         <?php echo e(number_format($detail['details']['moustiquaire'], 3, ',', ' ')); ?>
 
                                     </span>
+                                    <p class="text-xs text-gray-400">barres</p>
+                                </td>
+                                <!-- Nouveaux matériaux pour fenêtres 3 RAILS -->
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-cyan-700">
+                                        <?php echo e(isset($detail['fermeture_3rails']) ? number_format($detail['fermeture_3rails'], 0, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">Paire</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-lime-700">
+                                        <?php echo e(isset($detail['roulette_vento_3rails']) ? number_format($detail['roulette_vento_3rails'], 0, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">Paire</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-yellow-700">
+                                        <?php echo e(isset($detail['roulette_moustiquaire_3rails']) ? number_format($detail['roulette_moustiquaire_3rails'], 0, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">Paire</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-violet-700">
+                                        <?php echo e(isset($detail['equaire_moustiquaire_3rails']) ? number_format($detail['equaire_moustiquaire_3rails'], 0, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">Paire</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-sky-700">
+                                        <?php echo e(isset($detail['brosse_libanais_m']) ? number_format($detail['brosse_libanais_m'], 2, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">m</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-amber-700">
+                                        <?php echo e(isset($detail['joint_vitrage_3rails_m']) ? number_format($detail['joint_vitrage_3rails_m'], 2, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">m</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-fuchsia-700">
+                                        <?php echo e(isset($detail['joint_moustiquaire_3rails_m']) ? number_format($detail['joint_moustiquaire_3rails_m'], 2, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">m</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-emerald-700">
+                                        <?php echo e(isset($detail['grillage_moustiquaire_3rails_m']) ? number_format($detail['grillage_moustiquaire_3rails_m'], 2, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">m</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-slate-700">
+                                        <?php echo e(isset($detail['vitre_3rails']) ? number_format($detail['vitre_3rails'], 2, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">feuille</p>
                                 </td>
                                 <?php else: ?>
                                 <!-- Affichage pour fenêtres ALU 82 -->
-                                <td class="px-4 py-4 whitespace-nowrap text-center">
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold" style="color: <?php echo e($settings->primary_color ?? '#3b82f6'); ?>;">
                                         <?php echo e(number_format($detail['cadre'], 3, ',', ' ')); ?>
 
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-center">
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-green-700">
                                         <?php echo e(number_format($detail['vento'], 3, ',', ' ')); ?>
 
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-center">
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-purple-700">
                                         <?php echo e(number_format($detail['sikane'], 3, ',', ' ')); ?>
 
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-center">
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-orange-700">
                                         <?php echo e(number_format($detail['moustiquaire'], 3, ',', ' ')); ?>
 
                                     </span>
+                                </td>
+                                <!-- Nouveaux matériaux ALU A82 -->
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-cyan-700">
+                                        <?php echo e(isset($detail['fermeture_a82']) ? number_format($detail['fermeture_a82'], 0, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">Paire</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-pink-700">
+                                        <?php echo e(isset($detail['roulette_a82']) ? number_format($detail['roulette_a82'], 0, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">Paire</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-yellow-700">
+                                        <?php echo e(isset($detail['roulette_moustiquaire']) ? number_format($detail['roulette_moustiquaire'], 0, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">Paire</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-indigo-700">
+                                        <?php echo e(isset($detail['equaire_moustiquaire']) ? number_format($detail['equaire_moustiquaire'], 0, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">Paire</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-teal-700">
+                                        <?php echo e(isset($detail['brosse_a82_m']) ? number_format($detail['brosse_a82_m'], 2, ',', ' ') : '0,00'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">m</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-amber-700">
+                                        <?php echo e(isset($detail['joint_vitrage_m']) ? number_format($detail['joint_vitrage_m'], 2, ',', ' ') : '0,00'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">m</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-rose-700">
+                                        <?php echo e(isset($detail['joint_moustiquaire_m']) ? number_format($detail['joint_moustiquaire_m'], 2, ',', ' ') : '0,00'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">m</p>
+                                </td>
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs font-semibold text-emerald-700">
+                                        <?php echo e(isset($detail['vitre']) ? number_format($detail['vitre'], 2, ',', ' ') : '0,00'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">feuille</p>
                                 </td>
                                 <?php endif; ?>
                             </tr>
@@ -402,26 +756,38 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-box mr-2"></i>Produit
+                                <th class="px-6 py-2 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-box mr-1 text-[9px]"></i>Produit
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-ruler mr-2"></i>Dimensions
+                                <th class="px-6 py-2 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-ruler mr-1 text-[9px]"></i>Dimensions
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-hashtag mr-2"></i>Nb Portes
+                                <th class="px-6 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-hashtag mr-1 text-[9px]"></i>Nb Portes
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-tag mr-2"></i>Type
+                                <th class="px-6 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-tag mr-1 text-[9px]"></i>Type
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-cube mr-2"></i>CADRE PORTE
+                                <th class="px-6 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-cube mr-1 text-[9px]"></i>CADRE PORTE
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-cube mr-2"></i>BATTANT PORTE
+                                <th class="px-6 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-cube mr-1 text-[9px]"></i>BATTANT PORTE
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <i class="fas fa-cube mr-2"></i>DIVISION
+                                <th class="px-6 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-cube mr-1 text-[9px]"></i>DIVISION
+                                </th>
+                                <th class="px-6 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-brush mr-1 text-[9px]"></i>Brosse A82
+                                </th>
+                                <th class="px-6 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-link mr-1 text-[9px]"></i>Pomelles
+                                </th>
+                                <th class="px-6 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-window-maximize mr-1 text-[9px]"></i>Vitre
+                                </th>
+                                <th class="px-6 py-2 text-center text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                                    <i class="fas fa-seal mr-1 text-[9px]"></i>Joint Vitrage
                                 </th>
                             </tr>
                         </thead>
@@ -456,18 +822,51 @@
                                         <?php echo e(number_format($detail['cadre_porte'], 3, ',', ' ')); ?>
 
                                     </span>
+                                    <p class="text-xs text-gray-400">barres</p>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-teal-700">
                                         <?php echo e(number_format($detail['battant_porte'], 3, ',', ' ')); ?>
 
                                     </span>
+                                    <p class="text-xs text-gray-400">barres</p>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-bold text-pink-700">
                                         <?php echo e(number_format($detail['division'], 3, ',', ' ')); ?>
 
                                     </span>
+                                    <p class="text-xs text-gray-400">barres</p>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-semibold text-cyan-700">
+                                        <?php echo e(isset($detail['brosse_a82_m']) ? number_format($detail['brosse_a82_m'], 2, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">m</p>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-semibold text-purple-700">
+                                        <?php echo e(isset($detail['pomelles']) ? number_format($detail['pomelles'], 0, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">unité</p>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-semibold text-emerald-700">
+                                        <?php echo e(isset($detail['vitre_m2']) ? number_format($detail['vitre_m2'], 2, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">feuille</p>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-semibold text-amber-700">
+                                        <?php echo e(isset($detail['joint_vitrage_m']) ? number_format($detail['joint_vitrage_m'], 2, ',', ' ') : '0'); ?>
+
+                                    </span>
+                                    <p class="text-xs text-gray-400">m</p>
+                                </td>
+                                    <p class="text-xs text-gray-400">feuille</p>
                                 </td>
                             </tr>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -504,6 +903,9 @@
                                         <i class="fas fa-calculator mr-1"></i>Quantité
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        <i class="fas fa-ruler mr-1"></i>Unité
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
                                         <i class="fas fa-tag mr-1"></i>Prix Unitaire (GNF)
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
@@ -527,6 +929,12 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="text-sm text-gray-600">
+                                            <?php echo e($materiau['unite'] ?? '-'); ?>
+
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
                                         <span class="text-sm font-bold text-gray-700">
                                             <?php echo e(number_format($materiau['prix_unitaire'], 0, ',', ' ')); ?>
 
@@ -543,7 +951,7 @@
                             </tbody>
                             <tfoot class="bg-gray-100">
                                 <tr>
-                                    <td colspan="3" class="px-6 py-4 text-right text-sm font-bold text-gray-900">
+                                    <td colspan="4" class="px-6 py-4 text-right text-sm font-bold text-gray-900">
                                         <i class="fas fa-calculator mr-2"></i>Total Général des Matériaux :
                                     </td>
                                     <td class="px-6 py-4 text-center">

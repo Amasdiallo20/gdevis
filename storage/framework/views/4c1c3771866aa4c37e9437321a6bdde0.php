@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Catalogue de Modèles - A2 VitraDevis'); ?>
 
 <?php $__env->startSection('content'); ?>
