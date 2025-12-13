@@ -569,36 +569,66 @@
                                     </span>
                                     <p class="text-xs text-gray-400">Paire</p>
                                 </td>
+                                @if(isset($detail['brosse_libanais_m']) && $detail['brosse_libanais_m'] > 0)
                                 <td class="px-2 py-4 whitespace-nowrap text-center">
                                     <span class="text-xs font-semibold text-sky-700">
-                                        {{ isset($detail['brosse_libanais_m']) ? number_format($detail['brosse_libanais_m'], 2, ',', ' ') : '0' }}
+                                        {{ number_format($detail['brosse_libanais_m'], 2, ',', ' ') }}
                                     </span>
                                     <p class="text-xs text-gray-400">m</p>
                                 </td>
+                                @else
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs text-gray-300">-</span>
+                                </td>
+                                @endif
+                                @if(isset($detail['joint_vitrage_3rails_m']) && $detail['joint_vitrage_3rails_m'] > 0)
                                 <td class="px-2 py-4 whitespace-nowrap text-center">
                                     <span class="text-xs font-semibold text-amber-700">
-                                        {{ isset($detail['joint_vitrage_3rails_m']) ? number_format($detail['joint_vitrage_3rails_m'], 2, ',', ' ') : '0' }}
+                                        {{ number_format($detail['joint_vitrage_3rails_m'], 2, ',', ' ') }}
                                     </span>
                                     <p class="text-xs text-gray-400">m</p>
                                 </td>
+                                @else
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs text-gray-300">-</span>
+                                </td>
+                                @endif
+                                @if(isset($detail['joint_moustiquaire_3rails_m']) && $detail['joint_moustiquaire_3rails_m'] > 0)
                                 <td class="px-2 py-4 whitespace-nowrap text-center">
                                     <span class="text-xs font-semibold text-fuchsia-700">
-                                        {{ isset($detail['joint_moustiquaire_3rails_m']) ? number_format($detail['joint_moustiquaire_3rails_m'], 2, ',', ' ') : '0' }}
+                                        {{ number_format($detail['joint_moustiquaire_3rails_m'], 2, ',', ' ') }}
                                     </span>
                                     <p class="text-xs text-gray-400">m</p>
                                 </td>
+                                @else
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs text-gray-300">-</span>
+                                </td>
+                                @endif
+                                @if(isset($detail['grillage_moustiquaire_3rails_m']) && $detail['grillage_moustiquaire_3rails_m'] > 0)
                                 <td class="px-2 py-4 whitespace-nowrap text-center">
                                     <span class="text-xs font-semibold text-emerald-700">
-                                        {{ isset($detail['grillage_moustiquaire_3rails_m']) ? number_format($detail['grillage_moustiquaire_3rails_m'], 2, ',', ' ') : '0' }}
+                                        {{ number_format($detail['grillage_moustiquaire_3rails_m'], 2, ',', ' ') }}
                                     </span>
                                     <p class="text-xs text-gray-400">m</p>
                                 </td>
+                                @else
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs text-gray-300">-</span>
+                                </td>
+                                @endif
+                                @if(isset($detail['vitre_3rails']) && $detail['vitre_3rails'] > 0)
                                 <td class="px-2 py-4 whitespace-nowrap text-center">
                                     <span class="text-xs font-semibold text-slate-700">
-                                        {{ isset($detail['vitre_3rails']) ? number_format($detail['vitre_3rails'], 2, ',', ' ') : '0' }}
+                                        {{ number_format($detail['vitre_3rails'], 2, ',', ' ') }}
                                     </span>
                                     <p class="text-xs text-gray-400">feuille</p>
                                 </td>
+                                @else
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs text-gray-300">-</span>
+                                </td>
+                                @endif
                                 @else
                                 <!-- Affichage pour fenêtres ALU 82 -->
                                 <td class="px-3 py-4 whitespace-nowrap text-center">
@@ -646,30 +676,42 @@
                                     </span>
                                     <p class="text-xs text-gray-400">Paire</p>
                                 </td>
-                                <td class="px-2 py-4 whitespace-nowrap text-center">
-                                    <span class="text-xs font-semibold text-teal-700">
-                                        {{ isset($detail['brosse_a82_m']) ? number_format($detail['brosse_a82_m'], 2, ',', ' ') : '0,00' }}
-                                    </span>
-                                    <p class="text-xs text-gray-400">m</p>
-                                </td>
+                                @if(isset($detail['joint_vitrage_m']) && $detail['joint_vitrage_m'] > 0)
                                 <td class="px-2 py-4 whitespace-nowrap text-center">
                                     <span class="text-xs font-semibold text-amber-700">
-                                        {{ isset($detail['joint_vitrage_m']) ? number_format($detail['joint_vitrage_m'], 2, ',', ' ') : '0,00' }}
+                                        {{ number_format($detail['joint_vitrage_m'], 2, ',', ' ') }}
                                     </span>
                                     <p class="text-xs text-gray-400">m</p>
                                 </td>
+                                @else
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs text-gray-300">-</span>
+                                </td>
+                                @endif
+                                @if(isset($detail['joint_moustiquaire_m']) && $detail['joint_moustiquaire_m'] > 0)
                                 <td class="px-2 py-4 whitespace-nowrap text-center">
                                     <span class="text-xs font-semibold text-rose-700">
-                                        {{ isset($detail['joint_moustiquaire_m']) ? number_format($detail['joint_moustiquaire_m'], 2, ',', ' ') : '0,00' }}
+                                        {{ number_format($detail['joint_moustiquaire_m'], 2, ',', ' ') }}
                                     </span>
                                     <p class="text-xs text-gray-400">m</p>
                                 </td>
+                                @else
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs text-gray-300">-</span>
+                                </td>
+                                @endif
+                                @if(isset($detail['vitre']) && $detail['vitre'] > 0)
                                 <td class="px-2 py-4 whitespace-nowrap text-center">
                                     <span class="text-xs font-semibold text-emerald-700">
-                                        {{ isset($detail['vitre']) ? number_format($detail['vitre'], 2, ',', ' ') : '0,00' }}
+                                        {{ number_format($detail['vitre'], 2, ',', ' ') }}
                                     </span>
                                     <p class="text-xs text-gray-400">feuille</p>
                                 </td>
+                                @else
+                                <td class="px-2 py-4 whitespace-nowrap text-center">
+                                    <span class="text-xs text-gray-300">-</span>
+                                </td>
+                                @endif
                                 @endif
                             </tr>
                             @endforeach
