@@ -680,7 +680,7 @@
                         @endhasAnyPermission
                         <!-- Menu Chantiers -->
                         @hasAnyPermission(['chantiers.view', 'chantiers.edit'])
-                        <a href="{{ route('chantiers.index') }}" 
+                        <a href="{{ url('chantiers') }}" 
                                     class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center {{ request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100' }}"
                                     style="{{ request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
                                 <i class="fas fa-hard-hat mr-2"></i>Chantiers
@@ -833,7 +833,7 @@
                 </a>
                 @endhasAnyPermission
                 @hasAnyPermission(['chantiers.view', 'chantiers.edit'])
-                <a href="{{ route('chantiers.index') }}" 
+                <a href="{{ url('chantiers') }}" 
                    onclick="closeMobileMenu()"
                    class="block px-4 py-3 rounded-none text-base font-medium transition-colors {{ request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100' }}"
                    style="{{ request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : '' }}">
@@ -1035,7 +1035,7 @@
                         @hasAnyPermission(['chantiers.view', 'chantiers.edit'])
                             @hasPermission('chantiers.view')
                             <div class="sidebar-item {{ request()->routeIs('chantiers.index') || request()->routeIs('chantiers.show') ? 'active' : '' }}">
-                                <a href="{{ route('chantiers.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                <a href="{{ url('chantiers') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
                                     <i class="fas fa-list mr-3 w-5"></i>
                                     Liste
                                 </a>
@@ -1244,7 +1244,7 @@
                         @hasAnyPermission(['chantiers.view', 'chantiers.edit'])
                             @hasPermission('chantiers.view')
                             <div class="sidebar-item {{ request()->routeIs('chantiers.index') || request()->routeIs('chantiers.show') ? 'active' : '' }}">
-                                <a href="{{ route('chantiers.index') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                <a href="{{ url('chantiers') }}" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
                                     <i class="fas fa-list mr-3 w-5"></i>
                                     Liste
                                 </a>

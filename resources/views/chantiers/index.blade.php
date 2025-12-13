@@ -25,7 +25,7 @@
 
     <!-- Filtres -->
     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-        <form method="GET" action="{{ route('chantiers.index') }}" class="space-y-4">
+        <form method="GET" action="{{ url('chantiers') }}" class="space-y-4">
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 <!-- Recherche -->
                 <div>
@@ -83,7 +83,7 @@
                         <i class="fas fa-filter sm:mr-2"></i><span class="hidden sm:inline">Filtrer</span>
                     </button>
                     @if(request()->hasAny(['search', 'status', 'client_id']))
-                        <a href="{{ route('chantiers.index') }}" 
+                        <a href="{{ url('chantiers') }}" 
                            class="inline-flex items-center justify-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
                            title="Réinitialiser">
                             <i class="fas fa-times"></i>

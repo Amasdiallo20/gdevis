@@ -680,7 +680,7 @@
                         <?php endif; ?>
                         <!-- Menu Chantiers -->
                         <?php if (\Illuminate\Support\Facades\Blade::check('hasAnyPermission', ['chantiers.view', 'chantiers.edit'])): ?>
-                        <a href="<?php echo e(route('chantiers.index')); ?>" 
+                        <a href="<?php echo e(url('chantiers')); ?>" 
                                     class="px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center <?php echo e(request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'); ?>"
                                     style="<?php echo e(request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : ''); ?>">
                                 <i class="fas fa-hard-hat mr-2"></i>Chantiers
@@ -833,7 +833,7 @@
                 </a>
                 <?php endif; ?>
                 <?php if (\Illuminate\Support\Facades\Blade::check('hasAnyPermission', ['chantiers.view', 'chantiers.edit'])): ?>
-                <a href="<?php echo e(route('chantiers.index')); ?>" 
+                <a href="<?php echo e(url('chantiers')); ?>" 
                    onclick="closeMobileMenu()"
                    class="block px-4 py-3 rounded-none text-base font-medium transition-colors <?php echo e(request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'text-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100'); ?>"
                    style="<?php echo e(request()->routeIs('chantiers.*') && !request()->routeIs('chantiers.mes-taches') ? 'background-color: ' . ($settings->primary_color ?? '#3b82f6') . ';' : ''); ?>">
@@ -1036,7 +1036,7 @@
                         <?php if (\Illuminate\Support\Facades\Blade::check('hasAnyPermission', ['chantiers.view', 'chantiers.edit'])): ?>
                             <?php if (\Illuminate\Support\Facades\Blade::check('hasPermission', 'chantiers.view')): ?>
                             <div class="sidebar-item <?php echo e(request()->routeIs('chantiers.index') || request()->routeIs('chantiers.show') ? 'active' : ''); ?>">
-                                <a href="<?php echo e(route('chantiers.index')); ?>" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
+                                <a href="<?php echo e(url('chantiers')); ?>" class="flex items-center px-4 py-2.5 text-sm text-gray-700">
                                     <i class="fas fa-list mr-3 w-5"></i>
                                     Liste
                                 </a>
@@ -1245,7 +1245,7 @@
                         <?php if (\Illuminate\Support\Facades\Blade::check('hasAnyPermission', ['chantiers.view', 'chantiers.edit'])): ?>
                             <?php if (\Illuminate\Support\Facades\Blade::check('hasPermission', 'chantiers.view')): ?>
                             <div class="sidebar-item <?php echo e(request()->routeIs('chantiers.index') || request()->routeIs('chantiers.show') ? 'active' : ''); ?>">
-                                <a href="<?php echo e(route('chantiers.index')); ?>" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
+                                <a href="<?php echo e(url('chantiers')); ?>" class="flex items-center px-4 py-2.5 text-sm text-gray-700" onclick="toggleSidebarMobile()">
                                     <i class="fas fa-list mr-3 w-5"></i>
                                     Liste
                                 </a>

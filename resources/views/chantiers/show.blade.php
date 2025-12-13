@@ -22,7 +22,7 @@
                     </p>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <a href="{{ route('chantiers.index') }}" 
+                    <a href="{{ url('chantiers') }}" 
                        class="inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 rounded-lg shadow-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-all duration-300">
                         <i class="fas fa-arrow-left mr-2"></i>Retour
                     </a>
